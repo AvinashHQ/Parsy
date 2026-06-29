@@ -13,12 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      - name: Set up rbenv
+        run: |
+          echo "$HOME/.rbenv/shims" >> $GITHUB_PATH
+          echo "$HOME/.rbenv/bin" >> $GITHUB_PATH
+
       - name: Run CI
         env:
           RAILS_ENV: test
-        run: |
-          eval "$(~/.rbenv/bin/rbenv init - bash)"
-          bin/ci
+        run: bin/ci
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v7
