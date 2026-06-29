@@ -1,0 +1,282 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_img_003",
+  "document_type": "invoice",
+  "source": {
+    "family": "image",
+    "route": "visual_model",
+    "mime_type": "image/jpeg",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "IN",
+    "buyer_country": "IN",
+    "jurisdiction_candidates": [
+      "IN"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Saffron Cloud Solutions Pvt Ltd",
+    "legal_name": "Saffron Cloud Solutions Pvt Ltd",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "GSTIN",
+        "value": "29ABCDE1234F1Z5",
+        "issuing_country": "IN",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "15 Residency Road"
+      ],
+      "city": "Bengaluru",
+      "subdivision": null,
+      "postal_code": "560001",
+      "country_code": "IN"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Riverstone Retail LLP",
+    "legal_name": "Riverstone Retail LLP",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "GSTIN",
+        "value": "29AAECR0000A1Z2",
+        "issuing_country": "IN",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "44 Indiranagar Main Road"
+      ],
+      "city": "Bengaluru",
+      "subdivision": null,
+      "postal_code": "560038",
+      "country_code": "IN"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "SC-4521",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "INR",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [
+    {
+      "type": "purchase_order",
+      "value": "PO-IN-224",
+      "scheme": null,
+      "issue_date": null
+    }
+  ],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "40000.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "40000.00",
+    "total_tax_amount": "7200.00",
+    "tax_inclusive_amount": "47200.00",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "47200.00"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "GST",
+      "component": "CGST",
+      "jurisdiction_code": "IN-KA",
+      "category_code": "STANDARD",
+      "rate": "9",
+      "taxable_amount": "40000.00",
+      "tax_amount": "3600.00",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "CGST 9%"
+    },
+    {
+      "tax_type": "GST",
+      "component": "SGST",
+      "jurisdiction_code": "IN-KA",
+      "category_code": "STANDARD",
+      "rate": "9",
+      "taxable_amount": "40000.00",
+      "tax_amount": "3600.00",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "SGST 9%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Wi-Fi 6 access point",
+      "item_name": "Wi-Fi 6 access point",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [
+        {
+          "scheme": "HSN",
+          "value": "851762"
+        }
+      ],
+      "quantity": "4",
+      "unit_code": "EA",
+      "unit_price": "8500.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "34000.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "GST",
+          "component": "CGST",
+          "jurisdiction_code": "IN-KA",
+          "category_code": "STANDARD",
+          "rate": "9",
+          "taxable_amount": "34000.00",
+          "tax_amount": "3060.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "CGST 9%"
+        },
+        {
+          "tax_type": "GST",
+          "component": "SGST",
+          "jurisdiction_code": "IN-KA",
+          "category_code": "STANDARD",
+          "rate": "9",
+          "taxable_amount": "34000.00",
+          "tax_amount": "3060.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "SGST 9%"
+        }
+      ],
+      "line_gross_amount": "40120.00",
+      "service_period": null
+    },
+    {
+      "line_id": "line_2",
+      "line_no": 2,
+      "description": "Installation service",
+      "item_name": "Installation service",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [
+        {
+          "scheme": "SAC",
+          "value": "998713"
+        }
+      ],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "6000.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "6000.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "GST",
+          "component": "CGST",
+          "jurisdiction_code": "IN-KA",
+          "category_code": "STANDARD",
+          "rate": "9",
+          "taxable_amount": "6000.00",
+          "tax_amount": "540.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "CGST 9%"
+        },
+        {
+          "tax_type": "GST",
+          "component": "SGST",
+          "jurisdiction_code": "IN-KA",
+          "category_code": "STANDARD",
+          "rate": "9",
+          "taxable_amount": "6000.00",
+          "tax_amount": "540.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "SGST 9%"
+        }
+      ],
+      "line_gross_amount": "7080.00",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "SC-4521",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "SC-4521",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "INR 47200.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

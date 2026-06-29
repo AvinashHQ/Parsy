@@ -1,0 +1,10 @@
+Task: extract the attached document into Canonical Invoice Schema v2.
+
+Schema version: {{schema_version}}
+Capability profile: {{profile_id}}@{{profile_version}}
+Document request ID: {{request_id}}
+Required fields: {{required_fields_json}}
+Maximum line items: {{max_line_items}}
+Parsed page content, when available: {{parsed_pages_json}}
+
+Return only the canonical JSON object.

@@ -1,0 +1,15 @@
+{
+  "field_path": "/totals/payable_amount",
+  "value": "1500.00",
+  "evidence": {
+    "page": 1,
+    "text": "AMOUNT DUE GBP 1,500.00",
+    "bbox": [
+      0.7,
+      0.74,
+      0.94,
+      0.82
+    ]
+  },
+  "decision": "unchanged_document_value"
+}

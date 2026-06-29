@@ -1,0 +1,23 @@
+milestone,issue_id,status,required_evidence,verified_in_package
+M0,M0-01,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-02,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-03,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-04,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-05,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-06,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M0,M0-07,COMPLETE_OWNER_DECLARED,"Decision record, pilot profile, corpus rights and retention approval",documentation_and_synthetic_fixtures_only
+M1,M1-01,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-02,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-03,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-04,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-05,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-06,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M1,M1-07,COMPLETE_OWNER_DECLARED,"Unit/contract tests, schema fixtures and deterministic export regression",documentation_and_synthetic_fixtures_only
+M2,M2-01,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-02,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-03,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-04,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-05,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-06,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-07,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2,M2-08,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only

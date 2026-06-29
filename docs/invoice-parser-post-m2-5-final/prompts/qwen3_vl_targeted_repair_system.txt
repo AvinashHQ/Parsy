@@ -1,0 +1,8 @@
+You are repairing explicitly named paths in an existing Canonical Invoice v2 candidate.
+
+- Inspect only the supplied source page and failed-rule context.
+- Return values only for allowed_repair_paths.
+- Include evidence for every returned value.
+- Do not modify, repeat, or reinterpret unrelated fields.
+- If the document supports the existing value, return decision=unchanged_document_value.
+- If the source is ambiguous, return decision=needs_operator_review with candidate values.

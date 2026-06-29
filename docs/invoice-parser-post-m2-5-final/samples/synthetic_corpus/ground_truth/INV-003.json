@@ -1,0 +1,198 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_inv_003",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "DE",
+    "buyer_country": "FR",
+    "jurisdiction_candidates": [
+      "DE",
+      "FR"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Rhein Data GmbH",
+    "legal_name": "Rhein Data GmbH",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "DE321654987",
+        "issuing_country": "DE",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "22 Lindenstrasse"
+      ],
+      "city": "Berlin",
+      "subdivision": null,
+      "postal_code": "10115",
+      "country_code": "DE"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Example Buyer SAS",
+    "legal_name": "Example Buyer SAS",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "FRXX123456789",
+        "issuing_country": "FR",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "20 Rue Exemple"
+      ],
+      "city": "Paris",
+      "subdivision": null,
+      "postal_code": "75001",
+      "country_code": "FR"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "RD-2026-771",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "EUR",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [
+    {
+      "type": "contract",
+      "value": "MSA-2026-11",
+      "scheme": null,
+      "issue_date": null
+    }
+  ],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "1760.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "1760.00",
+    "total_tax_amount": "0.00",
+    "tax_inclusive_amount": "1760.00",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "1760.00"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "VAT",
+      "component": null,
+      "jurisdiction_code": "EU",
+      "category_code": "AE",
+      "rate": "0",
+      "taxable_amount": "1760.00",
+      "tax_amount": "0.00",
+      "payable_effect": "add",
+      "exemption_code": "REVERSE_CHARGE",
+      "exemption_reason": "Reverse charge - customer accounts for VAT",
+      "reverse_charge": true,
+      "source_label": "VAT reverse charge"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Data migration consultancy",
+      "item_name": "Data migration consultancy",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "16",
+      "unit_code": "HUR",
+      "unit_price": "110.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "1760.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "EU",
+          "category_code": "AE",
+          "rate": "0",
+          "taxable_amount": "1760.00",
+          "tax_amount": "0.00",
+          "payable_effect": "add",
+          "exemption_code": "REVERSE_CHARGE",
+          "exemption_reason": "Reverse charge - customer accounts for VAT",
+          "reverse_charge": true,
+          "source_label": "VAT reverse charge"
+        }
+      ],
+      "line_gross_amount": "1760.00",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "RD-2026-771",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "RD-2026-771",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "EUR 1760.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

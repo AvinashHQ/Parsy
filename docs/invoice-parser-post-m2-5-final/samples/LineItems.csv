@@ -1,0 +1,2 @@
+document_id,line_id,line_no,description,item_name,seller_item_id,buyer_item_id,quantity,unit_code,unit_price,price_base_quantity,line_net_amount,line_gross_amount
+doc_demo_global_0001,line_1,1,Consulting services,Consulting services,,,1,EA,1000.00,1,1000.00,1200.00

@@ -1,0 +1,9 @@
+milestone,status,status_basis,next_action
+M0,COMPLETE,Project owner status and M0 handoff,Maintain frozen pilot profile
+M1,COMPLETE,Project owner status,Run contract regression on every change
+M2,COMPLETE_FROZEN,Project owner status; no retroactive open-source scope,Maintain M2 provider contract and evidence links
+M2.5,NEXT,New post-M2 open-source integration milestone,Snapshot M2 contract and add provider feature flags
+M3,PLANNED_PARALLEL,Fixture-driven work may overlap M2.5; real E2E depends on M2.5,Build first review slice with fixture provider
+M4,PLANNED,Blocked by M3,Complete launch safety evidence
+M5,PLANNED,Blocked by M4,Run closed supervised pilot
+M6,DEFERRED,Requires M5 demand evidence,Choose one requested capability
