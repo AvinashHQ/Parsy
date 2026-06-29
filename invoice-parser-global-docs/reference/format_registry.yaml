@@ -1,0 +1,64 @@
+version: '1.0.0'
+formats:
+  - id: visual_pdf
+    family: visual_pdf
+    detection: [magic_bytes_pdf]
+    route: visual_model
+    mvp_status: supported
+  - id: image_jpeg
+    family: image
+    detection: [magic_bytes_jpeg]
+    route: visual_model
+    mvp_status: supported
+  - id: image_png
+    family: image
+    detection: [magic_bytes_png]
+    route: visual_model
+    mvp_status: supported
+  - id: image_tiff
+    family: image
+    detection: [magic_bytes_tiff]
+    route: visual_model
+    mvp_status: supported
+  - id: factur_x_zugferd
+    family: hybrid_pdf_xml
+    detection: [pdf_embedded_xml, factur_x_filename_or_namespace]
+    route: hybrid_compare
+    mvp_status: experimental
+  - id: oasis_ubl_invoice
+    family: ubl
+    detection: [xml_namespace_urn_oasis_ubl_invoice]
+    route: structured_parser
+    mvp_status: experimental
+  - id: uncefact_cii
+    family: cii
+    detection: [xml_namespace_uncefact_cross_industry_invoice]
+    route: structured_parser
+    mvp_status: experimental
+  - id: peppol_bis_billing_3
+    family: peppol_bis
+    detection: [ubl_or_cii_namespace, peppol_customization_id]
+    route: structured_parser
+    mvp_status: post_mvp
+  - id: xrechnung
+    family: xrechnung
+    detection: [ubl_or_cii_namespace, xrechnung_customization_id]
+    route: structured_parser
+    mvp_status: post_mvp
+  - id: fatturapa
+    family: fatturapa
+    detection: [fatturapa_xml_root]
+    route: structured_parser
+    mvp_status: backlog
+  - id: india_einvoice_json
+    family: india_einvoice
+    detection: [json_known_schema_version]
+    route: structured_parser
+    mvp_status: backlog
+  - id: brazil_nfe
+    family: brazil_nfe
+    detection: [nfe_xml_namespace]
+    route: structured_parser
+    mvp_status: backlog
+unknown_structured_policy: quarantine
+unknown_visual_policy: reject_or_operator_review

@@ -1,0 +1,71 @@
+version: '2.0.0'
+tolerance:
+  source: ISO-4217-minor-unit-registry
+  header_minor_units: 1
+  line_minor_units: 1
+  profile_override_allowed: true
+rules:
+  - code: SCHEMA_INVALID
+    severity: CRITICAL
+    scope: universal
+  - code: UNKNOWN_SOURCE_ROUTE
+    severity: HIGH
+    scope: universal
+  - code: MISSING_PROVENANCE
+    severity: HIGH
+    scope: universal
+  - code: MISSING_HIGH_RISK_EVIDENCE
+    severity: HIGH
+    scope: universal
+  - code: AMBIGUOUS_DOCUMENT_DATE
+    severity: HIGH
+    scope: universal
+  - code: AMBIGUOUS_CURRENCY
+    severity: HIGH
+    scope: universal
+  - code: HEADER_TOTAL_MISMATCH
+    severity: CRITICAL
+    scope: universal
+    expression: line_extension - allowances + charges ~= tax_exclusive
+  - code: TAX_INCLUSIVE_TOTAL_MISMATCH
+    severity: CRITICAL
+    scope: universal
+    expression: tax_exclusive + total_tax ~= tax_inclusive
+  - code: PAYABLE_TOTAL_MISMATCH
+    severity: CRITICAL
+    scope: universal
+    expression: tax_inclusive - prepaid - withholding + rounding ~= payable
+  - code: TAX_BREAKDOWN_SUM_MISMATCH
+    severity: CRITICAL
+    scope: universal
+    expression: sum(document_tax_breakdowns.tax_amount) ~= total_tax
+  - code: LINE_TOTAL_MISMATCH
+    severity: HIGH
+    scope: universal
+  - code: CURRENCY_PRECISION_MISMATCH
+    severity: HIGH
+    scope: universal
+  - code: DOCUMENT_TYPE_SIGN_MISMATCH
+    severity: HIGH
+    scope: universal
+  - code: PROBABLE_DUPLICATE
+    severity: CRITICAL
+    scope: universal
+  - code: FUTURE_ISSUE_DATE
+    severity: HIGH
+    scope: universal
+  - code: VISUAL_STRUCTURED_CONFLICT
+    severity: CRITICAL
+    scope: hybrid
+  - code: REGION_RULES_NOT_APPLIED
+    severity: INFO
+    scope: universal
+  - code: UNSUPPORTED_STRUCTURED_FORMAT
+    severity: HIGH
+    scope: intake
+  - code: INVALID_SUPPLIER_IDENTIFIER
+    severity: HIGH
+    scope: region_pack
+  - code: REGIONAL_TAX_SEMANTIC_MISMATCH
+    severity: HIGH
+    scope: region_pack

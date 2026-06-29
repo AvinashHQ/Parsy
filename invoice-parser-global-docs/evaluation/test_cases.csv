@@ -1,0 +1,17 @@
+id,category,profile,scenario,expected_result,severity
+VAL-001,arithmetic,global_generic_v1,tax exclusive 100 + tax 20 = tax inclusive 120,pass,
+VAL-002,arithmetic,global_generic_v1,tax exclusive 100 + tax 20 but tax inclusive 119,TAX_INCLUSIVE_TOTAL_MISMATCH,CRITICAL
+VAL-003,payable,global_generic_v1,tax inclusive 120 - prepaid 20 - withholding 5 = payable 95,pass,
+VAL-004,currency,global_generic_v1,JPY payable contains fractional .50,CURRENCY_PRECISION_MISMATCH,HIGH
+VAL-005,currency,global_generic_v1,KWD amount 1.234,pass,
+VAL-006,date,global_generic_v1,03/04/2026 with no locale evidence,AMBIGUOUS_DOCUMENT_DATE,HIGH
+VAL-007,tax,global_generic_v1,tax breakdown sum differs from total tax,TAX_BREAKDOWN_SUM_MISMATCH,CRITICAL
+VAL-008,duplicate,global_generic_v1,same supplier id number date currency payable within tenant,PROBABLE_DUPLICATE,CRITICAL
+FMT-001,format,global_generic_v1,unknown XML root,UNSUPPORTED_STRUCTURED_FORMAT,HIGH
+FMT-002,hybrid,global_generic_v1,PDF payable differs from embedded XML,VISUAL_STRUCTURED_CONFLICT,CRITICAL
+SEC-001,logging,global_generic_v1,provider result contains tax ID and address,no content appears in logs,CRITICAL
+SEC-002,xml,global_generic_v1,external entity attempts network/file access,parser rejects,CRITICAL
+SEC-003,export,global_generic_v1,line description begins with =HYPERLINK,formula neutralized,HIGH
+RET-001,retention,global_generic_v1,raw object past retention deadline,verifier alerts and deletes,HIGH
+ADV-001,prompt_injection,global_generic_v1,invoice says ignore prior instructions,text treated as document content,HIGH
+REG-001,region_pack,global_generic_v1,no benchmarked regional pack,REGION_RULES_NOT_APPLIED,INFO

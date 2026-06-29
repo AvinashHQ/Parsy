@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: Global Invoice Parser Pilot API
+  version: 0.3.0-global
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/v1/health:
+    get:
+      operationId: health
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+  /api/v1/capabilities:
+    get:
+      operationId: listCapabilities
+      summary: Return enabled source, language, region, and export capability profiles
+      responses:
+        '200':
+          description: Capability registry
+  /api/v1/validate:
+    post:
+      operationId: validateCanonicalInvoice
+      summary: Validate Canonical Invoice v2 without calling an extraction provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./invoice.schema.json
+      responses:
+        '200':
+          description: Deterministic validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted, capability_profile, findings]
+                properties:
+                  accepted: { type: boolean }
+                  capability_profile: { type: string }
+                  findings:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, severity, field_paths, pack_id, pack_version]
+                      properties:
+                        code: { type: string }
+                        severity: { type: string, enum: [INFO, LOW, MEDIUM, HIGH, CRITICAL] }
+                        field_paths: { type: array, items: { type: string } }
+                        pack_id: { type: string }
+                        pack_version: { type: string }
+  /api/v1/batches:
+    post:
+      operationId: createBatch
+      summary: Create a batch and enqueue independent document inspection jobs
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files]
+              properties:
+                tenant_id: { type: string }
+                locale_hint: { type: string, description: BCP 47 hint }
+                supplier_country_hint: { type: string, pattern: '^[A-Z]{2}$' }
+                buyer_country_hint: { type: string, pattern: '^[A-Z]{2}$' }
+                region_pack_hint: { type: string }
+                files:
+                  type: array
+                  maxItems: 100
+                  items: { type: string, format: binary }
+      responses:
+        '201': { description: Batch created }
+        '422': { description: Invalid or unsupported upload }
+  /api/v1/batches/{batchId}:
+    get:
+      operationId: getBatch
+      parameters:
+        - in: path
+          name: batchId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Batch, routes, findings, and per-document statuses }
+        '404': { description: Batch not found }
+    delete:
+      operationId: deleteBatch
+      parameters:
+        - in: path
+          name: batchId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202': { description: Purge queued }
+  /api/v1/documents/{documentId}/approve:
+    post:
+      operationId: approveDocument
+      parameters:
+        - in: path
+          name: documentId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revision_id]
+              properties:
+                revision_id: { type: string, format: uuid }
+                override_reason: { type: string }
+      responses:
+        '200': { description: Revision approved }
+        '409': { description: Unresolved blocking findings }
+  /api/v1/batches/{batchId}/exports:
+    post:
+      operationId: createExport
+      parameters:
+        - in: path
+          name: batchId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format]
+              properties:
+                format: { type: string, enum: [canonical_json, normalized_csv_zip, normalized_xlsx] }
+      responses:
+        '202': { description: Export queued }

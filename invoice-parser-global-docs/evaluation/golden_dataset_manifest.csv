@@ -1,0 +1,7 @@
+document_id,split,document_type,source_family,source_profile,quality,language_tag,script,supplier_country,buyer_country,currency,minor_unit_class,tax_regime,vendor_group,pages,line_items,structured_payload,ground_truth_status,permission_reference,notes
+gold_0001,train,invoice,visual_pdf,,clean,en-US,Latn,US,US,USD,2,SALES_TAX,vendor_us_a,1,5,false,DOUBLE_REVIEWED,pilot-dpa-001,
+gold_0002,holdout,invoice,visual_pdf,,blurred,en-GB,Latn,GB,GB,GBP,2,VAT,vendor_uk_unseen,1,3,false,DOUBLE_REVIEWED,pilot-dpa-001,unseen vendor
+gold_0003,holdout,credit_note,visual_pdf,,skewed,en-IN,Latn,IN,IN,INR,2,GST,vendor_in_unseen,2,8,false,DOUBLE_REVIEWED,pilot-dpa-002,negative economic value
+gold_0004,validation,invoice,visual_pdf,,clean,en,Latn,JP,US,JPY,0,NO_TAX,vendor_jp_a,1,4,false,DOUBLE_REVIEWED,pilot-dpa-002,zero-minor-unit currency
+gold_0005,holdout,invoice,visual_pdf,,clean,en,Latn,KW,AE,KWD,3,VAT,vendor_kw_unseen,1,6,false,DOUBLE_REVIEWED,pilot-dpa-003,three-minor-unit currency
+gold_0006,validation,invoice,hybrid_pdf_xml,factur_x,clean,de-DE,Latn,DE,FR,EUR,2,VAT,vendor_de_a,1,5,true,DOUBLE_REVIEWED,pilot-dpa-003,experimental language and hybrid conflict fixture
