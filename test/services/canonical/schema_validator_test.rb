@@ -13,6 +13,7 @@ module Canonical
         fix_001_minimal_visual_usd.json
         fix_002_credit_note_gbp.json
         fix_003_zero_minor_unit_jpy.json
+        fix_004_three_minor_unit_kwd.json
         fix_005_generic_vat_eur.json
       ].each do |filename|
         attributes = JSON.parse(FIXTURE_DIR.join(filename).read)
