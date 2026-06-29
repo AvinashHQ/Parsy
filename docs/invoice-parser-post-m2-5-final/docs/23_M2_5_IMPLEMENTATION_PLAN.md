@@ -2,7 +2,7 @@
 
 ## Milestone statement
 
-**Status:** Next
+**Status:** Complete for implementation fixtures and M3 handoff; permissioned real-corpus accuracy evidence remains separate launch evidence when available.
 
 **Dependency:** completed and frozen M2 provider-neutral extraction foundation.
 
@@ -155,14 +155,14 @@ Do not record source text, evidence snippets, party names, invoice numbers, acco
 
 ## Definition of done
 
-- [ ] M2 contract snapshot tests pass.
-- [ ] Feature flags and rollback path work.
-- [ ] Digital PDF adapter works.
-- [ ] Scan/layout/OCR adapter works.
-- [ ] Semantic extraction adapter works.
-- [ ] Provenance and idempotency remain intact.
-- [ ] Synthetic benchmark report is complete.
-- [ ] Real-corpus benchmark is recorded when permissioned data is available.
-- [ ] Bounded repair and failure tests pass.
-- [ ] Model-selection ADR is approved.
-- [ ] M3 consumes the output with no contract change.
+- [x] M2 contract snapshot tests pass.
+- [x] Feature flags and rollback path work.
+- [x] Digital PDF adapter works.
+- [x] Scan/layout/OCR adapter works.
+- [x] Semantic extraction adapter works.
+- [x] Provenance and idempotency remain intact.
+- [x] Synthetic benchmark report is complete.
+- [ ] Permissioned real-corpus benchmark is recorded when permissioned data is available; current completion evidence is synthetic/fixture-based only.
+- [x] Bounded repair and failure tests pass.
+- [x] Model-selection ADR is approved.
+- [x] M3 consumes the output with no contract change.

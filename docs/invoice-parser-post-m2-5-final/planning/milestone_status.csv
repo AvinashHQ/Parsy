@@ -2,8 +2,8 @@ milestone,status,status_basis,next_action
 M0,COMPLETE,Project owner status and M0 handoff,Maintain frozen pilot profile
 M1,COMPLETE,Project owner status,Run contract regression on every change
 M2,COMPLETE_FROZEN,Project owner status; no retroactive open-source scope,Maintain M2 provider contract and evidence links
-M2.5,NEXT,New post-M2 open-source integration milestone,Snapshot M2 contract and add provider feature flags
-M3,PLANNED_PARALLEL,Fixture-driven work may overlap M2.5; real E2E depends on M2.5,Build first review slice with fixture provider
-M4,PLANNED,Blocked by M3,Complete launch safety evidence
+M2.5,COMPLETE,Provider contract/local route/benchmark/rollback tests pass; permissioned real corpus remains separate launch evidence,Feed M3 through unchanged candidate/finding contract
+M3,COMPLETE,Review workflow persists M2.5 outputs; 50-document fixture exit gate and approved-only export tests pass,Proceed to M4 security reliability deployment
+M4,PLANNED,Blocked by M3 completion evidence,Complete launch safety evidence
 M5,PLANNED,Blocked by M4,Run closed supervised pilot
 M6,DEFERRED,Requires M5 demand evidence,Choose one requested capability

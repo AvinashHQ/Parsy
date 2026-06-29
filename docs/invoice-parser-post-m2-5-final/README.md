@@ -2,9 +2,9 @@
 
 This is the implementation source of truth for a small, global-ready, human-supervised invoice-processing MVP built with Ruby on Rails and a provider-neutral extraction boundary.
 
-**Project status supplied by the owner:** M0, M1, and M2 are complete and frozen. The open-source model integration was introduced after M2 and is therefore tracked as **M2.5**, not retroactively assigned to M2. M2.5 is the next milestone; M3 review work may begin against fixture/provider-contract outputs in parallel, but real local extraction must pass the M2.5 exit gate before the M3 end-to-end gate.
+**Project status supplied by the owner and implementation evidence:** M0, M1, and M2 are complete and frozen. The open-source model integration was introduced after M2 and is tracked as **M2.5**, not retroactively assigned to M2. M2.5 implementation fixtures now pass behind the unchanged provider contract, and M3 review workflow tests consume those outputs without controller-time model/provider calls. Permissioned real-corpus accuracy remains separate launch evidence when data is available.
 
-This package contains documentation, schemas, prompts, planning assets, and a synthetic regression corpus. It contains no generated Rails application.
+This package contains documentation, schemas, prompts, planning assets, and a synthetic regression corpus alongside this Rails implementation.
 
 ## Frozen completed milestones
 
@@ -47,8 +47,8 @@ M2.5 must preserve the M2 provider contract and be removable through feature fla
 
 ## Remaining delivery sequence
 
-- **M2.5 — Next:** integrate, benchmark, and select the local open-source extraction route.
-- **M3 — Planned:** operator review, corrections, immutable approval, and approved-only exports.
+- **M2.5 — Complete:** local route, benchmark harness, bounded repair, rollback, and M3 handoff evidence.
+- **M3 — Complete:** operator review, corrections, immutable approval, 50-document fixture flow, and approved-only exports.
 - **M4 — Planned:** tenant security, retention/deletion, deployment, restore, monitoring, and cost controls.
 - **M5 — Planned:** closed supervised pilot and go/iterate/stop decision.
 

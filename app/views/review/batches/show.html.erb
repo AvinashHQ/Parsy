@@ -1,0 +1,35 @@
+<h1><%= @batch.name %></h1>
+
+<section aria-label="Batch progress">
+  <h2>Progress</h2>
+  <p><%= @progress[:completed] %> / <%= @progress[:total] %> complete (<%= @progress[:percent] %>%)</p>
+  <p>Status: <%= @batch.status %></p>
+</section>
+
+<section aria-label="Risk-ranked review queue">
+  <h2>Risk-ranked review queue</h2>
+  <table>
+    <thead>
+      <tr><th>Risk</th><th>Status</th><th>Document</th><th>Route</th><th>Locale</th><th>Rule pack</th></tr>
+    </thead>
+    <tbody>
+      <% @documents.each do |document| %>
+        <tr>
+          <td><%= document.risk_score %></td>
+          <td><%= document.status %></td>
+          <td><%= link_to document.source_sha256.first(12), review_document_path(document), accesskey: "n" %></td>
+          <td><%= document.route %></td>
+          <td><%= [document.detected_language, document.detected_country, document.detected_currency].compact.join(" / ") %></td>
+          <td><%= document.rule_pack_id %> <%= document.rule_pack_version %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</section>
+
+<section aria-label="Export approved revisions">
+  <h2>Export</h2>
+  <%= button_to "Export approved JSON", review_batch_exports_path(@batch, format_type: "json"), method: :post %>
+  <%= button_to "Export approved CSV", review_batch_exports_path(@batch, format_type: "csv"), method: :post %>
+  <%= button_to "Export approved XLSX", review_batch_exports_path(@batch, format_type: "xlsx"), method: :post %>
+</section>

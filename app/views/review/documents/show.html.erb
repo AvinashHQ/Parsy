@@ -1,0 +1,112 @@
+<h1>Document review</h1>
+
+<% if @revision.nil? %>
+  <p>No candidate revision is available. The document remains in <%= @document.status %>.</p>
+<% else %>
+  <section aria-label="Source and profile">
+    <h2>Source, route, and profile</h2>
+    <dl>
+      <dt>Route</dt><dd><%= @document.route %></dd>
+      <dt>Source format</dt><dd><%= [@document.source_format_family, @document.source_format_profile, @document.source_format_version].compact.join(" / ") %></dd>
+      <dt>Language</dt><dd><%= @document.detected_language %></dd>
+      <dt>Country</dt><dd><%= @document.detected_country %></dd>
+      <dt>Currency</dt><dd><%= @document.detected_currency %></dd>
+      <dt>Rule pack</dt><dd><%= @document.rule_pack_id %> <%= @document.rule_pack_version %></dd>
+      <dt>Capability</dt><dd><%= @document.capability_profile || @revision.provenance.dig("capability", "level") %></dd>
+      <dt>Safe preview</dt><dd><%= @document.source_metadata["safe_preview_path"] || "not attached" %></dd>
+    </dl>
+  </section>
+
+  <section aria-label="Acceptance policy">
+    <h2>Acceptance policy</h2>
+    <% if @decision.auto_acceptable %>
+      <p>Ready for approval.</p>
+    <% else %>
+      <ul>
+        <% @decision.reasons.each do |reason| %>
+          <li><%= reason %></li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+
+  <section aria-label="Validation findings">
+    <h2>Risk-sorted findings</h2>
+    <table>
+      <thead><tr><th>Severity</th><th>Code</th><th>Fields</th><th>State</th><th>Message</th></tr></thead>
+      <tbody>
+        <% @revision.findings.order(Arel.sql("CASE severity WHEN 'CRITICAL' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 WHEN 'LOW' THEN 3 ELSE 4 END"), :code).each do |finding| %>
+          <tr>
+            <td><%= finding.severity %></td>
+            <td><%= finding.code %></td>
+            <td><%= finding.field_paths.join(", ") %></td>
+            <td><%= finding.resolution_state %></td>
+            <td><%= finding.message %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <section aria-label="Evidence references">
+    <h2>Evidence</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Kind</th><th>Page/path</th><th>Snippet</th><th>Confirmed</th></tr></thead>
+      <tbody>
+        <% @revision.evidence_references.order(:field_path).each do |evidence| %>
+          <tr>
+            <td><%= evidence.field_path %></td>
+            <td><%= evidence.source_kind %></td>
+            <td><%= evidence.page || evidence.source_path %></td>
+            <td><%= evidence.text_snippet %></td>
+            <td><%= evidence.operator_confirmed? %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+
+  <section aria-label="Canonical editor">
+    <h2>Canonical editor and overrides</h2>
+    <%= form_with url: review_document_path(@document), method: :patch do |form| %>
+      <fieldset>
+        <legend>High-risk fields</legend>
+        <%= label_tag "canonical_invoice[invoice][number]", "Invoice number" %>
+        <%= text_field_tag "canonical_invoice[invoice][number]", @revision.canonical_invoice.dig("invoice", "number") %>
+        <%= label_tag "canonical_invoice[invoice][currency]", "Currency" %>
+        <%= text_field_tag "canonical_invoice[invoice][currency]", @revision.canonical_invoice.dig("invoice", "currency") %>
+        <%= label_tag "canonical_invoice[totals][payable_amount]", "Payable amount" %>
+        <%= text_field_tag "canonical_invoice[totals][payable_amount]", @revision.canonical_invoice.dig("totals", "payable_amount") %>
+      </fieldset>
+      <fieldset>
+        <legend>Locale, format, and rule pack override</legend>
+        <%= label_tag "overrides[document_language]", "Language" %>
+        <%= text_field_tag "overrides[document_language]", @document.detected_language %>
+        <%= label_tag "overrides[supplier_country]", "Country" %>
+        <%= text_field_tag "overrides[supplier_country]", @document.detected_country %>
+        <%= label_tag "overrides[currency]", "Currency" %>
+        <%= text_field_tag "overrides[currency]", @document.detected_currency %>
+        <%= label_tag "overrides[source_format_family]", "Format" %>
+        <%= text_field_tag "overrides[source_format_family]", @document.source_format_family %>
+        <%= label_tag "overrides[rule_pack_id]", "Rule pack" %>
+        <%= text_field_tag "overrides[rule_pack_id]", @document.rule_pack_id %>
+        <%= label_tag "overrides[rule_pack_version]", "Rule pack version" %>
+        <%= text_field_tag "overrides[rule_pack_version]", @document.rule_pack_version %>
+      </fieldset>
+      <%= label_tag :reason, "Reason" %>
+      <%= text_field_tag :reason %>
+      <%= form.submit "Save (S)", accesskey: "s" %>
+    <% end %>
+  </section>
+
+  <section aria-label="Review actions">
+    <h2>Review actions</h2>
+    <%= button_to "Approve (A)", approve_review_document_path(@document), method: :post, params: { confirm_blocking_findings: "true", reason: "operator explicit approval" }, accesskey: "a" %>
+    <%= button_to "Reject (R)", reject_review_document_path(@document), method: :post, params: { reason: "operator rejection" }, accesskey: "r" %>
+    <% if @next_document %>
+      <%= link_to "Next exception (N)", review_document_path(@next_document), accesskey: "n" %>
+    <% else %>
+      <%= link_to "Back to batch", review_batch_path(@document.batch) %>
+    <% end %>
+  </section>
+<% end %>

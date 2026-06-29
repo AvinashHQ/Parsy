@@ -1,0 +1,17 @@
+<h1>Review batches</h1>
+
+<table>
+  <thead>
+    <tr><th>Name</th><th>Status</th><th>Documents</th><th>Updated</th></tr>
+  </thead>
+  <tbody>
+    <% @batches.each do |batch| %>
+      <tr>
+        <td><%= link_to batch.name, review_batch_path(batch) %></td>
+        <td><%= batch.status %></td>
+        <td><%= batch.documents.count %></td>
+        <td><%= time_tag batch.updated_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

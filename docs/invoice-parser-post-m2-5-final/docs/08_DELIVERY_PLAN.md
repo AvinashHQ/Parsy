@@ -7,8 +7,8 @@
 | M0 | Complete | Scope and pilot contract frozen |
 | M1 | Complete | Canonical and deterministic core complete |
 | M2 | Complete and frozen | Intake, routing, provider contract, provenance, repair contract, and benchmark harness complete |
-| M2.5 | Next | Open-source parser/model integration and selection introduced after M2 |
-| M3 | Planned | Review workflow; fixture-driven UI work may begin in parallel |
+| M2.5 | Complete | Local route, provenance, benchmark harness, bounded repair, rollback, and M3 handoff tests pass |
+| M3 | Complete | Persisted review workflow, 50-document fixture exit gate, safe acceptance, audit, and approved-only exports pass |
 | M4 | Planned | Launch security and operations |
 | M5 | Planned | Closed live pilot |
 | M6 | Deferred | One evidence-backed expansion after M5 |
@@ -114,7 +114,7 @@ Deferred until M5 evidence selects exactly one region pack, structured adapter, 
 
 `M0 -> M1 -> M2 -> M2.5 -> M3 -> M4 -> M5`
 
-M3 fixture-driven UI work can overlap M2.5, but M2.5 remains a required gate for the real end-to-end MVP.
+M2.5 fixture/provider-contract evidence now satisfies the M3 implementation handoff; permissioned real-corpus accuracy remains separate launch evidence when available.
 
 ## Issue discipline
 

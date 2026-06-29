@@ -11,4 +11,18 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  namespace :review do
+    resources :batches, only: %i[index show] do
+      resources :exports, only: :create
+    end
+    resources :documents, only: %i[show update] do
+      member do
+        post :approve
+        post :reject
+      end
+    end
+  end
+
+  root "review/batches#index"
 end

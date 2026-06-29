@@ -6,6 +6,8 @@
 
 M0-M2 are complete and frozen according to the project owner. M2.5 contains every new open-source integration decision introduced after M2.
 
+Implementation status: M2.5 fixture/provider-contract evidence and M3 review workflow evidence are complete; permissioned real-corpus accuracy evidence remains separate launch evidence when data is available.
+
 ## M2.5 — open-source extraction upgrade
 
 Eight issues are defined in `docs/23_M2_5_IMPLEMENTATION_PLAN.md` and `planning/remaining_mvp_issues.csv`:

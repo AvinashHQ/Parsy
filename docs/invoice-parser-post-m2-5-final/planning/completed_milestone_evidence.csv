@@ -21,3 +21,19 @@ M2,M2-05,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark re
 M2,M2-06,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
 M2,M2-07,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
 M2,M2-08,COMPLETE_OWNER_DECLARED,"Intake/routing tests, provenance, benchmark report, idempotency and quarantine fixtures",documentation_and_synthetic_fixtures_only
+M2.5,M2.5-01,COMPLETE,"Provider contract and feature-flag rollback tests",test/services/extraction/provider_adapter_test.rb;test/services/extraction/provider_selection_test.rb
+M2.5,M2.5-02,COMPLETE,"Digital parser fixture output and provenance tests",test/services/local_extraction/parser_adapter_test.rb
+M2.5,M2.5-03,COMPLETE,"OCR/evidence adapter fixture and safe failure tests",test/services/local_extraction/parser_adapter_test.rb
+M2.5,M2.5-04,COMPLETE,"Semantic adapter schema-valid and failure tests",test/services/local_extraction/semantic_route_test.rb
+M2.5,M2.5-05,COMPLETE,"Route provenance and idempotency tests",test/services/local_extraction/semantic_route_test.rb
+M2.5,M2.5-06,COMPLETE,"Synthetic benchmark runner tests; real-corpus accuracy remains separate launch evidence when available",test/services/evaluation/m2_5_benchmark_runner_test.rb
+M2.5,M2.5-07,COMPLETE,"Bounded repair and safe failure tests",test/services/extraction/provider_adapter_test.rb;test/services/local_extraction/semantic_route_test.rb
+M2.5,M2.5-08,COMPLETE,"ADR rollout/rollback evidence and M3 unchanged-contract ingestion",docs/invoice-parser-post-m2-5-final/docs/10_ADRS.md;test/services/review/m3_workflow_test.rb
+M3,M3-01,COMPLETE,"Persisted batch/document/revision/finding/evidence workflow and review job tests",test/services/review/m3_workflow_test.rb
+M3,M3-02,COMPLETE,"Batch progress and risk-ranked queue tests",test/services/review/m3_workflow_test.rb
+M3,M3-03,COMPLETE,"Evidence-backed canonical editor and view tests",test/services/review/m3_workflow_test.rb;test/controllers/review_workflow_controller_test.rb
+M3,M3-04,COMPLETE,"Locale/country/currency/format/rule-pack override audit tests",test/services/review/m3_workflow_test.rb
+M3,M3-05,COMPLETE,"Deterministic acceptance policy blocks unresolved critical/high auto-acceptance",test/services/review/m3_workflow_test.rb
+M3,M3-06,COMPLETE,"Approved revision immutability and audit event tests",test/services/review/m3_workflow_test.rb
+M3,M3-07,COMPLETE,"Keyboard-first save/approve/reject/next controls and 50-document fixture flow",test/controllers/review_workflow_controller_test.rb;test/services/review/m3_workflow_test.rb
+M3,M3-08,COMPLETE,"Approved-revision-only export integration tests",test/services/review/m3_workflow_test.rb
