@@ -15,6 +15,11 @@ module Canonical
         fix_003_zero_minor_unit_jpy.json
         fix_004_three_minor_unit_kwd.json
         fix_005_generic_vat_eur.json
+        fix_010_duplicate_a.json
+        fix_010_duplicate_b.json
+        fix_011_non_duplicate_similar.json
+        fix_012_formula_injection_values.json
+        fix_013_schema_minor_migration.json
       ].each do |filename|
         attributes = JSON.parse(FIXTURE_DIR.join(filename).read)
 
