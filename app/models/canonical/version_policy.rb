@@ -24,7 +24,12 @@ module Canonical
       return incompatible("profile version is not semantic major.minor.patch") unless parsed
 
       current = parse_version(CURRENT_PROFILE_VERSION, parts: 3)
-      compare_major_minor(parsed, current, "profile")
+      compare_semver(parsed, current, "profile")
+    end
+
+    def self.profile_document_compatibility(profile)
+      attributes = profile.deep_stringify_keys
+      profile_compatibility(profile_id: attributes["id"], profile_version: attributes["version"])
     end
 
     def self.invoice_compatibility(invoice)
@@ -64,6 +69,20 @@ module Canonical
       )
     end
     private_class_method :compare_major_minor
+
+    def self.compare_semver(candidate, current, label)
+      return incompatible("unsupported #{label} major version") unless candidate.major == current.major
+      return incompatible("future #{label} minor version") if candidate.minor > current.minor
+      return incompatible("future #{label} patch version") if candidate.minor == current.minor && candidate.patch > current.patch
+
+      migration_required = candidate.minor < current.minor || candidate.patch < current.patch
+      Compatibility.new(
+        compatible: true,
+        migration_required: migration_required,
+        reason: migration_required ? "#{label} migration required" : "compatible"
+      )
+    end
+    private_class_method :compare_semver
 
     def self.incompatible(reason)
       Compatibility.new(compatible: false, migration_required: false, reason: reason)

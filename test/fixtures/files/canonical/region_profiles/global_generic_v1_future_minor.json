@@ -1,0 +1,17 @@
+{
+  "id": "global_generic_v1",
+  "version": "1.1.0",
+  "status": "pilot",
+  "jurisdictions": ["*"],
+  "supported_languages": ["en"],
+  "capabilities": {
+    "extraction": "benchmarked",
+    "identifier_validation": "none",
+    "tax_semantics": "none",
+    "structured_conformance": "none",
+    "export_adapters": ["canonical_json", "normalized_csv", "normalized_xlsx"]
+  },
+  "currency_overrides": {},
+  "validators": ["schema", "provenance"],
+  "unsupported_scenarios": ["direct ERP posting"]
+}

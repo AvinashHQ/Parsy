@@ -1,0 +1,32 @@
+{
+  "id": "global_generic_v1",
+  "version": "1.0.0",
+  "status": "pilot",
+  "jurisdictions": ["*"],
+  "supported_languages": ["en"],
+  "capabilities": {
+    "extraction": "benchmarked",
+    "identifier_validation": "none",
+    "tax_semantics": "none",
+    "structured_conformance": "none",
+    "export_adapters": ["canonical_json", "normalized_csv", "normalized_xlsx"]
+  },
+  "currency_overrides": {},
+  "validators": [
+    "schema",
+    "provenance",
+    "universal_totals",
+    "tax_sum",
+    "line_arithmetic",
+    "date_consistency",
+    "currency_precision",
+    "duplicate",
+    "evidence"
+  ],
+  "unsupported_scenarios": [
+    "legal invoice validity certification",
+    "tax advice or tax calculation",
+    "non-English auto-accept",
+    "direct ERP posting"
+  ]
+}
