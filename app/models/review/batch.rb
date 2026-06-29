@@ -6,9 +6,13 @@ module Review
 
     STATUSES = %w[uploaded processing review completed exported purged].freeze
 
+    belongs_to :tenant, optional: true
+
     has_many :documents, class_name: "Review::Document", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
     has_many :events, class_name: "Review::Event", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
     has_many :export_artifacts, class_name: "Review::ExportArtifact", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
+    has_many :purge_evidences, class_name: "Retention::PurgeEvidence", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
+
 
     validates :name, presence: true
     validates :status, inclusion: { in: STATUSES }

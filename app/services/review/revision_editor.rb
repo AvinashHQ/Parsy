@@ -42,7 +42,7 @@ module Review
         end
 
         revision.update!(status: "superseded")
-        revision.document.update!(current_revision: next_revision)
+        revision.document.update!({ current_revision: next_revision }.merge(document_override_attributes))
         revision.document.recompute_risk!
         revision.document.mark_review_state!
         revision.document.events.create!(
@@ -88,6 +88,18 @@ module Review
 
     def top_level_keys(paths)
       paths.map { |path| path.split("/").second }.compact.uniq
+    end
+
+    def document_override_attributes
+      {
+        detected_language: overrides["document_language"],
+        detected_country: overrides["supplier_country"] || overrides["buyer_country"],
+        detected_currency: overrides["currency"],
+        source_format_family: overrides["source_format_family"],
+        source_format_profile: overrides["source_format_profile"],
+        rule_pack_id: overrides["rule_pack_id"],
+        rule_pack_version: overrides["rule_pack_version"]
+      }.compact_blank
     end
 
     def digest(payload)

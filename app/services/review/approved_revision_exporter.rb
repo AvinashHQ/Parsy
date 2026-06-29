@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "stringio"
+
 module Review
   class ApprovedRevisionExporter
     def self.call(batch:, format:, actor: "system")
@@ -29,6 +31,12 @@ module Review
         byte_size: bytes,
         metadata: { "document_count" => revisions.size }
       )
+      artifact.file.attach(
+        io: StringIO.new(payload.to_s),
+        filename: "batch-#{batch.id}-export.#{artifact.format}",
+        content_type: mime_type(format),
+        identify: false
+      )
 
       batch.documents.where(id: revisions.map(&:review_document_id)).update_all(status: "exported", updated_at: Time.current)
       if (document = batch.documents.first)
@@ -42,5 +50,14 @@ module Review
     private
 
     attr_reader :batch, :format, :actor
+
+    def mime_type(format)
+      case format
+      when "json" then "application/json"
+      when "csv" then "application/zip"
+      when "xlsx" then "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      else "application/octet-stream"
+      end
+    end
   end
 end

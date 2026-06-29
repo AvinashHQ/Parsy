@@ -29,11 +29,20 @@ M2.5,M2.5-05,COMPLETE,"Route provenance and idempotency tests",test/services/loc
 M2.5,M2.5-06,COMPLETE,"Synthetic benchmark runner tests; real-corpus accuracy remains separate launch evidence when available",test/services/evaluation/m2_5_benchmark_runner_test.rb
 M2.5,M2.5-07,COMPLETE,"Bounded repair and safe failure tests",test/services/extraction/provider_adapter_test.rb;test/services/local_extraction/semantic_route_test.rb
 M2.5,M2.5-08,COMPLETE,"ADR rollout/rollback evidence and M3 unchanged-contract ingestion",docs/invoice-parser-post-m2-5-final/docs/10_ADRS.md;test/services/review/m3_workflow_test.rb
-M3,M3-01,COMPLETE,"Persisted batch/document/revision/finding/evidence workflow and review job tests",test/services/review/m3_workflow_test.rb
+M3,M3-01,COMPLETE,"Persisted batch/document/revision/finding/evidence workflow, idempotency, and review job tests",test/services/review/m3_workflow_test.rb
 M3,M3-02,COMPLETE,"Batch progress and risk-ranked queue tests",test/services/review/m3_workflow_test.rb
-M3,M3-03,COMPLETE,"Evidence-backed canonical editor and view tests",test/services/review/m3_workflow_test.rb;test/controllers/review_workflow_controller_test.rb
-M3,M3-04,COMPLETE,"Locale/country/currency/format/rule-pack override audit tests",test/services/review/m3_workflow_test.rb
+M3,M3-03,COMPLETE,"Evidence-backed canonical editor, high-risk evidence focus, and view tests",test/services/review/m3_workflow_test.rb;test/controllers/review_workflow_controller_test.rb
+M3,M3-04,COMPLETE,"Locale/country/currency/format/rule-pack override application and audit tests",test/services/review/m3_workflow_test.rb
 M3,M3-05,COMPLETE,"Deterministic acceptance policy blocks unresolved critical/high auto-acceptance",test/services/review/m3_workflow_test.rb
 M3,M3-06,COMPLETE,"Approved revision immutability and audit event tests",test/services/review/m3_workflow_test.rb
-M3,M3-07,COMPLETE,"Keyboard-first save/approve/reject/next controls and 50-document fixture flow",test/controllers/review_workflow_controller_test.rb;test/services/review/m3_workflow_test.rb
+M3,M3-07,COMPLETE,"50-document M2.5 route-backed system keyboard flow",test/system/review_keyboard_flow_test.rb
 M3,M3-08,COMPLETE,"Approved-revision-only export integration tests",test/services/review/m3_workflow_test.rb
+M4,M4-01,COMPLETE,"Authentication and tenant isolation fail closed",test/controllers/review_tenant_isolation_test.rb
+M4,M4-02,COMPLETE,"Private export artifact storage and authenticated short-lived download boundary",app/controllers/review/export_downloads_controller.rb;app/services/review/approved_revision_exporter.rb
+M4,M4-03,COMPLETE,"Retention purge removes source/export objects and records reconciliation evidence",test/services/retention/purge_batch_test.rb
+M4,M4-04,COMPLETE,"Content-free log parameter and job argument canary proof",test/services/security/content_free_logging_test.rb
+M4,M4-05,COMPLETE,"Quota spend guard pauses provider calls before external execution",test/services/usage/spend_guard_test.rb
+M4,M4-06,COMPLETE,"Production SSL/private storage/web-job split/CI system-test config invariants",test/config/production_security_config_test.rb
+M4,M4-07,COMPLETE,"Restore verifier checks tenant batches revisions and object reconciliation",test/services/operations/restore_verifier_test.rb
+M4,M4-08,COMPLETE,"Privacy launch verifier requires signed evidence flags",test/services/security/privacy_launch_verifier_test.rb
+M4,M4-09,COMPLETE,"Upload abuse suite and security CI coverage",test/services/intake/upload_abuse_test.rb;config/ci.rb

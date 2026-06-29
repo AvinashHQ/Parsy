@@ -6,6 +6,12 @@ require "json"
 class ReviewWorkflowControllerTest < ActionDispatch::IntegrationTest
   FIXTURE_PATH = Rails.root.join("test/fixtures/files/canonical/fix_005_generic_vat_eur.json")
 
+  setup do
+    @tenant = Tenant.create!(name: "Controller Tenant", slug: "controller-tenant")
+    @user = User.create!(tenant: @tenant, email: "operator@example.test", name: "Operator", operator_token: "controller-token")
+    post session_path, params: { email: @user.email, operator_token: "controller-token" }
+  end
+
   def test_batch_and_document_review_screens_show_m3_controls
     document = create_review_document
 
@@ -21,6 +27,8 @@ class ReviewWorkflowControllerTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='Validation findings']"
     assert_select "section[aria-label='Evidence references']"
     assert_select "section[aria-label='Canonical editor']"
+    assert_select "tr#evidence-invoice-number[tabindex='-1']"
+    assert_select "input[name='canonical_invoice[invoice][number]'][aria-describedby='evidence-invoice-number'][data-evidence-target='#evidence-invoice-number']"
     assert_select "input[accesskey='s']"
     assert_select "form[action='#{approve_review_document_path(document)}'] button[accesskey='a']"
     assert_select "form[action='#{reject_review_document_path(document)}'] button[accesskey='r']"
@@ -31,13 +39,18 @@ class ReviewWorkflowControllerTest < ActionDispatch::IntegrationTest
     forbid_provider_calls do
       patch review_document_path(document), params: {
         canonical_invoice: { invoice: { currency: "JPY" } },
-        overrides: { document_language: "ja-JP", supplier_country: "JP", currency: "JPY", rule_pack_id: "global_generic_v1" },
+        overrides: { document_language: "ja-JP", supplier_country: "JP", currency: "JPY", source_format_family: "visual_pdf", source_format_profile: "local_visual_pdf", rule_pack_id: "global_generic_v1", rule_pack_version: "1.0.1" },
         reason: "operator override"
       }
       assert_redirected_to review_document_path(document)
 
       assert_equal "JPY", document.reload.current_revision.canonical_invoice.dig("invoice", "currency")
       assert_equal "ja-JP", document.current_revision.locale_overrides.fetch("document_language")
+      assert_equal "ja-JP", document.detected_language
+      assert_equal "JP", document.detected_country
+      assert_equal "JPY", document.detected_currency
+      assert_equal "local_visual_pdf", document.source_format_profile
+      assert_equal "1.0.1", document.rule_pack_version
 
       post approve_review_document_path(document), params: { confirm_blocking_findings: "true", reason: "operator confirmed" }
       assert_response :redirect
@@ -48,7 +61,7 @@ class ReviewWorkflowControllerTest < ActionDispatch::IntegrationTest
   private
 
   def create_review_document
-    batch = Review::Batch.create!(name: "Controller batch")
+    batch = Review::Batch.create!(tenant: @tenant, name: "Controller batch")
     invoice = Canonical::Invoice.from_hash(invoice_hash)
     result = Struct.new(:candidate, :attempts, :idempotency_key, keyword_init: true) do
       def success? = true

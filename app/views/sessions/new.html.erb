@@ -1,0 +1,9 @@
+<h1>Operator sign in</h1>
+
+<%= form_with url: session_path, method: :post do %>
+  <%= label_tag :email, "Email" %>
+  <%= email_field_tag :email, nil, autocomplete: "username" %>
+  <%= label_tag :operator_token, "Operator token" %>
+  <%= password_field_tag :operator_token, nil, autocomplete: "current-password" %>
+  <%= submit_tag "Sign in" %>
+<% end %>

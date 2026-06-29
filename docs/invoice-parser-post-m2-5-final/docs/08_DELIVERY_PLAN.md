@@ -8,8 +8,8 @@
 | M1 | Complete | Canonical and deterministic core complete |
 | M2 | Complete and frozen | Intake, routing, provider contract, provenance, repair contract, and benchmark harness complete |
 | M2.5 | Complete | Local route, provenance, benchmark harness, bounded repair, rollback, and M3 handoff tests pass |
-| M3 | Complete | Persisted review workflow, 50-document fixture exit gate, safe acceptance, audit, and approved-only exports pass |
-| M4 | Planned | Launch security and operations |
+| M3 | Complete | Persisted review workflow, M2.5-backed 50-document system keyboard flow, safe acceptance, audit, and approved-only exports pass |
+| M4 | Complete | Tenant isolation, private storage, deletion/reconcile, content-free logs, quota circuit breaker, deploy/restore checks, privacy gate, and upload-abuse CI pass |
 | M5 | Planned | Closed live pilot |
 | M6 | Deferred | One evidence-backed expansion after M5 |
 

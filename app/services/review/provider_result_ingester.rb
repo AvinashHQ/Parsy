@@ -19,6 +19,8 @@ module Review
     def call
       ApplicationRecord.transaction do
         document = batch.documents.find_or_initialize_by(source_sha256: source_sha256)
+        return document if document.persisted? && terminal_review_state?(document)
+
         document.assign_attributes(document_attributes)
         document.save!
 
@@ -62,6 +64,14 @@ module Review
     end
 
     def persist_candidate!(document)
+      if (revision = idempotent_revision_for(document))
+        document.update!(current_revision: revision) unless document.current_revision_id == revision.id
+        document.recompute_risk!
+        document.mark_review_state!
+        record_event(document, revision, "candidate_reused")
+        return revision
+      end
+
       revision = document.candidate_revisions.create!(
         revision_number: document.next_revision_number,
         canonical_invoice: result.candidate.to_h,
@@ -124,6 +134,36 @@ module Review
 
     def record_event(document, revision, action)
       document.events.create!(batch: batch, candidate_revision: revision, actor: actor, action: action, metadata: { "provenance_keys" => provenance.keys })
+    end
+
+    def terminal_review_state?(document)
+      document.approved_revision_id.present? || document.status == "exported"
+    end
+
+    def idempotent_revision_for(document)
+      idempotency_key = provenance["idempotency_key"].presence
+      return nil if idempotency_key.blank?
+
+      candidate_digest = digest_for_comparison(candidate_hash)
+      document.candidate_revisions.detect do |revision|
+        revision.provenance["idempotency_key"] == idempotency_key &&
+          digest_for_comparison(revision.canonical_invoice) == candidate_digest
+      end
+    end
+
+    def digest_for_comparison(value)
+      Digest::SHA256.hexdigest(JSON.generate(sort_for_digest(value)))
+    end
+
+    def sort_for_digest(value)
+      case value
+      when Hash
+        value.keys.sort.to_h { |key| [ key, sort_for_digest(value[key]) ] }
+      when Array
+        value.map { |entry| sort_for_digest(entry) }
+      else
+        value
+      end
     end
 
     def digest(value)

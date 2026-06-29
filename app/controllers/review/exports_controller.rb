@@ -3,24 +3,15 @@
 module Review
   class ExportsController < ApplicationController
     def create
-      batch = Review::Batch.find(params[:batch_id])
-      artifact, payload = Review::ApprovedRevisionExporter.call(batch: batch, format: params[:format_type] || params[:format] || "json", actor: current_actor)
-      send_data payload, filename: "batch-#{batch.id}-export.#{artifact.format}", type: mime_type(artifact.format)
+      batch = Review::Batch.where(tenant: current_tenant).find(params[:batch_id])
+      artifact, _payload = Review::ApprovedRevisionExporter.call(batch: batch, format: params[:format_type] || params[:format] || "json", actor: current_actor)
+      redirect_to review_batch_export_download_path(batch, artifact), notice: "Export created"
     end
 
     private
 
     def current_actor
-      request.headers["X-Operator"] || "operator"
-    end
-
-    def mime_type(format)
-      case format
-      when "json" then "application/json"
-      when "csv" then "application/zip"
-      when "xlsx" then "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      else "application/octet-stream"
-      end
+      current_user.email
     end
   end
 end

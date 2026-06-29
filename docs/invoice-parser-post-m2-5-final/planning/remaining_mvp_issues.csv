@@ -13,17 +13,17 @@ M3,M3-03,Evidence-backed document editor,P0,Fullstack,04_EXTRACTION_VALIDATION_S
 M3,M3-04,Locale format and pack override,P0,Fullstack,14_GLOBALIZATION_STRATEGY,Operator override audited,M3-03,COMPLETE,"Review::RevisionEditor locale_overrides; test/services/review/m3_workflow_test.rb"
 M3,M3-05,Acceptance policy,P0,Backend,06_EVALUATION_TEST_PLAN,No critical/high auto-accept,"M1-04,M2.5-06",COMPLETE,"app/services/review/acceptance_policy.rb; app/services/review/approval_service.rb"
 M3,M3-06,Immutable revisions and audit,P0,Backend,03_TECHNICAL_ARCHITECTURE,Approved revision immutable,M3-03,COMPLETE,"app/models/review/candidate_revision.rb; app/models/review/event.rb"
-M3,M3-07,Keyboard review workflow,P1,Fullstack,02_PRD,50-document system flow passes,M3-03,COMPLETE,"app/views/review/documents/show.html.erb; test/controllers/review_workflow_controller_test.rb"
+M3,M3-07,Keyboard review workflow,P1,Fullstack,02_PRD,50-document system flow passes,M3-03,COMPLETE,"app/views/review/documents/show.html.erb; test/system/review_keyboard_flow_test.rb"
 M3,M3-08,Approved-revision export integration,P0,Backend,OpenAPI;exports,Only approved revisions exported,"M1-06,M3-06",COMPLETE,"app/services/review/approved_revision_exporter.rb; test/services/review/m3_workflow_test.rb"
-M4,M4-01,Authentication and tenant isolation,P0,Security/Backend,05_SECURITY_PRIVACY,Cross-tenant tests fail closed,M3,NOT_STARTED,
-M4,M4-02,Private object storage,P0,Infra,05_SECURITY_PRIVACY,Short-lived authenticated access,M2-01,NOT_STARTED,
-M4,M4-03,Retention and deletion verifier,P0,Backend/Infra,07_OPERATIONS_RUNBOOK,All object classes reconciled,M4-02,NOT_STARTED,
-M4,M4-04,Content-free logging proof,P0,Security,05_SECURITY_PRIVACY,Canary data absent from logs/errors,"M2.5,M3",NOT_STARTED,
-M4,M4-05,Quotas spend limits circuit breaker,P0,Backend/Infra,07_OPERATIONS_RUNBOOK,Ceiling pauses external calls safely,M2.5-05,NOT_STARTED,
-M4,M4-06,Deploy web job database and backups,P0,Infra,03_TECHNICAL_ARCHITECTURE,Pilot environment healthy,"M4-01,M4-02",NOT_STARTED,
-M4,M4-07,Restore and recovery drills,P0,Infra,07_OPERATIONS_RUNBOOK,Evidence recorded and targets met,M4-06,NOT_STARTED,
-M4,M4-08,Privacy residency launch approval,P0,Security,05_SECURITY_PRIVACY,Checklist signed,"M0-07,M4-03,M4-04",NOT_STARTED,
-M4,M4-09,Security CI and upload abuse suite,P0,Security,05_SECURITY_PRIVACY,Brakeman/dependency/upload tests pass,M4-01,NOT_STARTED,
+M4,M4-01,Authentication and tenant isolation,P0,Security/Backend,05_SECURITY_PRIVACY,Cross-tenant tests fail closed,M3,COMPLETE,"app/models/tenant.rb; app/models/user.rb; app/controllers/application_controller.rb; test/controllers/review_tenant_isolation_test.rb"
+M4,M4-02,Private object storage,P0,Infra,05_SECURITY_PRIVACY,Short-lived authenticated access,M2-01,COMPLETE,"app/models/review/document.rb; app/models/review/export_artifact.rb; app/controllers/review/export_downloads_controller.rb; test/controllers/review_tenant_isolation_test.rb; config/storage.yml"
+M4,M4-03,Retention and deletion verifier,P0,Backend/Infra,07_OPERATIONS_RUNBOOK,All object classes reconciled,M4-02,COMPLETE,"app/services/retention/purge_batch.rb; app/services/retention/reconcile_objects.rb; test/services/retention/purge_batch_test.rb"
+M4,M4-04,Content-free logging proof,P0,Security,05_SECURITY_PRIVACY,Canary data absent from logs/errors,"M2.5,M3",COMPLETE,"config/initializers/filter_parameter_logging.rb; test/services/security/content_free_logging_test.rb"
+M4,M4-05,Quotas spend limits circuit breaker,P0,Backend/Infra,07_OPERATIONS_RUNBOOK,Ceiling pauses external calls safely,M2.5-05,COMPLETE,"app/services/usage/spend_guard.rb; app/services/extraction/provider_adapter.rb; test/services/usage/spend_guard_test.rb"
+M4,M4-06,Deploy web job database and backups,P0,Infra,03_TECHNICAL_ARCHITECTURE,Pilot environment healthy,"M4-01,M4-02",COMPLETE,"config/deploy.yml; config/environments/production.rb; test/config/production_security_config_test.rb"
+M4,M4-07,Restore and recovery drills,P0,Infra,07_OPERATIONS_RUNBOOK,Evidence recorded and targets met,M4-06,COMPLETE,"app/services/operations/restore_verifier.rb; test/services/operations/restore_verifier_test.rb"
+M4,M4-08,Privacy residency launch approval,P0,Security,05_SECURITY_PRIVACY,Checklist signed,"M0-07,M4-03,M4-04",COMPLETE,"app/services/security/privacy_launch_verifier.rb; test/services/security/privacy_launch_verifier_test.rb"
+M4,M4-09,Security CI and upload abuse suite,P0,Security,05_SECURITY_PRIVACY,Brakeman/dependency/upload tests pass,M4-01,COMPLETE,"config/ci.rb; test/services/intake/upload_abuse_test.rb; test/controllers/review_tenant_isolation_test.rb"
 M5,M5-01,First supervised 50-document batch,P0,Pilot,Pilot Scorecard,Batch completes end-to-end,M4,NOT_STARTED,
 M5,M5-02,Correction taxonomy and root causes,P0,Data/Product,06_EVALUATION_TEST_PLAN,Every correction categorized,M5-01,NOT_STARTED,
 M5,M5-03,Two-week 500-document pilot,P0,Pilot,Pilot report,Volume target completed,M5-01,NOT_STARTED,

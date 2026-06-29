@@ -3,6 +3,7 @@
 <% if @revision.nil? %>
   <p>No candidate revision is available. The document remains in <%= @document.status %>.</p>
 <% else %>
+  <% evidence_dom_id = ->(field_path) { "evidence-#{field_path.to_s.delete_prefix('/').parameterize}" } %>
   <section aria-label="Source and profile">
     <h2>Source, route, and profile</h2>
     <dl>
@@ -39,7 +40,11 @@
           <tr>
             <td><%= finding.severity %></td>
             <td><%= finding.code %></td>
-            <td><%= finding.field_paths.join(", ") %></td>
+            <td>
+              <% finding.field_paths.each do |field_path| %>
+                <%= link_to field_path, "##{evidence_dom_id.call(field_path)}" %>
+              <% end %>
+            </td>
             <td><%= finding.resolution_state %></td>
             <td><%= finding.message %></td>
           </tr>
@@ -54,7 +59,7 @@
       <thead><tr><th>Field</th><th>Kind</th><th>Page/path</th><th>Snippet</th><th>Confirmed</th></tr></thead>
       <tbody>
         <% @revision.evidence_references.order(:field_path).each do |evidence| %>
-          <tr>
+          <tr id="<%= evidence_dom_id.call(evidence.field_path) %>" tabindex="-1">
             <td><%= evidence.field_path %></td>
             <td><%= evidence.source_kind %></td>
             <td><%= evidence.page || evidence.source_path %></td>
@@ -71,12 +76,14 @@
     <%= form_with url: review_document_path(@document), method: :patch do |form| %>
       <fieldset>
         <legend>High-risk fields</legend>
+        <%= label_tag "canonical_invoice[supplier][display_name]", "Supplier display name" %>
+        <%= text_field_tag "canonical_invoice[supplier][display_name]", @revision.canonical_invoice.dig("supplier", "display_name"), aria: { describedby: evidence_dom_id.call("/supplier/display_name") }, data: { evidence_target: "##{evidence_dom_id.call('/supplier/display_name')}" } %>
         <%= label_tag "canonical_invoice[invoice][number]", "Invoice number" %>
-        <%= text_field_tag "canonical_invoice[invoice][number]", @revision.canonical_invoice.dig("invoice", "number") %>
+        <%= text_field_tag "canonical_invoice[invoice][number]", @revision.canonical_invoice.dig("invoice", "number"), aria: { describedby: evidence_dom_id.call("/invoice/number") }, data: { evidence_target: "##{evidence_dom_id.call('/invoice/number')}" } %>
         <%= label_tag "canonical_invoice[invoice][currency]", "Currency" %>
-        <%= text_field_tag "canonical_invoice[invoice][currency]", @revision.canonical_invoice.dig("invoice", "currency") %>
+        <%= text_field_tag "canonical_invoice[invoice][currency]", @revision.canonical_invoice.dig("invoice", "currency"), aria: { describedby: evidence_dom_id.call("/invoice/currency") }, data: { evidence_target: "##{evidence_dom_id.call('/invoice/currency')}" } %>
         <%= label_tag "canonical_invoice[totals][payable_amount]", "Payable amount" %>
-        <%= text_field_tag "canonical_invoice[totals][payable_amount]", @revision.canonical_invoice.dig("totals", "payable_amount") %>
+        <%= text_field_tag "canonical_invoice[totals][payable_amount]", @revision.canonical_invoice.dig("totals", "payable_amount"), aria: { describedby: evidence_dom_id.call("/totals/payable_amount") }, data: { evidence_target: "##{evidence_dom_id.call('/totals/payable_amount')}" } %>
       </fieldset>
       <fieldset>
         <legend>Locale, format, and rule pack override</legend>

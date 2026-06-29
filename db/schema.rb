@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_29_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,9 +82,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
     t.jsonb "approved_revision_ids", default: [], null: false
     t.integer "byte_size", default: 0, null: false
     t.datetime "created_at", null: false
+    t.datetime "expires_at"
     t.string "format", null: false
     t.string "mapping_version", default: "generic_v1", null: false
     t.jsonb "metadata", default: {}, null: false
+    t.datetime "purged_at"
     t.bigint "review_batch_id", null: false
     t.string "status", default: "created", null: false
     t.datetime "updated_at", null: false
@@ -92,12 +94,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
     t.index ["review_batch_id"], name: "index_export_artifacts_on_review_batch_id"
   end
 
+  create_table "purge_evidences", force: :cascade do |t|
+    t.string "actor", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.jsonb "object_counts", default: {}, null: false
+    t.datetime "purged_at", null: false
+    t.bigint "review_batch_id", null: false
+    t.string "status", null: false
+    t.bigint "tenant_id"
+    t.datetime "updated_at", null: false
+    t.index ["review_batch_id", "created_at"], name: "index_purge_evidences_on_review_batch_id_and_created_at"
+    t.index ["review_batch_id"], name: "index_purge_evidences_on_review_batch_id"
+    t.index ["tenant_id"], name: "index_purge_evidences_on_tenant_id"
+  end
+
   create_table "review_batches", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.jsonb "metadata", default: {}, null: false
     t.string "name", null: false
+    t.string "purge_status", default: "active", null: false
+    t.datetime "purged_at"
+    t.datetime "retention_deadline_at"
     t.string "status", default: "uploaded", null: false
+    t.bigint "tenant_id"
     t.datetime "updated_at", null: false
+    t.index ["tenant_id"], name: "index_review_batches_on_tenant_id"
   end
 
   create_table "review_documents", force: :cascade do |t|
@@ -109,6 +131,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
     t.string "detected_currency"
     t.string "detected_language"
     t.jsonb "processing_provenance", default: {}, null: false
+    t.datetime "purged_at"
+    t.datetime "retention_deadline_at"
     t.bigint "review_batch_id", null: false
     t.integer "risk_score", default: 0, null: false
     t.string "route"
@@ -148,6 +172,53 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
     t.index ["review_document_id"], name: "index_review_events_on_review_document_id"
   end
 
+  create_table "tenants", force: :cascade do |t|
+    t.string "allowed_processing_regions", default: [], null: false, array: true
+    t.string "allowed_providers", default: [], null: false, array: true
+    t.string "circuit_breaker_status", default: "closed", null: false
+    t.datetime "created_at", null: false
+    t.integer "current_spend_cents", default: 0, null: false
+    t.string "hosting_region", default: "eu-west-2", null: false
+    t.integer "monthly_spend_limit_cents", default: 1000, null: false
+    t.string "name", null: false
+    t.jsonb "privacy_approval", default: {}, null: false
+    t.datetime "privacy_approved_at"
+    t.string "privacy_approved_by"
+    t.string "slug", null: false
+    t.datetime "spend_period_started_at"
+    t.string "storage_region", default: "eu-west-2", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_tenants_on_slug", unique: true
+  end
+
+  create_table "usage_spend_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "estimated_cents", default: 0, null: false
+    t.string "idempotency_key"
+    t.jsonb "metadata", default: {}, null: false
+    t.string "provider", null: false
+    t.string "status", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "created_at"], name: "index_usage_spend_events_on_tenant_id_and_created_at"
+    t.index ["tenant_id", "idempotency_key"], name: "index_usage_spend_events_on_tenant_id_and_idempotency_key", unique: true
+    t.index ["tenant_id"], name: "index_usage_spend_events_on_tenant_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "last_authenticated_at"
+    t.string "name", null: false
+    t.string "operator_token_digest", null: false
+    t.string "role", default: "operator", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["operator_token_digest"], name: "index_users_on_operator_token_digest", unique: true
+    t.index ["tenant_id", "email"], name: "index_users_on_tenant_id_and_email", unique: true
+    t.index ["tenant_id"], name: "index_users_on_tenant_id"
+  end
+
   create_table "validation_findings", force: :cascade do |t|
     t.string "behavior"
     t.string "calculated"
@@ -177,12 +248,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
   add_foreign_key "evidence_references", "candidate_revisions"
   add_foreign_key "evidence_references", "review_documents"
   add_foreign_key "export_artifacts", "review_batches"
+  add_foreign_key "purge_evidences", "review_batches"
+  add_foreign_key "purge_evidences", "tenants"
+  add_foreign_key "review_batches", "tenants"
   add_foreign_key "review_documents", "candidate_revisions", column: "approved_revision_id"
   add_foreign_key "review_documents", "candidate_revisions", column: "current_revision_id"
   add_foreign_key "review_documents", "review_batches"
   add_foreign_key "review_events", "candidate_revisions"
   add_foreign_key "review_events", "review_batches"
   add_foreign_key "review_events", "review_documents"
+  add_foreign_key "usage_spend_events", "tenants"
+  add_foreign_key "users", "tenants"
   add_foreign_key "validation_findings", "candidate_revisions"
   add_foreign_key "validation_findings", "review_documents"
 end

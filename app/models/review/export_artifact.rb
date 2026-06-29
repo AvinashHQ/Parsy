@@ -8,6 +8,8 @@ module Review
 
     belongs_to :batch, class_name: "Review::Batch", foreign_key: :review_batch_id, inverse_of: :export_artifacts
 
+    has_one_attached :file
+
     validates :format, inclusion: { in: FORMATS }
     validates :status, presence: true
   end

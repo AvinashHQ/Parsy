@@ -48,8 +48,8 @@ M2.5 must preserve the M2 provider contract and be removable through feature fla
 ## Remaining delivery sequence
 
 - **M2.5 — Complete:** local route, benchmark harness, bounded repair, rollback, and M3 handoff evidence.
-- **M3 — Complete:** operator review, corrections, immutable approval, 50-document fixture flow, and approved-only exports.
-- **M4 — Planned:** tenant security, retention/deletion, deployment, restore, monitoring, and cost controls.
+- **M3 — Complete:** operator review, corrections, immutable approval, M2.5-backed 50-document system keyboard flow, and approved-only exports.
+- **M4 — Complete:** tenant authentication/isolation, private storage, retention/deletion, content-free logging, cost controls, deploy/restore checks, privacy approval gate, and upload-abuse CI coverage.
 - **M5 — Planned:** closed supervised pilot and go/iterate/stop decision.
 
 Read `docs/18_M2_FROZEN_AND_M2_5_HANDOFF.md` first.

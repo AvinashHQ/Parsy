@@ -5,14 +5,14 @@ module Review
     rescue_from Review::ApprovalService::ConfirmationRequired, with: :confirmation_required
 
     def show
-      @document = Review::Document.find(params[:id])
+      @document = tenant_documents.find(params[:id])
       @revision = @document.current_revision
       @decision = @revision ? Review::AcceptancePolicy.new(@revision).decision : nil
       @next_document = next_document
     end
 
     def update
-      document = Review::Document.find(params[:id])
+      document = tenant_documents.find(params[:id])
       Review::RevisionEditor.call(
         revision: document.current_revision,
         patch: canonical_patch,
@@ -24,7 +24,7 @@ module Review
     end
 
     def approve
-      document = Review::Document.find(params[:id])
+      document = tenant_documents.find(params[:id])
       Review::ApprovalService.call(
         revision: document.current_revision,
         actor: current_actor,
@@ -35,7 +35,7 @@ module Review
     end
 
     def reject
-      document = Review::Document.find(params[:id])
+      document = tenant_documents.find(params[:id])
       document.current_revision&.update!(status: "rejected")
       document.update!(status: "rejected")
       document.events.create!(batch: document.batch, candidate_revision: document.current_revision, actor: current_actor, action: "rejected", reason: params[:reason])
@@ -45,8 +45,12 @@ module Review
 
     private
 
+    def tenant_documents
+      Review::Document.joins(:batch).where(review_batches: { tenant_id: current_tenant.id })
+    end
+
     def canonical_patch
-      params.fetch(:canonical_invoice, {}).permit!.to_h
+      params.fetch(:canonical_invoice, {}).permit(supplier: [ :display_name ], invoice: [ :number, :currency ], totals: [ :payable_amount ]).to_h
     end
 
     def override_params
@@ -54,7 +58,7 @@ module Review
     end
 
     def current_actor
-      request.headers["X-Operator"] || "operator"
+      current_user.email
     end
 
     def next_document

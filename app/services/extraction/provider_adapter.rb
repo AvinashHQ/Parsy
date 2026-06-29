@@ -11,6 +11,8 @@ module Extraction
     REPAIR_LIMIT_EXCEEDED = "REPAIR_LIMIT_EXCEEDED"
     REPAIR_PATH_NOT_ALLOWED = "REPAIR_PATH_NOT_ALLOWED"
     REPAIR_EMPTY_PATCH = "REPAIR_EMPTY_PATCH"
+    COST_LIMIT_PAUSED = "COST_LIMIT_PAUSED"
+
 
     ProviderResponse = Data.define(:json_text, :metadata)
 
@@ -71,15 +73,16 @@ module Extraction
 
     CandidateRecord = Data.define(:candidate, :attributes)
 
-    def initialize(provider:, schema_validator: Canonical::SchemaValidator.new, cache: {})
+    def initialize(provider:, schema_validator: Canonical::SchemaValidator.new, cache: {}, quota_guard: nil)
       @provider = provider
       @schema_validator = schema_validator
       @cache = cache
+      @quota_guard = quota_guard
     end
 
     def extract(source_sha256:, route:, region: nil, prompt_id: nil, prompt: nil, schema_version: Canonical::Invoice::SCHEMA_VERSION,
                 provider_id: nil, provider_version: nil, model: nil, model_version: nil, route_profile_version: nil,
-                region_pack_version: nil, **provider_request)
+                region_pack_version: nil, estimated_cost_cents: 0, **provider_request)
       prompt_identifier = prompt_identifier(prompt_id:, prompt:)
       prompt_sha256 = sha256(prompt_identifier)
       provider_identifier = provider_identifier(provider_id:, provider_version:)
@@ -104,6 +107,35 @@ module Extraction
           error_code: nil,
           repair_attempts: 0
         )
+      end
+
+      if quota_guard
+        quota = quota_guard.reserve!(
+          provider: provider_identifier,
+          estimated_cents: estimated_cost_cents.to_i,
+          idempotency_key:,
+          metadata: { route:, region:, model: }.compact
+        )
+        unless quota.allowed
+          attempt = processing_attempt(
+            status: :rejected,
+            error_code: COST_LIMIT_PAUSED,
+            source_sha256:,
+            route:,
+            region:,
+            schema_version:,
+            prompt_id: prompt_identifier,
+            prompt_sha256:,
+            provider_identifier:,
+            provider_version:,
+            model:,
+            model_version:,
+            idempotency_key:,
+            metadata: { cost: estimated_cost_cents.to_i },
+            repair_attempt: 0
+          )
+          return rejected_result(error_code: COST_LIMIT_PAUSED, attributes: nil, attempts: [ attempt ], idempotency_key:, repair_attempts: 0)
+        end
       end
 
       response = normalize_response(call_provider(provider_request.merge(
@@ -221,7 +253,7 @@ module Extraction
 
     private
 
-    attr_reader :provider, :schema_validator, :cache
+    attr_reader :provider, :schema_validator, :cache, :quota_guard
 
     def prompt_identifier(prompt_id:, prompt:)
       identifier = prompt_id || prompt

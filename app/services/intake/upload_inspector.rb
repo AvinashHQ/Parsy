@@ -8,6 +8,9 @@ module Intake
   class UploadInspector
     DEFAULT_MAX_BYTES = 20.megabytes
     XML_SCAN_LIMIT = 128.kilobytes
+    MAX_PDF_PAGES = 50
+    MAX_XML_BYTES = 1.megabyte
+    MAX_XML_TAGS = 5_000
 
     Sniff = Data.define(:mime_type, :kind)
 
@@ -33,11 +36,12 @@ module Intake
       bytes = bytes.to_s.b
       sha256 = forced_sha256 || Digest::SHA256.hexdigest(bytes)
       byte_size = forced_byte_size || bytes.bytesize
+      return reject(sha256: sha256, byte_size: byte_size, sniff: Sniff.new(nil, :unknown), filename: filename, content_type: content_type, code: "MALICIOUS_FILENAME", message: "filename contains unsafe path characters") if unsafe_filename?(filename)
+
       sniff = sniff(bytes)
 
       return reject(sha256: sha256, byte_size: byte_size, sniff: sniff, filename: filename, content_type: content_type, code: "FILE_TOO_LARGE", message: "file exceeds maximum allowed size") if byte_size > max_bytes
       return reject(sha256: sha256, byte_size: byte_size, sniff: sniff, filename: filename, content_type: content_type, code: "UNSUPPORTED_BINARY_FORMAT", message: "file type is unsupported") if sniff.kind == :unknown
-
       detection = detect(bytes, sniff)
       status = detection.quarantine? ? "quarantined" : "accepted"
       InspectionResult.new(
@@ -96,6 +100,10 @@ module Intake
       )
     end
 
+    def unsafe_filename?(filename)
+      filename.to_s.match?(%r{[\/\\\0]}) || filename.to_s.include?("..")
+    end
+
     def sniff(bytes)
       return Sniff.new("application/pdf", :pdf) if bytes.start_with?("%PDF-")
       return Sniff.new("image/jpeg", :jpeg) if bytes.byteslice(0, 3) == "\xFF\xD8\xFF".b
@@ -131,6 +139,7 @@ module Intake
     def detect_pdf(bytes)
       return quarantine("visual_pdf", "ENCRYPTED_PDF") if encrypted_pdf?(bytes)
       return quarantine("visual_pdf", "CORRUPT_PDF") unless bytes.include?("%%EOF")
+      return quarantine("visual_pdf", "PDF_PAGE_LIMIT_EXCEEDED") if pdf_page_count(bytes) > MAX_PDF_PAGES
 
       payloads = embedded_payloads(bytes)
       if payloads.any?
@@ -141,8 +150,11 @@ module Intake
     end
 
     def detect_xml(bytes)
+      return quarantine("unknown_structured", "XML_TOO_LARGE") if bytes.bytesize > MAX_XML_BYTES
+
       sample = bytes.byteslice(0, XML_SCAN_LIMIT).to_s
-      return quarantine("unknown_structured", "XML_ENTITY_EXPANSION_RISK") if sample.match?(/<!DOCTYPE|<!ENTITY/i)
+      return quarantine("unknown_structured", "XML_ENTITY_EXPANSION_RISK") if sample.match?(/<!DOCTYPE|<!ENTITY|SYSTEM\\s+[\"']https?:/i)
+      return quarantine("unknown_structured", "XML_NESTING_LIMIT_EXCEEDED") if sample.scan(/<[^!?\/][^>]*>/).size > MAX_XML_TAGS
       return registry_detection("oasis_ubl_invoice") if sample.include?("urn:oasis:names:specification:ubl:schema:xsd:Invoice-2") || sample.include?("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2")
       return registry_detection("uncefact_cii") if sample.include?("CrossIndustryInvoice") || sample.include?("urn:un:unece:uncefact:data:standard:CrossIndustryInvoice")
 
@@ -198,13 +210,17 @@ module Intake
       ) ]
     end
 
+    def pdf_page_count(bytes)
+      [ bytes.scan(%r{/Type\s*/Page\b}).length, 1 ].max
+    end
+
     def content_free_metadata(bytes, sniff, detection)
       metadata = {
         registry_version: registry.fetch("version"),
         magic_kind: sniff.kind.to_s,
         embedded_payload_count: detection.embedded_payloads.length
       }
-      metadata[:page_count] = [ bytes.scan(%r{/Type\s*/Page\b}).length, 1 ].max if sniff.kind == :pdf
+      metadata[:page_count] = pdf_page_count(bytes) if sniff.kind == :pdf
       metadata
     end
   end

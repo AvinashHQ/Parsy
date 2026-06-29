@@ -15,6 +15,8 @@ module Review
     has_many :evidence_references, class_name: "Review::EvidenceReference", foreign_key: :review_document_id, inverse_of: :document, dependent: :destroy
     has_many :events, class_name: "Review::Event", foreign_key: :review_document_id, inverse_of: :document, dependent: :destroy
 
+    has_one_attached :source_file
+
     validates :status, inclusion: { in: STATUSES }
     validates :source_sha256, presence: true, uniqueness: { scope: :review_batch_id }
     validates :risk_score, numericality: { greater_than_or_equal_to: 0 }
