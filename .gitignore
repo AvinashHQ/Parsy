@@ -9,9 +9,6 @@
 .idea/
 .vscode/
 
-# Stale historical documentation pack; global pack is authoritative.
-/docs/invoice-parser-rails-docs-only/
-
 # Rails secrets
 /config/master.key
 /config/credentials/*.key
