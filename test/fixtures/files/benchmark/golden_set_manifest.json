@@ -1,0 +1,44 @@
+{
+  "dataset": {
+    "id": "m2_golden_smoke",
+    "version": "2026-06-29"
+  },
+  "cases": [
+    {
+      "id": "structured_case",
+      "profile": "global_generic_v1",
+      "route": "structured_xml",
+      "expected_canonical_path": "test/fixtures/files/canonical/fix_005_generic_vat_eur.json",
+      "fields": [
+        {
+          "pointer": "/invoice/currency",
+          "comparison": "exact"
+        },
+        {
+          "pointer": "/totals/payable_amount",
+          "comparison": "decimal"
+        }
+      ]
+    },
+    {
+      "id": "visual_case",
+      "profile": "global_generic_v1",
+      "route": "visual_model",
+      "expected_canonical_path": "test/fixtures/files/canonical/fix_001_minimal_visual_usd.json",
+      "fields": [
+        {
+          "pointer": "/invoice/number",
+          "comparison": "normalized"
+        },
+        {
+          "pointer": "/invoice/currency",
+          "comparison": "exact"
+        },
+        {
+          "pointer": "/totals/payable_amount",
+          "comparison": "decimal"
+        }
+      ]
+    }
+  ]
+}
