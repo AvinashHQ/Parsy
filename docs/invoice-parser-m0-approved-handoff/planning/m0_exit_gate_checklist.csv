@@ -1,0 +1,11 @@
+gate,target,assumed_result,status,evidence
+Qualifying interviews,>=5,7,PASS,research/interview_summary.csv
+Organizations represented,>=3,5,PASS,research/interview_summary.csv
+Observed workflows,>=2,3,PASS,research/interview_summary.csv
+Two pilot teams selected,2,2,PASS,pilot/PILOT_TEAMS_AND_DATA_TERMS.md
+Generic export useful,Both selected pilots,Yes,PASS,research/M0_INTERVIEW_SYNTHESIS.md
+Fields and unacceptable errors frozen,Required,v1.0,PASS,pilot/*.yaml
+Capability statement frozen,Required,global_generic_v1.0,PASS,pilot/PILOT_PROFILE_V1.md
+Permissioned corpus commitment,150-300,240,PASS,pilot/CORPUS_AND_HOLDOUT_PLAN.md
+Double-reviewed holdout,100,100,PASS,pilot/CORPUS_AND_HOLDOUT_PLAN.md
+Security/retention boundary approved,Required,v1.0,PASS,pilot/SECURITY_RETENTION_DECISION.md

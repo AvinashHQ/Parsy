@@ -1,0 +1,58 @@
+policy_version: blocking_errors_v1.0
+canonical_schema: canonical_invoice_v2
+rules:
+- code: SCHEMA_INVALID
+  severity: critical
+  behavior: block_export
+  description: Canonical document does not validate against the pinned schema.
+- code: DOCUMENT_TYPE_AMBIGUOUS
+  severity: critical
+  behavior: block_export
+  description: Invoice versus credit/debit note cannot be determined.
+- code: CURRENCY_MISSING_OR_AMBIGUOUS
+  severity: critical
+  behavior: block_export
+  description: Currency is absent or conflicting.
+- code: PAYABLE_AMOUNT_MISSING
+  severity: critical
+  behavior: block_export
+  description: Payable amount cannot be established.
+- code: TOTALS_DO_NOT_RECONCILE
+  severity: critical
+  behavior: block_export
+  description: Tax-exclusive, tax, inclusive, prepaid, withholding, rounding or payable
+    totals fail tolerance rules.
+- code: POSSIBLE_DUPLICATE
+  severity: high
+  behavior: require_confirmation
+  description: Normalized fingerprint matches an existing document in tenant scope.
+- code: SUPPLIER_IDENTITY_AMBIGUOUS
+  severity: high
+  behavior: require_confirmation
+  description: Supplier name/identifier candidates conflict.
+- code: HIGH_RISK_EVIDENCE_MISSING
+  severity: high
+  behavior: block_export
+  description: A high-risk extracted value has no source evidence locator.
+- code: TAX_BREAKDOWN_CONFLICT
+  severity: high
+  behavior: require_confirmation
+  description: Source tax components do not reconcile with total tax.
+- code: LINE_ITEM_RECONCILIATION_FAILED
+  severity: high
+  behavior: require_confirmation
+  description: Required line-item net/tax/gross totals do not reconcile.
+- code: UNSUPPORTED_STRUCTURED_PROFILE
+  severity: high
+  behavior: quarantine
+  description: A structured or hybrid payload was detected without an enabled tested
+    profile.
+- code: MALWARE_OR_FILE_POLICY_FAILURE
+  severity: critical
+  behavior: reject_input
+  description: Input failed file safety inspection.
+initial_live_policy:
+  human_approval_required: true
+  auto_accept_enabled: false
+  critical_findings_may_not_be_overridden_without_explicit_reason: true
+  high_findings_require_confirmation: true

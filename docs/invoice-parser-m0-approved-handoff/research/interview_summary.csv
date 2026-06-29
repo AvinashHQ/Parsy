@@ -1,0 +1,8 @@
+interview_id,organization_id,role,measurement_method,documents,workflow,currencies,downstream,active_min_per_doc,rework_min_per_doc,error_events,reviewed_export_useful,pilot_willingness,top_errors
+INT-001,ORG-A,Bookkeeper,OBSERVED,22,Header + totals,USD/GBP/EUR,QBO + Excel,4.0,0.8,5,Yes,Yes,Source quality; identifiers
+INT-002,ORG-A,Reviewer,SYSTEM_SUPPORTED,30,Header + totals,USD/GBP/EUR,QBO + Excel,4.5,1.0,6,Yes,Yes,Tax; duplicates
+INT-003,ORG-B,AP operator,OBSERVED,18,Header + line items,GBP/EUR/SGD,Xero + CSV,8.7,2.1,8,Yes,Yes,Line items; tax
+INT-004,ORG-B,Team lead,RECENT_RECALL,15,Mixed,GBP/EUR/INR,Xero + CSV,6.2,1.6,7,Yes,Yes,Export mapping; identifiers
+INT-005,ORG-C,Junior accountant,OBSERVED,23,Header + totals,AUD/USD,Spreadsheet import,4.1,1.2,4,Yes,No,Dates; source quality
+INT-006,ORG-D,AP lead,SYSTEM_SUPPORTED,24,Header + line items,EUR/AED/USD,ERP CSV import,9.4,2.3,9,Yes,Yes,Amounts; line items
+INT-007,ORG-E,Firm owner,RECENT_RECALL,12,Header + totals,INR/USD,Spreadsheet/Tally staging,5.9,1.1,5,No,No,Classification; tax

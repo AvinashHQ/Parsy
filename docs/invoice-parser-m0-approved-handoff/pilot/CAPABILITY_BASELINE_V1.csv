@@ -1,0 +1,11 @@
+capability,profile,status,first_live_behavior,claim_allowed
+Visual PDF ingestion,global_generic_v1,REQUIRED,Process after inspection,"Yes, for benchmarked limits"
+JPEG/PNG/TIFF ingestion,global_generic_v1,REQUIRED,Process after inspection,"Yes, for benchmarked limits"
+English Latin-script extraction,global_generic_v1,REQUIRED,Extract and review,"Yes, after M2 benchmark"
+ISO multi-currency amounts,canonical_invoice_v2,REQUIRED,Decimal-string normalization,"Yes, after M1 tests"
+Generic tax breakdown,canonical_invoice_v2,REQUIRED,Represent source values; arithmetic only,No tax-compliance claim
+Line-item extraction,pilot_beta_v1,CONDITIONAL,Review-required,Pilot-specific only
+Credit note recognition,global_generic_v1,REQUIRED,Blocking if ambiguous,"Yes, after benchmark"
+Structured XML/hybrid document,format_detector_v1,DETECT_ONLY,Quarantine unless named profile enabled,No extraction claim
+Regional tax semantics,region_profile,POST_MVP,No named pack enabled,No
+Direct ERP posting,none,OUT_OF_SCOPE,Not implemented,No

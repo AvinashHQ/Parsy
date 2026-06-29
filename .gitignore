@@ -10,7 +10,7 @@
 .vscode/
 
 # Stale historical documentation pack; global pack is authoritative.
-/invoice-parser-rails-docs-only/
+/docs/invoice-parser-rails-docs-only/
 
 # Rails secrets
 /config/master.key
