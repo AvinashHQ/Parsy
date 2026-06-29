@@ -32,6 +32,15 @@ module Evaluation
       assert_equal JSON.generate(first_report), JSON.generate(second_report)
     end
 
+    def test_report_orders_cases_and_fields_deterministically
+      report = run_report
+
+      assert_equal [ "structured_case", "visual_case" ], report.fetch("cases").map { |entry| entry.fetch("id") }
+      visual = report.fetch("cases").find { |entry| entry.fetch("id") == "visual_case" }
+      assert_equal [ "/invoice/currency", "/invoice/number", "/totals/payable_amount" ],
+        visual.fetch("fields").map { |field| field.fetch("pointer") }
+    end
+
     def test_profiles_separate_visual_and_structured_route_metrics
       report = run_report
       profile = report.fetch("profiles").fetch(0)

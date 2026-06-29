@@ -5,22 +5,6 @@
   },
   "cases": [
     {
-      "id": "structured_case",
-      "profile": "global_generic_v1",
-      "route": "structured_xml",
-      "expected_canonical_path": "test/fixtures/files/canonical/fix_005_generic_vat_eur.json",
-      "fields": [
-        {
-          "pointer": "/invoice/currency",
-          "comparison": "exact"
-        },
-        {
-          "pointer": "/totals/payable_amount",
-          "comparison": "decimal"
-        }
-      ]
-    },
-    {
       "id": "visual_case",
       "profile": "global_generic_v1",
       "route": "visual_model",
@@ -31,12 +15,28 @@
           "comparison": "normalized"
         },
         {
+          "pointer": "/totals/payable_amount",
+          "comparison": "decimal"
+        },
+        {
           "pointer": "/invoice/currency",
           "comparison": "exact"
-        },
+        }
+      ]
+    },
+    {
+      "id": "structured_case",
+      "profile": "global_generic_v1",
+      "route": "structured_xml",
+      "expected_canonical_path": "test/fixtures/files/canonical/fix_005_generic_vat_eur.json",
+      "fields": [
         {
           "pointer": "/totals/payable_amount",
           "comparison": "decimal"
+        },
+        {
+          "pointer": "/invoice/currency",
+          "comparison": "exact"
         }
       ]
     }
