@@ -16,7 +16,9 @@ jobs:
       - name: Run CI
         env:
           RAILS_ENV: test
-        run: bin/ci
+        run: |
+          eval "$(~/.rbenv/bin/rbenv init - bash)"
+          bin/ci
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v7
