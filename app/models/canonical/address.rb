@@ -7,5 +7,9 @@ module Canonical
     def subdivision = value(:subdivision)
     def postal_code = value(:postal_code)
     def country_code = value(:country_code)
+
+    def normalized_country_code
+      country_code&.upcase
+    end
   end
 end

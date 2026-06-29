@@ -8,15 +8,15 @@ module Canonical
     def item_name = value(:item_name)
     def seller_item_id = value(:seller_item_id)
     def buyer_item_id = value(:buyer_item_id)
-    def classifications = value(:classifications)
+    def classifications = objects(:classifications, Classification)
     def quantity = value(:quantity)
     def unit_code = value(:unit_code)
     def unit_price = value(:unit_price)
     def price_base_quantity = value(:price_base_quantity)
-    def allowances_charges = value(:allowances_charges)
+    def allowances_charges = objects(:allowances_charges, AllowanceCharge)
     def line_net_amount = value(:line_net_amount)
     def tax_breakdowns = objects(:tax_breakdowns, TaxBreakdown)
     def line_gross_amount = value(:line_gross_amount)
-    def service_period = value(:service_period)
+    def service_period = object(:service_period, Period)
   end
 end

@@ -8,7 +8,7 @@ module Canonical
     def tax_point_date = value(:tax_point_date)
     def currency = value(:currency)
     def tax_currency = value(:tax_currency)
-    def service_period = value(:service_period)
+    def service_period = object(:service_period, Period)
     def payment_terms_text = value(:payment_terms_text)
   end
 end

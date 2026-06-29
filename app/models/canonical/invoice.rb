@@ -48,6 +48,10 @@ module Canonical
       objects(:references, Reference)
     end
 
+    def allowances_charges
+      objects(:allowances_charges, AllowanceCharge)
+    end
+
     def totals
       object(:totals, Totals)
     end
@@ -58,6 +62,10 @@ module Canonical
 
     def line_items
       objects(:line_items, LineItem)
+    end
+
+    def payment
+      object(:payment, Payment)
     end
 
     def evidence
