@@ -1,0 +1,126 @@
+{
+  "schema_version": "2.0",
+  "document_id": "fix_001_minimal_visual_usd",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en-GB",
+    "script": "Latn",
+    "supplier_country": "US",
+    "buyer_country": "US",
+    "jurisdiction_candidates": [
+      "US"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Northstar Services Ltd",
+    "legal_name": "Northstar Services Ltd",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "BUSINESS_REGISTRATION",
+        "value": "US-DEMO-001",
+        "issuing_country": "US",
+        "purpose": "business"
+      }
+    ],
+    "address": {
+      "lines": [
+        "10 Example Street"
+      ],
+      "city": "London",
+      "subdivision": null,
+      "postal_code": "EC1A 1AA",
+      "country_code": "GB"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": null,
+  "payee": null,
+  "invoice": {
+    "number": "INV-2026-1042",
+    "issue_date": "2026-06-15",
+    "due_date": "2026-07-15",
+    "tax_point_date": null,
+    "currency": "USD",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "100.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "100.00",
+    "total_tax_amount": "0.00",
+    "tax_inclusive_amount": "100.00",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "100.00"
+  },
+  "tax_breakdowns": [],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Consulting services",
+      "item_name": "Consulting services",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "100.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "100.00",
+      "tax_breakdowns": [],
+      "line_gross_amount": "100.00",
+      "service_period": null
+    }
+  ],
+  "payment": null,
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Invoice No. INV-2026-1042",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Invoice date 15 June 2026",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Amount due USD 100.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}
