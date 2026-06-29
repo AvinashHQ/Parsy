@@ -68,6 +68,20 @@ module Canonical
       assert_equal "1234", invoice.payment.means.first.iban_last4
     end
 
+    def test_schema_rejects_country_specific_core_payload_fields
+      validator = Canonical::SchemaValidator.new
+      attributes = JSON.parse(FIXTURE_DIR.join("fix_005_generic_vat_eur.json").read)
+      attributes["supplier"]["gstin_required"] = true
+      attributes["eu_vat_core_hint"] = "domestic_reverse_charge"
+
+      errors = validator.validate(attributes)
+
+      refute_empty errors
+      assert errors.any? { |error| error.data_pointer == "/supplier/gstin_required" }
+      assert errors.any? { |error| error.data_pointer == "/eu_vat_core_hint" }
+      assert errors.all? { |error| error.schema_pointer.end_with?("/additionalProperties") }
+    end
+
     def test_no_country_specific_core_model_classes_are_defined
       country_specific_constants = Canonical.constants.grep(/GST|GSTIN|EU|VAT|TALLY|INDIA|PEPPOL|UBL|CII/)
 

@@ -1,0 +1,74 @@
+{
+  "schema_version": "2.0",
+  "document_id": "fix_013_schema_minor_migration",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en-GB",
+    "script": "Latn",
+    "supplier_country": "US",
+    "buyer_country": "US",
+    "jurisdiction_candidates": ["US"],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Migration Fixture Supplier",
+    "legal_name": "Migration Fixture Supplier",
+    "trading_name": null,
+    "identifiers": [],
+    "address": null,
+    "electronic_addresses": []
+  },
+  "buyer": null,
+  "payee": null,
+  "invoice": {
+    "number": "MIG-013",
+    "issue_date": "2026-06-15",
+    "due_date": null,
+    "tax_point_date": null,
+    "currency": "USD",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": null
+  },
+  "references": [],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "1.00",
+    "allowance_total_amount": "0",
+    "charge_total_amount": "0",
+    "tax_exclusive_amount": "1.00",
+    "total_tax_amount": "0",
+    "tax_inclusive_amount": "1.00",
+    "prepaid_amount": "0",
+    "withholding_total_amount": "0",
+    "rounding_amount": "0",
+    "payable_amount": "1.00"
+  },
+  "tax_breakdowns": [],
+  "line_items": [],
+  "payment": null,
+  "evidence": [
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Amount due USD 1.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

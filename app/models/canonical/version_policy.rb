@@ -9,11 +9,11 @@ module Canonical
     Compatibility = Data.define(:compatible, :migration_required, :reason)
     Version = Data.define(:major, :minor, :patch)
 
-    def self.schema_compatibility(schema_version)
+    def self.schema_compatibility(schema_version, current_schema_version: CURRENT_SCHEMA_VERSION)
       parsed = parse_version(schema_version, parts: 2)
       return incompatible("schema version is not major.minor") unless parsed
 
-      current = parse_version(CURRENT_SCHEMA_VERSION, parts: 2)
+      current = parse_version(current_schema_version, parts: 2)
       compare_major_minor(parsed, current, "schema")
     end
 
