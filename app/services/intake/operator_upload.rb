@@ -27,8 +27,8 @@ module Intake
 
     EntryResult = Data.define(:status, :sha256, :route, :document, :rejection_code, :message) do
       def persisted? = document.present? && !duplicate?
-      def candidate_ready? = document&.current_revision_id.present?
-      def queued_without_candidate? = document.present? && document.current_revision_id.blank? && document.status == "needs_review"
+      def candidate_ready? = !duplicate? && document&.current_revision_id.present?
+      def queued_without_candidate? = !duplicate? && document.present? && document.current_revision_id.blank? && document.status == "needs_review"
       def quarantined? = status == "quarantined"
       def rejected? = status == "rejected"
       def duplicate? = status == "duplicate"

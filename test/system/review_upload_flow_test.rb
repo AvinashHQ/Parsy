@@ -14,6 +14,7 @@ class ReviewUploadFlowTest < ApplicationSystemTestCase
     fill_in "Email", with: @user.email
     fill_in "Operator token", with: "system-upload-token"
     click_on "Sign in"
+    assert_current_path review_batches_path
   end
 
   teardown do
@@ -43,10 +44,11 @@ class ReviewUploadFlowTest < ApplicationSystemTestCase
     xml_document = batch.documents.where(route: "structured_parser").sole
     pdf_document = batch.documents.where(route: "visual_model").sole
 
-    assert_selector "a", text: xml_document.source_sha256.first(12)
-    assert_selector "a", text: pdf_document.source_sha256.first(12)
-
-    click_on pdf_document.source_sha256.first(12)
+    within "section[aria-label='Intake results']" do
+      assert_selector "a", text: xml_document.source_sha256.first(12)
+      assert_selector "a", text: pdf_document.source_sha256.first(12)
+      click_on pdf_document.source_sha256.first(12)
+    end
     assert_text "No candidate revision available"
     assert_link "Download source"
   end

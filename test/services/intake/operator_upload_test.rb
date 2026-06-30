@@ -101,6 +101,7 @@ module Intake
       assert_equal "DUPLICATE_SOURCE", duplicate.rejection_code
       assert_includes result.flash_message, "1 document"
       assert_includes result.flash_message, "1 duplicate"
+      assert_includes result.flash_message, "1 awaiting extraction"
     end
 
     private

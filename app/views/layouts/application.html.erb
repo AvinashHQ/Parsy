@@ -52,7 +52,7 @@
 
         <% if current_user %>
           <nav class="ml-2 hidden items-center gap-1 sm:flex">
-            <% batches_active = controller_path == "review/batches" %>
+            <% batches_active = controller_path.start_with?("review") && controller_path != "review/uploads" %>
             <% upload_active = controller_path == "review/uploads" %>
             <a href="<%= review_batches_path %>"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= batches_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
