@@ -8,6 +8,10 @@ module Review
 
     belongs_to :tenant, optional: true
 
+    broadcasts_refreshes
+    after_update_commit :broadcast_to_tenant
+    after_create_commit :broadcast_to_tenant
+
     has_many :documents, class_name: "Review::Document", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
     has_many :events, class_name: "Review::Event", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
     has_many :export_artifacts, class_name: "Review::ExportArtifact", foreign_key: :review_batch_id, inverse_of: :batch, dependent: :destroy
@@ -46,6 +50,12 @@ module Review
       end
 
       update!(status: next_status)
+    end
+
+    private
+
+    def broadcast_to_tenant
+      broadcast_refresh_later_to(tenant) if tenant.present?
     end
   end
 end

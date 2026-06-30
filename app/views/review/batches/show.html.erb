@@ -1,4 +1,9 @@
 <% content_for :title, "#{@batch.name} · Parsy" %>
+<% content_for :head do %>
+  <meta name="turbo-refresh-method" content="morph">
+  <meta name="turbo-refresh-scroll" content="preserve">
+<% end %>
+<%= turbo_stream_from @batch %>
 
 <%= page_header @batch.name, breadcrumbs: [["Batches", review_batches_path]] do %>
   <%= status_badge @batch.status %>
@@ -12,7 +17,18 @@
 <div class="space-y-6">
   <section class="card p-5" aria-label="Batch progress">
     <div class="mb-4 flex items-center justify-between gap-3">
-      <h2 class="text-sm font-medium text-ink">Progress</h2>
+      <div class="flex items-center gap-2">
+        <h2 class="text-sm font-medium text-ink">Progress</h2>
+        <% if %w[processing review uploaded].include?(@batch.status) %>
+          <span class="inline-flex items-center gap-1.5 text-xs text-muted" title="This page updates automatically">
+            <span class="relative flex size-1.5">
+              <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-info opacity-75"></span>
+              <span class="relative inline-flex size-1.5 rounded-full bg-info"></span>
+            </span>
+            Live
+          </span>
+        <% end %>
+      </div>
       <span class="font-mono text-xs text-muted"><%= @progress[:completed] %> / <%= @progress[:total] %> complete · <%= @progress[:percent] %>%</span>
     </div>
     <%= progress_bar @progress[:percent] %>

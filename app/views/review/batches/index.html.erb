@@ -1,4 +1,9 @@
 <% content_for :title, "Batches · Parsy" %>
+<% content_for :head do %>
+  <meta name="turbo-refresh-method" content="morph">
+  <meta name="turbo-refresh-scroll" content="preserve">
+<% end %>
+<%= turbo_stream_from current_tenant if current_tenant %>
 
 <%= page_header "Batches", subtitle: "Invoice processing batches for #{current_tenant&.name}." do %>
   <%= link_to new_review_upload_path, class: "btn btn-primary" do %>

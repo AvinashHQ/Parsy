@@ -1,10 +1,24 @@
 <% content_for :title, "Document review · Parsy" %>
 
 <% if @revision.nil? %>
+  <% processing_statuses = %w[uploaded inspecting routed_structured routed_visual extracting validating] %>
+  <% still_processing = processing_statuses.include?(@document.status) %>
+  <% if still_processing %>
+    <% content_for :head do %>
+      <meta name="turbo-refresh-method" content="morph">
+    <% end %>
+    <%= turbo_stream_from @document %>
+  <% end %>
   <%= page_header "Document review",
         breadcrumbs: [["Batches", review_batches_path], [@document.batch.name, review_batch_path(@document.batch)]] %>
+  <% if still_processing %>
+    <div class="mb-5 flex items-center gap-2.5 rounded-xl border border-info-line bg-info-subtle px-4 py-3 text-sm text-info-fg">
+      <%= icon "loader", class: "size-4 shrink-0 animate-spin" %>
+      <span>Extracting document data — this page will update automatically when ready.</span>
+    </div>
+  <% end %>
   <%= empty_state "triangle-alert", "No candidate revision available",
-        "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}. It may have failed extraction or been quarantined during intake." %>
+        still_processing ? "Extraction is in progress (#{@document.status.humanize.downcase})." : "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}. It may have failed extraction or been quarantined during intake." %>
   <div class="mt-5">
     <%= render "source_preview", document: @document, meta: (@document.source_metadata || {}) %>
   </div>

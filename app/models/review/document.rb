@@ -17,6 +17,9 @@ module Review
 
     has_one_attached :source_file
 
+    broadcasts_refreshes
+    broadcasts_refreshes_to :batch
+
     validates :status, inclusion: { in: STATUSES }
     validates :source_sha256, presence: true, uniqueness: { scope: :review_batch_id }
     validates :risk_score, numericality: { greater_than_or_equal_to: 0 }
