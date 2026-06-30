@@ -1,9 +1,30 @@
-<h1>Operator sign in</h1>
+<% content_for :title, "Sign in · Parsy" %>
 
-<%= form_with url: session_path, method: :post do %>
-  <%= label_tag :email, "Email" %>
-  <%= email_field_tag :email, nil, autocomplete: "username" %>
-  <%= label_tag :operator_token, "Operator token" %>
-  <%= password_field_tag :operator_token, nil, autocomplete: "current-password" %>
-  <%= submit_tag "Sign in" %>
-<% end %>
+<div class="mx-auto flex min-h-[70vh] w-full max-w-sm flex-col justify-center py-10">
+  <div class="mb-6 text-center">
+    <div class="mx-auto mb-4 grid size-12 place-items-center rounded-xl bg-accent text-on-accent">
+      <%= icon "scale", class: "size-6" %>
+    </div>
+    <h1 class="text-xl font-medium tracking-tight text-ink">Sign in to Parsy</h1>
+    <p class="mt-1 text-sm text-muted">Operator access to the invoice review console.</p>
+  </div>
+
+  <div class="card p-6">
+    <%= form_with url: session_path, method: :post, class: "space-y-4" do %>
+      <div>
+        <%= label_tag :email, "Email", class: "mb-1.5 block text-sm font-medium text-ink" %>
+        <%= email_field_tag :email, nil, autocomplete: "username", autofocus: true, placeholder: "operator@example.com" %>
+      </div>
+      <div>
+        <%= label_tag :operator_token, "Operator token", class: "mb-1.5 block text-sm font-medium text-ink" %>
+        <%= password_field_tag :operator_token, nil, autocomplete: "current-password", placeholder: "••••••••••••" %>
+      </div>
+      <%= submit_tag "Sign in", class: "btn btn-primary w-full" %>
+    <% end %>
+  </div>
+
+  <p class="mt-4 flex items-center justify-center gap-1.5 text-xs text-faint">
+    <%= icon "shield", class: "size-3.5" %>
+    Invite-only · token authenticated
+  </p>
+</div>

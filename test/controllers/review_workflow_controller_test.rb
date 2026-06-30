@@ -27,9 +27,9 @@ class ReviewWorkflowControllerTest < ActionDispatch::IntegrationTest
     assert_select "section[aria-label='Validation findings']"
     assert_select "section[aria-label='Evidence references']"
     assert_select "section[aria-label='Canonical editor']"
-    assert_select "tr#evidence-invoice-number[tabindex='-1']"
-    assert_select "input[name='canonical_invoice[invoice][number]'][aria-describedby='evidence-invoice-number'][data-evidence-target='#evidence-invoice-number']"
-    assert_select "input[accesskey='s']"
+    assert_select "li#evidence-invoice-number[tabindex='-1']"
+    assert_select "input[name='canonical_invoice[invoice][number]'][aria-describedby='evidence-invoice-number'][data-evidence-id-param='evidence-invoice-number']"
+    assert_select "button[accesskey='s']"
     assert_select "form[action='#{approve_review_document_path(document)}'] button[accesskey='a']"
     assert_select "form[action='#{reject_review_document_path(document)}'] button[accesskey='r']"
   end

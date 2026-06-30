@@ -1,17 +1,43 @@
-<h1>Review batches</h1>
+<% content_for :title, "Batches · Parsy" %>
 
-<table>
-  <thead>
-    <tr><th>Name</th><th>Status</th><th>Documents</th><th>Updated</th></tr>
-  </thead>
-  <tbody>
-    <% @batches.each do |batch| %>
-      <tr>
-        <td><%= link_to batch.name, review_batch_path(batch) %></td>
-        <td><%= batch.status %></td>
-        <td><%= batch.documents.count %></td>
-        <td><%= time_tag batch.updated_at %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<%= page_header "Batches", subtitle: "Invoice processing batches for #{current_tenant&.name}." %>
+
+<% if @batches.any? %>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="border-b border-line bg-subtle text-xs">
+          <tr>
+            <th class="px-4 py-2.5 font-medium">Name</th>
+            <th class="px-4 py-2.5 font-medium">Status</th>
+            <th class="px-4 py-2.5 font-medium">Documents</th>
+            <th class="px-4 py-2.5 font-medium">Updated</th>
+            <th class="w-10 px-4 py-2.5"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          <% @batches.each do |batch| %>
+            <tr class="group relative transition-colors hover:bg-subtle">
+              <td class="px-4 py-3">
+                <%= link_to batch.name, review_batch_path(batch),
+                      class: "font-medium text-ink no-underline after:absolute after:inset-0 hover:no-underline" %>
+              </td>
+              <td class="px-4 py-3"><%= status_badge batch.status %></td>
+              <td class="px-4 py-3 text-muted"><%= batch.documents.count %></td>
+              <td class="px-4 py-3 text-muted">
+                <time datetime="<%= batch.updated_at.iso8601 %>" title="<%= batch.updated_at.strftime("%-d %b %Y, %H:%M") %>">
+                  <%= time_ago_in_words(batch.updated_at) %> ago
+                </time>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= icon "chevron-right", class: "ml-auto size-4 text-faint transition-transform group-hover:translate-x-0.5" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <%= empty_state "layers", "No batches yet", "Batches appear here once invoices are ingested into the pipeline." %>
+<% end %>

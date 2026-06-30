@@ -1,35 +1,120 @@
-<h1><%= @batch.name %></h1>
+<% content_for :title, "#{@batch.name} · Parsy" %>
 
-<section aria-label="Batch progress">
-  <h2>Progress</h2>
-  <p><%= @progress[:completed] %> / <%= @progress[:total] %> complete (<%= @progress[:percent] %>%)</p>
-  <p>Status: <%= @batch.status %></p>
-</section>
+<%= page_header @batch.name, breadcrumbs: [["Batches", review_batches_path]] do %>
+  <%= status_badge @batch.status %>
+  <%= button_to review_batch_path(@batch), method: :delete,
+        form: { data: { turbo_confirm: "Purge this batch and all of its documents? This cannot be undone." } },
+        class: "btn btn-ghost btn-sm text-danger-fg" do %>
+    <%= icon "trash", class: "size-4" %> Purge
+  <% end %>
+<% end %>
 
-<section aria-label="Risk-ranked review queue">
-  <h2>Risk-ranked review queue</h2>
-  <table>
-    <thead>
-      <tr><th>Risk</th><th>Status</th><th>Document</th><th>Route</th><th>Locale</th><th>Rule pack</th></tr>
-    </thead>
-    <tbody>
-      <% @documents.each do |document| %>
-        <tr>
-          <td><%= document.risk_score %></td>
-          <td><%= document.status %></td>
-          <td><%= link_to document.source_sha256.first(12), review_document_path(document), accesskey: "n" %></td>
-          <td><%= document.route %></td>
-          <td><%= [document.detected_language, document.detected_country, document.detected_currency].compact.join(" / ") %></td>
-          <td><%= document.rule_pack_id %> <%= document.rule_pack_version %></td>
-        </tr>
+<div class="space-y-6">
+  <section class="card p-5" aria-label="Batch progress">
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h2 class="text-sm font-medium text-ink">Progress</h2>
+      <span class="font-mono text-xs text-muted"><%= @progress[:completed] %> / <%= @progress[:total] %> complete · <%= @progress[:percent] %>%</span>
+    </div>
+    <%= progress_bar @progress[:percent] %>
+    <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <%= metric_card "Total", @progress[:total] %>
+      <%= metric_card "Needs review", @progress[:needs_review], tone: (@progress[:needs_review].positive? ? "warning" : nil) %>
+      <%= metric_card "Approved", @progress[:approved], tone: (@progress[:approved].positive? ? "success" : nil) %>
+      <%= metric_card "Failed", @progress[:failed], tone: (@progress[:failed].positive? ? "danger" : nil) %>
+    </div>
+  </section>
+
+  <section aria-label="Risk-ranked review queue">
+    <div class="mb-3 flex items-center gap-2">
+      <h2 class="text-sm font-medium text-ink">Risk-ranked review queue</h2>
+      <span class="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted"><%= @documents.size %></span>
+    </div>
+
+    <% if @documents.any? %>
+      <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-line bg-subtle text-xs">
+              <tr>
+                <th class="px-4 py-2.5 font-medium">Risk</th>
+                <th class="px-4 py-2.5 font-medium">Status</th>
+                <th class="px-4 py-2.5 font-medium">Document</th>
+                <th class="px-4 py-2.5 font-medium">Route</th>
+                <th class="px-4 py-2.5 font-medium">Locale</th>
+                <th class="px-4 py-2.5 font-medium">Rule pack</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <% @documents.each_with_index do |document, i| %>
+                <tr class="group relative transition-colors hover:bg-subtle">
+                  <td class="px-4 py-3"><%= risk_chip document.risk_score %></td>
+                  <td class="px-4 py-3"><%= status_badge document.status %></td>
+                  <td class="px-4 py-3">
+                    <%= link_to review_document_path(document), accesskey: ("n" if i.zero?),
+                          class: "font-mono text-xs text-accent no-underline after:absolute after:inset-0 group-hover:underline" do %>
+                      <%= document.source_sha256.first(12) %>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3 text-muted"><%= document.route %></td>
+                  <td class="px-4 py-3 text-muted">
+                    <%= [document.detected_language, document.detected_country, document.detected_currency].compact.join(" / ").presence || "—" %>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-xs text-muted">
+                    <%= [document.rule_pack_id, document.rule_pack_version].compact.join(" ").presence || "—" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% else %>
+      <%= empty_state "circle-check", "Queue clear", "No documents are waiting for review in this batch." %>
+    <% end %>
+  </section>
+
+  <section class="card p-5" aria-label="Export approved revisions">
+    <% approved_count = @progress[:approved] %>
+    <h2 class="text-sm font-medium text-ink">Export approved revisions</h2>
+    <p class="mt-1 text-sm text-muted">
+      <% if approved_count.positive? %>
+        <%= pluralize(approved_count, "approved revision") %> ready to export.
+      <% else %>
+        No approved revisions yet — approve documents to enable export.
       <% end %>
-    </tbody>
-  </table>
-</section>
+    </p>
 
-<section aria-label="Export approved revisions">
-  <h2>Export</h2>
-  <%= button_to "Export approved JSON", review_batch_exports_path(@batch, format_type: "json"), method: :post %>
-  <%= button_to "Export approved CSV", review_batch_exports_path(@batch, format_type: "csv"), method: :post %>
-  <%= button_to "Export approved XLSX", review_batch_exports_path(@batch, format_type: "xlsx"), method: :post %>
-</section>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <% %w[json csv xlsx].each do |fmt| %>
+        <%= button_to review_batch_exports_path(@batch, format_type: fmt), method: :post,
+              class: "btn btn-secondary btn-sm #{'opacity-60' unless approved_count.positive?}" do %>
+          <%= icon "download", class: "size-4" %> <%= fmt.upcase %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% artifacts = @batch.export_artifacts.order(created_at: :desc).limit(5) %>
+    <% if artifacts.any? %>
+      <div class="mt-5 border-t border-line pt-4">
+        <p class="mb-2 text-xs font-medium text-muted">Recent exports</p>
+        <ul class="space-y-2">
+          <% artifacts.each do |artifact| %>
+            <li class="flex items-center justify-between gap-3 text-sm">
+              <span class="flex items-center gap-2 text-ink">
+                <%= icon "file-text", class: "size-4 text-faint" %>
+                <span class="font-mono text-xs uppercase"><%= artifact.format %></span>
+                <span class="text-muted"><%= time_ago_in_words(artifact.created_at) %> ago</span>
+              </span>
+              <% if artifact.file.attached? %>
+                <%= link_to review_batch_export_download_path(@batch, artifact),
+                      class: "inline-flex items-center gap-1 text-accent no-underline hover:underline" do %>
+                  <%= icon "download", class: "size-3.5" %> Download
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </section>
+</div>

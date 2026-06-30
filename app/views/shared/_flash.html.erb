@@ -1,3 +1,23 @@
-<% flash.each do |kind, message| %>
-  <p role="status" class="flash <%= kind %>"><%= message %></p>
+<% if flash.any? %>
+  <div class="mb-5 space-y-2">
+    <% flash.each do |kind, message| %>
+      <% case kind.to_s %>
+      <% when "alert", "error" %>
+        <div role="alert" class="flex items-start gap-2.5 rounded-xl border border-danger-line bg-danger-subtle px-4 py-3 text-sm text-danger-fg">
+          <%= icon "circle-alert", class: "mt-px size-4 shrink-0" %>
+          <span><%= message %></span>
+        </div>
+      <% when "notice", "success" %>
+        <div role="status" class="flex items-start gap-2.5 rounded-xl border border-success-line bg-success-subtle px-4 py-3 text-sm text-success-fg">
+          <%= icon "circle-check", class: "mt-px size-4 shrink-0" %>
+          <span><%= message %></span>
+        </div>
+      <% else %>
+        <div role="status" class="flex items-start gap-2.5 rounded-xl border border-info-line bg-info-subtle px-4 py-3 text-sm text-info-fg">
+          <%= icon "info", class: "mt-px size-4 shrink-0" %>
+          <span><%= message %></span>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 <% end %>

@@ -1,119 +1,314 @@
-<h1>Document review</h1>
+<% content_for :title, "Document review · Parsy" %>
 
 <% if @revision.nil? %>
-  <p>No candidate revision is available. The document remains in <%= @document.status %>.</p>
+  <%= page_header "Document review",
+        breadcrumbs: [["Batches", review_batches_path], [@document.batch.name, review_batch_path(@document.batch)]] %>
+  <%= empty_state "triangle-alert", "No candidate revision available",
+        "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}. It may have failed extraction or been quarantined during intake." %>
+  <div class="mt-4">
+    <%= link_to review_batch_path(@document.batch), class: "btn btn-secondary btn-sm" do %>
+      <%= icon "arrow-left", class: "size-4" %> Back to batch
+    <% end %>
+  </div>
 <% else %>
-  <% evidence_dom_id = ->(field_path) { "evidence-#{field_path.to_s.delete_prefix('/').parameterize}" } %>
-  <section aria-label="Source and profile">
-    <h2>Source, route, and profile</h2>
-    <dl>
-      <dt>Route</dt><dd><%= @document.route %></dd>
-      <dt>Source format</dt><dd><%= [@document.source_format_family, @document.source_format_profile, @document.source_format_version].compact.join(" / ") %></dd>
-      <dt>Language</dt><dd><%= @document.detected_language %></dd>
-      <dt>Country</dt><dd><%= @document.detected_country %></dd>
-      <dt>Currency</dt><dd><%= @document.detected_currency %></dd>
-      <dt>Rule pack</dt><dd><%= @document.rule_pack_id %> <%= @document.rule_pack_version %></dd>
-      <dt>Capability</dt><dd><%= @document.capability_profile || @revision.provenance.dig("capability", "level") %></dd>
-      <dt>Safe preview</dt><dd><%= @document.source_metadata["safe_preview_path"] || "not attached" %></dd>
-    </dl>
-  </section>
+  <% meta = @document.source_metadata || {} %>
+  <% sha = @document.source_sha256.to_s %>
+  <% evidence_dom_id = ->(fp) { "evidence-#{fp.to_s.delete_prefix('/').parameterize}" } %>
+  <% evidence_by_path = @revision.evidence_references.index_by(&:field_path) %>
+  <% fid = ->(n) { n.tr("[", "_").delete("]") } %>
+  <% findings = @revision.findings.order(Arel.sql("CASE severity WHEN 'CRITICAL' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 WHEN 'LOW' THEN 3 ELSE 4 END"), :code) %>
+  <% refs = @revision.evidence_references.order(:field_path) %>
+  <% locale = [@document.detected_language, @document.detected_country, @document.detected_currency].compact.join(" / ").presence %>
 
-  <section aria-label="Acceptance policy">
-    <h2>Acceptance policy</h2>
-    <% if @decision.auto_acceptable %>
-      <p>Ready for approval.</p>
-    <% else %>
-      <ul>
-        <% @decision.reasons.each do |reason| %>
-          <li><%= reason %></li>
-        <% end %>
-      </ul>
-    <% end %>
-  </section>
+  <div data-controller="evidence">
+    <nav class="mb-2 flex flex-wrap items-center gap-1.5 text-xs" aria-label="Breadcrumb">
+      <%= link_to "Batches", review_batches_path, class: "text-muted no-underline hover:text-ink hover:no-underline" %>
+      <%= icon "chevron-right", class: "size-3.5 text-faint" %>
+      <%= link_to @document.batch.name, review_batch_path(@document.batch), class: "text-muted no-underline hover:text-ink hover:no-underline" %>
+      <%= icon "chevron-right", class: "size-3.5 text-faint" %>
+      <span class="font-mono text-ink"><%= sha.first(12) %></span>
+    </nav>
 
-  <section aria-label="Validation findings">
-    <h2>Risk-sorted findings</h2>
-    <table>
-      <thead><tr><th>Severity</th><th>Code</th><th>Fields</th><th>State</th><th>Message</th></tr></thead>
-      <tbody>
-        <% @revision.findings.order(Arel.sql("CASE severity WHEN 'CRITICAL' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 WHEN 'LOW' THEN 3 ELSE 4 END"), :code).each do |finding| %>
-          <tr>
-            <td><%= finding.severity %></td>
-            <td><%= finding.code %></td>
-            <td>
-              <% finding.field_paths.each do |field_path| %>
-                <%= link_to field_path, "##{evidence_dom_id.call(field_path)}" %>
+    <div class="mb-4">
+      <h1 class="text-xl font-medium tracking-tight text-ink">Document review</h1>
+      <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        <span class="font-mono text-xs"><%= sha.first(24) %>…</span>
+        <% if @document.route.present? %><span class="text-faint">·</span><span><%= @document.route %></span><% end %>
+        <% if locale %><span class="text-faint">·</span><span><%= locale %></span><% end %>
+      </p>
+    </div>
+
+    <div class="sticky top-14 z-30 -mx-4 mb-6 border-y border-line bg-surface/85 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <%= status_badge @document.status %>
+          <%= risk_chip @document.risk_score %>
+          <% if @decision.auto_acceptable %>
+            <span class="badge border-success-line bg-success-subtle text-success-fg"><%= icon "circle-check", class: "size-3.5" %> Ready for approval</span>
+          <% else %>
+            <span class="badge border-warning-line bg-warning-subtle text-warning-fg"><%= icon "triangle-alert", class: "size-3.5" %> <%= pluralize(@decision.reasons.size, "blocker") %></span>
+          <% end %>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="submit" form="canonical-editor" accesskey="s" class="btn btn-secondary btn-sm">
+            <%= icon "save", class: "size-4" %> Save <kbd class="kbd">S</kbd>
+          </button>
+
+          <%= button_to reject_review_document_path(@document),
+                { method: :post, params: { reason: "operator rejection" },
+                  form: { data: { turbo_confirm: "Reject this document? It will be sent back as rejected." } },
+                  accesskey: "r", class: "btn btn-danger btn-sm" } do %>
+            <%= icon "circle-x", class: "size-4" %> Reject <kbd class="kbd">R</kbd>
+          <% end %>
+
+          <% approve_opts = { method: :post,
+               params: { confirm_blocking_findings: "true", reason: "operator explicit approval" },
+               accesskey: "a", class: "btn btn-primary btn-sm" } %>
+          <% approve_opts[:form] = { data: { turbo_confirm: "This document has unresolved blockers. Approve with override?" } } unless @decision.auto_acceptable %>
+          <%= button_to approve_review_document_path(@document), approve_opts do %>
+            <%= icon "circle-check", class: "size-4" %> <%= @decision.auto_acceptable ? "Approve" : "Override & approve" %> <kbd class="kbd">A</kbd>
+          <% end %>
+
+          <% if @next_document %>
+            <%= link_to review_document_path(@next_document), accesskey: "n", class: "btn btn-ghost btn-sm" do %>
+              Next <kbd class="kbd">N</kbd> <%= icon "arrow-right", class: "size-4" %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <%# ---------- Left: source preview + profile ---------- %>
+      <div class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+        <div class="card overflow-hidden">
+          <div class="flex items-center justify-between gap-2 border-b border-line bg-subtle px-4 py-2.5">
+            <div class="flex min-w-0 items-center gap-2 text-sm">
+              <%= icon "file-text", class: "size-4 shrink-0 text-faint" %>
+              <span class="truncate text-ink"><%= meta["filename"] || "Source document" %></span>
+            </div>
+            <span class="shrink-0 text-xs text-muted"><%= pluralize(meta["page_count"] || 1, "page") %></span>
+          </div>
+
+          <% preview = meta["safe_preview_path"] %>
+          <% mime = meta["mime_type"].to_s %>
+          <div class="bg-page">
+            <% if preview.present? && mime.start_with?("image/") %>
+              <img src="<%= preview %>" alt="Source preview" loading="lazy"
+                   class="mx-auto max-h-[60vh] w-full object-contain"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="hidden min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
+                <%= icon "file-text", class: "size-7 text-faint" %>
+                <p class="text-sm text-muted">Preview could not be loaded.</p>
+              </div>
+            <% else %>
+              <div class="flex min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
+                <div class="grid size-12 place-items-center rounded-full bg-subtle"><%= icon "file-text", class: "size-6 text-muted" %></div>
+                <p class="text-sm font-medium text-ink">Preview not rendered inline</p>
+                <p class="text-xs text-muted"><%= [@document.source_format_family, mime.presence].compact.join(" · ") %></p>
+              </div>
+            <% end %>
+          </div>
+
+          <% if preview.present? %>
+            <div class="border-t border-line px-4 py-2.5">
+              <%= link_to preview, target: "_blank", rel: "noopener",
+                    class: "inline-flex items-center gap-1.5 text-sm text-accent no-underline hover:underline" do %>
+                <%= icon "external-link", class: "size-3.5" %> Open original source
               <% end %>
-            </td>
-            <td><%= finding.resolution_state %></td>
-            <td><%= finding.message %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
+            </div>
+          <% end %>
+        </div>
 
-  <section aria-label="Evidence references">
-    <h2>Evidence</h2>
-    <table>
-      <thead><tr><th>Field</th><th>Kind</th><th>Page/path</th><th>Snippet</th><th>Confirmed</th></tr></thead>
-      <tbody>
-        <% @revision.evidence_references.order(:field_path).each do |evidence| %>
-          <tr id="<%= evidence_dom_id.call(evidence.field_path) %>" tabindex="-1">
-            <td><%= evidence.field_path %></td>
-            <td><%= evidence.source_kind %></td>
-            <td><%= evidence.page || evidence.source_path %></td>
-            <td><%= evidence.text_snippet %></td>
-            <td><%= evidence.operator_confirmed? %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </section>
+        <section class="card p-5" aria-label="Source and profile">
+          <h2 class="mb-3 text-sm font-medium text-ink">Source &amp; profile</h2>
+          <dl class="grid grid-cols-1 gap-x-4 gap-y-3 text-sm sm:grid-cols-2">
+            <% profile_rows = {
+                 "Route" => @document.route,
+                 "Source format" => [@document.source_format_family, @document.source_format_profile, @document.source_format_version].compact.join(" / ").presence,
+                 "Language" => @document.detected_language,
+                 "Country" => @document.detected_country,
+                 "Currency" => @document.detected_currency,
+                 "Rule pack" => [@document.rule_pack_id, @document.rule_pack_version].compact.join(" ").presence,
+                 "Capability" => (@document.capability_profile || @revision.provenance.to_h.dig("capability", "level"))
+               } %>
+            <% profile_rows.each do |label, value| %>
+              <div>
+                <dt class="text-xs text-muted"><%= label %></dt>
+                <dd class="mt-0.5 font-mono text-xs text-ink"><%= value.presence || "—" %></dd>
+              </div>
+            <% end %>
+          </dl>
+        </section>
+      </div>
 
-  <section aria-label="Canonical editor">
-    <h2>Canonical editor and overrides</h2>
-    <%= form_with url: review_document_path(@document), method: :patch do |form| %>
-      <fieldset>
-        <legend>High-risk fields</legend>
-        <%= label_tag "canonical_invoice[supplier][display_name]", "Supplier display name" %>
-        <%= text_field_tag "canonical_invoice[supplier][display_name]", @revision.canonical_invoice.dig("supplier", "display_name"), aria: { describedby: evidence_dom_id.call("/supplier/display_name") }, data: { evidence_target: "##{evidence_dom_id.call('/supplier/display_name')}" } %>
-        <%= label_tag "canonical_invoice[invoice][number]", "Invoice number" %>
-        <%= text_field_tag "canonical_invoice[invoice][number]", @revision.canonical_invoice.dig("invoice", "number"), aria: { describedby: evidence_dom_id.call("/invoice/number") }, data: { evidence_target: "##{evidence_dom_id.call('/invoice/number')}" } %>
-        <%= label_tag "canonical_invoice[invoice][currency]", "Currency" %>
-        <%= text_field_tag "canonical_invoice[invoice][currency]", @revision.canonical_invoice.dig("invoice", "currency"), aria: { describedby: evidence_dom_id.call("/invoice/currency") }, data: { evidence_target: "##{evidence_dom_id.call('/invoice/currency')}" } %>
-        <%= label_tag "canonical_invoice[totals][payable_amount]", "Payable amount" %>
-        <%= text_field_tag "canonical_invoice[totals][payable_amount]", @revision.canonical_invoice.dig("totals", "payable_amount"), aria: { describedby: evidence_dom_id.call("/totals/payable_amount") }, data: { evidence_target: "##{evidence_dom_id.call('/totals/payable_amount')}" } %>
-      </fieldset>
-      <fieldset>
-        <legend>Locale, format, and rule pack override</legend>
-        <%= label_tag "overrides[document_language]", "Language" %>
-        <%= text_field_tag "overrides[document_language]", @document.detected_language %>
-        <%= label_tag "overrides[supplier_country]", "Country" %>
-        <%= text_field_tag "overrides[supplier_country]", @document.detected_country %>
-        <%= label_tag "overrides[currency]", "Currency" %>
-        <%= text_field_tag "overrides[currency]", @document.detected_currency %>
-        <%= label_tag "overrides[source_format_family]", "Format" %>
-        <%= text_field_tag "overrides[source_format_family]", @document.source_format_family %>
-        <%= label_tag "overrides[rule_pack_id]", "Rule pack" %>
-        <%= text_field_tag "overrides[rule_pack_id]", @document.rule_pack_id %>
-        <%= label_tag "overrides[rule_pack_version]", "Rule pack version" %>
-        <%= text_field_tag "overrides[rule_pack_version]", @document.rule_pack_version %>
-      </fieldset>
-      <%= label_tag :reason, "Reason" %>
-      <%= text_field_tag :reason %>
-      <%= form.submit "Save (S)", accesskey: "s" %>
-    <% end %>
-  </section>
+      <%# ---------- Right: acceptance, findings, editor, evidence ---------- %>
+      <div class="space-y-5">
+        <section class="card p-5" aria-label="Acceptance policy">
+          <h2 class="mb-3 text-sm font-medium text-ink">Acceptance policy</h2>
+          <% if @decision.auto_acceptable %>
+            <div class="flex items-center gap-2 rounded-lg border border-success-line bg-success-subtle px-3 py-2.5 text-sm text-success-fg">
+              <%= icon "circle-check", class: "size-4 shrink-0" %>
+              Ready for approval — no blocking conditions.
+            </div>
+          <% else %>
+            <p class="mb-3 text-sm text-muted">Operator confirmation is required before approval:</p>
+            <ul class="space-y-2">
+              <% @decision.reasons.each do |reason| %>
+                <li class="flex gap-2 text-sm text-ink">
+                  <%= icon "circle-alert", class: "mt-0.5 size-4 shrink-0 text-warning" %>
+                  <span><%= reason %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </section>
 
-  <section aria-label="Review actions">
-    <h2>Review actions</h2>
-    <%= button_to "Approve (A)", approve_review_document_path(@document), method: :post, params: { confirm_blocking_findings: "true", reason: "operator explicit approval" }, accesskey: "a" %>
-    <%= button_to "Reject (R)", reject_review_document_path(@document), method: :post, params: { reason: "operator rejection" }, accesskey: "r" %>
-    <% if @next_document %>
-      <%= link_to "Next exception (N)", review_document_path(@next_document), accesskey: "n" %>
-    <% else %>
-      <%= link_to "Back to batch", review_batch_path(@document.batch) %>
-    <% end %>
-  </section>
+        <section class="card overflow-hidden" aria-label="Validation findings">
+          <div class="flex items-center justify-between gap-2 border-b border-line px-5 py-3">
+            <h2 class="text-sm font-medium text-ink">Risk-sorted findings</h2>
+            <span class="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted"><%= findings.size %></span>
+          </div>
+          <% if findings.any? %>
+            <ul class="divide-y divide-line">
+              <% findings.each do |finding| %>
+                <li class="px-5 py-3.5">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <%= severity_badge finding.severity %>
+                    <span class="font-mono text-xs text-muted"><%= finding.code %></span>
+                    <% if finding.resolution_state.present? && finding.resolution_state != "unresolved" %>
+                      <span class="text-xs text-faint">· <%= finding.resolution_state.humanize.downcase %></span>
+                    <% end %>
+                  </div>
+                  <p class="mt-2 text-sm text-ink"><%= finding.message %></p>
+                  <% if finding.observed.present? || finding.calculated.present? %>
+                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                      <% if finding.observed.present? %><span>observed <span class="font-mono text-ink"><%= finding.observed %></span></span><% end %>
+                      <% if finding.calculated.present? %><span>expected <span class="font-mono text-ink"><%= finding.calculated %></span></span><% end %>
+                    </div>
+                  <% end %>
+                  <% if finding.field_paths.present? %>
+                    <div class="mt-2.5 flex flex-wrap gap-1.5">
+                      <% finding.field_paths.each do |fp| %>
+                        <a href="#<%= evidence_dom_id.call(fp) %>"
+                           data-action="evidence#highlight" data-evidence-id-param="<%= evidence_dom_id.call(fp) %>"
+                           class="inline-flex items-center gap-1 rounded-md bg-subtle px-1.5 py-0.5 font-mono text-xs text-accent no-underline hover:underline">
+                          <%= icon "git-branch", class: "size-3" %><%= fp %>
+                        </a>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="px-5 py-8 text-center text-sm text-muted">No validation findings on this revision.</p>
+          <% end %>
+        </section>
+
+        <section class="card p-5" aria-label="Canonical editor">
+          <h2 class="text-sm font-medium text-ink">Canonical data</h2>
+          <p class="mt-1 text-sm text-muted">Correct high-risk fields, then save to create a new revision.</p>
+
+          <%= form_with url: review_document_path(@document), method: :patch, id: "canonical-editor", class: "mt-4" do |form| %>
+            <div class="space-y-4">
+              <% high_risk = [
+                   ["/supplier/display_name", "Supplier display name", "canonical_invoice[supplier][display_name]", @revision.canonical_invoice.to_h.dig("supplier", "display_name")],
+                   ["/invoice/number", "Invoice number", "canonical_invoice[invoice][number]", @revision.canonical_invoice.to_h.dig("invoice", "number")],
+                   ["/invoice/currency", "Currency", "canonical_invoice[invoice][currency]", @revision.canonical_invoice.to_h.dig("invoice", "currency")],
+                   ["/totals/payable_amount", "Payable amount", "canonical_invoice[totals][payable_amount]", @revision.canonical_invoice.to_h.dig("totals", "payable_amount")]
+                 ] %>
+              <% high_risk.each do |path, label, name, value| %>
+                <% changed = @revision.changed_field_paths.to_a.include?(path) %>
+                <% ev = evidence_by_path[path] %>
+                <div>
+                  <div class="mb-1.5 flex items-center gap-2">
+                    <%= label_tag fid.call(name), label, class: "text-sm font-medium text-ink" %>
+                    <% if changed %>
+                      <span class="badge border-info-line bg-info-subtle text-info-fg"><%= icon "pencil", class: "size-3" %> Edited</span>
+                    <% end %>
+                  </div>
+                  <%= text_field_tag name, value, id: fid.call(name), class: "font-mono",
+                        aria: { describedby: evidence_dom_id.call(path) },
+                        data: { action: "focus->evidence#highlight", evidence_id_param: evidence_dom_id.call(path) } %>
+                  <% if ev %>
+                    <button type="button" data-action="evidence#highlight" data-evidence-id-param="<%= evidence_dom_id.call(path) %>"
+                            class="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent">
+                      <%= icon "eye", class: "size-3.5" %>
+                      Evidence: <%= ev.source_kind %><%= " · p.#{ev.page}" if ev.page %>
+                    </button>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+
+            <details class="group mt-5 border-t border-line pt-4">
+              <summary class="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+                <span class="flex items-center gap-2"><%= icon "git-branch", class: "size-4 text-faint" %> Locale, format &amp; rule pack overrides</span>
+                <%= icon "chevron-down", class: "size-4 text-faint transition-transform group-open:rotate-180" %>
+              </summary>
+              <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <% overrides = [
+                     ["overrides[document_language]", "Language", @document.detected_language],
+                     ["overrides[supplier_country]", "Country", @document.detected_country],
+                     ["overrides[currency]", "Currency", @document.detected_currency],
+                     ["overrides[source_format_family]", "Format", @document.source_format_family],
+                     ["overrides[rule_pack_id]", "Rule pack", @document.rule_pack_id],
+                     ["overrides[rule_pack_version]", "Rule pack version", @document.rule_pack_version]
+                   ] %>
+                <% overrides.each do |name, label, value| %>
+                  <div>
+                    <%= label_tag fid.call(name), label, class: "mb-1.5 block text-sm text-muted" %>
+                    <%= text_field_tag name, value, id: fid.call(name), class: "font-mono" %>
+                  </div>
+                <% end %>
+              </div>
+            </details>
+
+            <div class="mt-5 border-t border-line pt-4">
+              <%= label_tag :reason, "Reason for changes", class: "mb-1.5 block text-sm text-muted" %>
+              <%= text_field_tag :reason, nil, placeholder: "e.g. corrected supplier name from page 1 header" %>
+              <div class="mt-3 flex justify-end">
+                <%= form.submit "Save revision", class: "btn btn-secondary" %>
+              </div>
+            </div>
+          <% end %>
+        </section>
+
+        <section class="card overflow-hidden" aria-label="Evidence references">
+          <div class="flex items-center justify-between gap-2 border-b border-line px-5 py-3">
+            <h2 class="text-sm font-medium text-ink">Evidence</h2>
+            <span class="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted"><%= refs.size %></span>
+          </div>
+          <% if refs.any? %>
+            <ul class="divide-y divide-line">
+              <% refs.each do |ev| %>
+                <li id="<%= evidence_dom_id.call(ev.field_path) %>" tabindex="-1" class="scroll-mt-28 px-5 py-3 transition duration-500">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="font-mono text-xs text-accent"><%= ev.field_path %></span>
+                    <div class="flex items-center gap-2.5 text-xs text-muted">
+                      <span class="inline-flex items-center gap-1">
+                        <%= icon(ev.source_kind.to_s == "operator_confirmation" ? "user" : "file-text", class: "size-3.5") %>
+                        <%= ev.source_kind %>
+                      </span>
+                      <% if ev.page %><span>p.<%= ev.page %></span><% end %>
+                      <% if ev.operator_confirmed? %>
+                        <span class="inline-flex items-center gap-1 text-success-fg"><%= icon "circle-check", class: "size-3.5" %> confirmed</span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <% if ev.text_snippet.present? %>
+                    <p class="mt-1.5 rounded-md bg-subtle px-2.5 py-1.5 font-mono text-xs text-muted">“<%= ev.text_snippet %>”</p>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="px-5 py-8 text-center text-sm text-muted">No evidence references recorded for this revision.</p>
+          <% end %>
+        </section>
+      </div>
+    </div>
+  </div>
 <% end %>

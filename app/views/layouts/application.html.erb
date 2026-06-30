@@ -1,30 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="h-full">
   <head>
-    <title><%= content_for(:title) || "Invoice Parser" %></title>
+    <%# No-FOUC theme: apply stored/system preference before first paint %>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <title><%= content_for(:title) || "Parsy" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Invoice Parser">
+    <meta name="application-name" content="Parsy">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f766e">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%# Self-hosted fonts: resolved through Propshaft so the digested paths stay correct %>
+    <link rel="preload" href="<%= font_path("inter.woff2") %>" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="<%= font_path("jetbrains-mono.woff2") %>" as="font" type="font/woff2" crossorigin>
+    <style>
+      @font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("<%= font_path("inter.woff2") %>") format("woff2")}
+      @font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:100 800;font-display:swap;src:url("<%= font_path("jetbrains-mono.woff2") %>") format("woff2")}
+    </style>
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="min-h-full bg-page text-ink antialiased">
+    <header class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-sm">
+      <div class="mx-auto flex h-14 w-full max-w-[100rem] items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <a href="<%= root_path %>" class="flex items-center gap-2.5 no-underline hover:no-underline">
+          <span class="grid size-8 place-items-center rounded-lg bg-accent text-on-accent">
+            <%= icon "scale", class: "size-[18px]" %>
+          </span>
+          <span class="text-[15px] font-medium tracking-tight text-ink">Parsy</span>
+        </a>
+
+        <% if current_user %>
+          <nav class="ml-2 hidden items-center gap-1 sm:flex">
+            <% review_active = controller_path.start_with?("review") %>
+            <a href="<%= review_batches_path %>"
+               class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= review_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
+              <%= icon "layers", class: "size-4" %> Batches
+            </a>
+          </nav>
+        <% end %>
+
+        <div class="ml-auto flex items-center gap-2">
+          <button type="button" data-controller="theme" data-action="theme#toggle"
+                  class="inline-grid size-9 place-items-center rounded-lg border border-line text-muted transition-colors hover:bg-subtle hover:text-ink"
+                  aria-label="Toggle dark mode" title="Toggle theme">
+            <%= icon "moon", class: "size-[18px] dark:hidden" %>
+            <%= icon "sun", class: "hidden size-[18px] dark:block" %>
+          </button>
+
+          <% if current_user %>
+            <details class="group relative">
+              <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-line py-1.5 pl-1.5 pr-2.5 transition-colors hover:bg-subtle [&::-webkit-details-marker]:hidden">
+                <span class="grid size-6 place-items-center rounded-md bg-accent-subtle text-[11px] font-medium uppercase text-accent">
+                  <%= current_user.name.to_s.first(2) %>
+                </span>
+                <span class="hidden max-w-[10rem] truncate text-sm text-ink sm:inline"><%= current_user.name %></span>
+                <%= icon "chevron-down", class: "size-4 text-faint transition-transform group-open:rotate-180" %>
+              </summary>
+              <div class="absolute right-0 z-50 mt-2 w-60 rounded-xl border border-line bg-surface p-1.5 shadow-lg shadow-black/5">
+                <div class="px-2.5 py-2">
+                  <p class="truncate text-sm font-medium text-ink"><%= current_user.name %></p>
+                  <p class="truncate text-xs text-muted"><%= current_user.email %></p>
+                  <div class="mt-2 inline-flex items-center gap-1.5 rounded-md bg-subtle px-2 py-1 text-[11px] font-medium text-muted">
+                    <%= icon "building", class: "size-3" %>
+                    <%= current_tenant&.name %>
+                  </div>
+                </div>
+                <div class="my-1 h-px bg-line"></div>
+                <%= button_to session_path, method: :delete,
+                      class: "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-subtle hover:text-ink" do %>
+                  <%= icon "log-out", class: "size-4" %> Sign out
+                <% end %>
+              </div>
+            </details>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-[100rem] px-4 py-6 sm:px-6 lg:px-8">
       <%= render "shared/flash" %>
       <%= yield %>
     </main>
