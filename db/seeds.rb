@@ -4,8 +4,8 @@
 
 tenant = Tenant.find_or_create_by!(slug: "default-tenant") do |t|
   t.name = "Default Tenant"
-  t.allowed_processing_regions = ["eu-west-2"]
-  t.allowed_providers = ["fixture"]
+  t.allowed_processing_regions = [ "eu-west-2" ]
+  t.allowed_providers = [ "fixture" ]
   t.monthly_spend_limit_cents = 100_00 # $100.00
 end
 
@@ -66,7 +66,7 @@ if tenant.review_batches.empty?
       def success? = true
     end.new(
       candidate: invoice,
-      attempts: [attempt],
+      attempts: [ attempt ],
       idempotency_key: "seed-#{fixture_info[:filename]}"
     )
 
@@ -105,5 +105,3 @@ sample_fixtures.each do |fixture_info|
   document.source_file.attach(io: File.open(source_path), filename: desired, content_type: fixture_info[:mime])
   puts "Attached source #{desired} → #{fixture_info[:name]}."
 end
-
-

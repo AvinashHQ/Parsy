@@ -12,7 +12,7 @@ module Evaluation
   class LLMBenchmark
     MANIFEST_PATH = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
     CORPUS_ROOT = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus")
-    
+
     SYSTEM_PROMPT = <<~PROMPT.freeze
       You extract invoice facts into Canonical Invoice Schema v2.
       Rules:
@@ -48,7 +48,7 @@ module Evaluation
 
     def run
       manifest_rows = CSV.read(MANIFEST_PATH, headers: true).map(&:to_h)
-      subset = ["INV-001", "INV-002", "INV-003", "INV-014", "INV-016", "IMG-001", "IMG-002", "IMG-003", "HYB-001"]
+      subset = [ "INV-001", "INV-002", "INV-003", "INV-014", "INV-016", "IMG-001", "IMG-002", "IMG-003", "HYB-001" ]
       all_scored_rows = manifest_rows.select { |row| row["ground_truth"].present? && subset.include?(row["fixture_id"]) }
 
       results = {}
@@ -56,16 +56,16 @@ module Evaluation
       @models.each do |model|
         puts "\n=== Benchmarking model: #{model} ==="
         model_results = []
-        
+
         scored_rows = all_scored_rows
 
         sanitized_model = model.gsub(/[:.]/, "_")
         csv_path = Rails.root.join("tmp/benchmark/benchmark_results_#{sanitized_model}.csv")
         FileUtils.mkdir_p(File.dirname(csv_path))
-        
+
         CSV.open(csv_path, "w") do |csv|
           csv << [
-            "fixture_id", "expected_route", "schema_valid", "fields_matched", "fields_total", 
+            "fixture_id", "expected_route", "schema_valid", "fields_matched", "fields_total",
             "accuracy", "latency_ms", "error_code"
           ]
         end
@@ -81,17 +81,17 @@ module Evaluation
 
           # Extract text
           text = get_text_content(file_rel, gt_path)
-          
+
           # Call Ollama
           response_json = nil
           error_code = nil
           latency_ms = 0
-          
+
           started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
           begin
             res = call_ollama(model, text)
             latency_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
-            
+
             raw_text = res.dig("message", "content") || res["response"]
             cleaned = clean_json(raw_text)
             response_json = JSON.parse(cleaned)
@@ -113,7 +113,7 @@ module Evaluation
           score["fixture_id"] = fixture_id
           score["expected_route"] = expected_route
           model_results << score
-          
+
           # Append incrementally to CSV
           append_to_report(csv_path, score)
         end
@@ -251,10 +251,10 @@ module Evaluation
       FIELDS.each do |spec|
         pointer = spec[:pointer]
         comparison = spec[:comparison]
-        
+
         expected_val = resolve_pointer(expected, pointer)
         actual_val = resolve_pointer(actual, pointer)
-        
+
         matched = false
         if (expected_val.nil? || expected_val == :missing) && (actual_val.nil? || actual_val == :missing)
           matched = true
@@ -280,7 +280,7 @@ module Evaluation
           "actual" => actual_val,
           "matched" => matched
         }
-        
+
         matched_count += 1 if matched
       end
 
@@ -319,9 +319,9 @@ module Evaluation
       puts "====================================================================="
       puts "                     LLM BENCHMARK FINAL SUMMARY                     "
       puts "====================================================================="
-      puts "%-25s | %-12s | %-12s | %-12s | %-10s" % ["Model", "Schema Valid", "Field Match", "Avg Latency", "Accuracy"]
+      puts "%-25s | %-12s | %-12s | %-12s | %-10s" % [ "Model", "Schema Valid", "Field Match", "Avg Latency", "Accuracy" ]
       puts "---------------------------------------------------------------------"
-      
+
       summaries = []
 
       results.each do |model, model_results|
@@ -378,13 +378,13 @@ module Evaluation
       csv_files.each do |csv_path|
         filename = File.basename(csv_path, ".csv")
         model_part = filename.sub("benchmark_results_", "")
-        
+
         model_name = case model_part
-                     when "qwen2_5-coder_1_5b" then "qwen2.5-coder:1.5b"
-                     when "qwen2_5-coder_7b" then "qwen2.5-coder:7b"
-                     when "deepseek-r1_7b" then "deepseek-r1:7b"
-                     else model_part.gsub("_", ":")
-                     end
+        when "qwen2_5-coder_1_5b" then "qwen2.5-coder:1.5b"
+        when "qwen2_5-coder_7b" then "qwen2.5-coder:7b"
+        when "deepseek-r1_7b" then "deepseek-r1:7b"
+        else model_part.gsub("_", ":")
+        end
 
         rows = CSV.read(csv_path, headers: true).map(&:to_h)
         total_cases = rows.length
@@ -407,7 +407,7 @@ module Evaluation
       puts "====================================================================="
       puts "                     LLM BENCHMARK FINAL SUMMARY                     "
       puts "====================================================================="
-      puts "%-25s | %-20s | %-20s | %-12s" % ["Model", "Schema Valid Rate", "Field Match Accuracy", "Avg Latency"]
+      puts "%-25s | %-20s | %-20s | %-12s" % [ "Model", "Schema Valid Rate", "Field Match Accuracy", "Avg Latency" ]
       puts "---------------------------------------------------------------------"
       summaries.each do |s|
         puts "%-25s | %-20s | %-20s | %-12s" % [
@@ -422,7 +422,7 @@ module Evaluation
     end
     def self.write_markdown_summary(summaries)
       md_path = Rails.root.join("tmp/benchmark/summary.md")
-      
+
       content = []
       content << "# LLM Model Evaluation Report"
       content << "Date: #{Time.current.strftime('%Y-%m-%d')}"
@@ -431,13 +431,13 @@ module Evaluation
       content << ""
       content << "| Model | Schema Validity Rate | Field Match Accuracy | Average Latency |"
       content << "| --- | --- | --- | --- |"
-      
+
       summaries.each do |s|
         content << "| #{s[:model]} | #{(s[:schema_valid_rate] * 100).round(2)}% | #{(s[:overall_accuracy] * 100).round(2)}% | #{s[:avg_latency]}ms |"
       end
       content << ""
-      
-      best = summaries.max_by { |s| [s[:schema_valid_rate], s[:overall_accuracy], -s[:avg_latency]] }
+
+      best = summaries.max_by { |s| [ s[:schema_valid_rate], s[:overall_accuracy], -s[:avg_latency] ] }
       content << "## Recommendation"
       content << ""
       content << "Based on the benchmark results, the best model for this task is **#{best[:model]}** with a field match accuracy of **#{(best[:overall_accuracy] * 100).round(2)}%** and a schema validity rate of **#{(best[:schema_valid_rate] * 100).round(2)}%**."
@@ -454,7 +454,7 @@ if __FILE__ == $0
   if arg == "summary"
     Evaluation::LLMBenchmark.compile_summary
   elsif arg
-    Evaluation::LLMBenchmark.new(models: [arg]).run
+    Evaluation::LLMBenchmark.new(models: [ arg ]).run
   else
     puts "Usage: ruby script/run_llm_benchmark.rb [model_name | summary]"
     puts "Example: ruby script/run_llm_benchmark.rb qwen2.5-coder:1.5b"
