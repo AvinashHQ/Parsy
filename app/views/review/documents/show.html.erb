@@ -82,40 +82,58 @@
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <%# ---------- Left: source preview + profile ---------- %>
       <div class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+        <% src_file    = @document.source_file if @document.source_file.attached? %>
+        <% src_mime    = (src_file&.content_type.presence || meta["mime_type"]).to_s %>
+        <% src_name    = src_file&.filename&.to_s.presence || meta["filename"].presence || "Source document" %>
+        <% src_pages   = meta["page_count"] || 1 %>
+        <% legacy_url  = meta["safe_preview_path"].presence %>
+        <% is_image    = src_mime.start_with?("image/") && !src_mime.include?("tiff") %>
+        <% is_pdf      = src_mime == "application/pdf" %>
+        <% inline_url  = src_file ? rails_blob_path(src_file, disposition: "inline") : (legacy_url if is_image) %>
         <div class="card overflow-hidden">
           <div class="flex items-center justify-between gap-2 border-b border-line bg-subtle px-4 py-2.5">
             <div class="flex min-w-0 items-center gap-2 text-sm">
               <%= icon "file-text", class: "size-4 shrink-0 text-faint" %>
-              <span class="truncate text-ink"><%= meta["filename"] || "Source document" %></span>
+              <span class="truncate text-ink" title="<%= src_name %>"><%= src_name %></span>
             </div>
-            <span class="shrink-0 text-xs text-muted"><%= pluralize(meta["page_count"] || 1, "page") %></span>
+            <span class="shrink-0 text-xs text-muted"><%= pluralize(src_pages, "page") %></span>
           </div>
 
-          <% preview = meta["safe_preview_path"] %>
-          <% mime = meta["mime_type"].to_s %>
           <div class="bg-page">
-            <% if preview.present? && mime.start_with?("image/") %>
-              <img src="<%= preview %>" alt="Source preview" loading="lazy"
-                   class="mx-auto max-h-[60vh] w-full object-contain"
+            <% if inline_url && is_image %>
+              <img src="<%= inline_url %>" alt="Source document preview" loading="lazy"
+                   class="mx-auto max-h-[70vh] w-full object-contain"
                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="hidden min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
                 <%= icon "file-text", class: "size-7 text-faint" %>
                 <p class="text-sm text-muted">Preview could not be loaded.</p>
               </div>
+            <% elsif inline_url && is_pdf %>
+              <iframe src="<%= inline_url %>" title="Source document preview" loading="lazy"
+                      class="h-[72vh] w-full border-0 bg-white"></iframe>
             <% else %>
               <div class="flex min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
                 <div class="grid size-12 place-items-center rounded-full bg-subtle"><%= icon "file-text", class: "size-6 text-muted" %></div>
-                <p class="text-sm font-medium text-ink">Preview not rendered inline</p>
-                <p class="text-xs text-muted"><%= [@document.source_format_family, mime.presence].compact.join(" · ") %></p>
+                <p class="text-sm font-medium text-ink"><%= src_file ? "No inline preview for this format" : "Source not available for preview" %></p>
+                <p class="text-xs text-muted"><%= [@document.source_format_family, src_mime.presence].compact.join(" · ").presence || "Structured or retained-elsewhere source" %></p>
+                <% if src_file %>
+                  <%= link_to rails_blob_path(src_file, disposition: "attachment"), class: "btn btn-secondary btn-sm mt-1" do %>
+                    <%= icon "download", class: "size-4" %> Download source
+                  <% end %>
+                <% end %>
               </div>
             <% end %>
           </div>
 
-          <% if preview.present? %>
-            <div class="border-t border-line px-4 py-2.5">
-              <%= link_to preview, target: "_blank", rel: "noopener",
-                    class: "inline-flex items-center gap-1.5 text-sm text-accent no-underline hover:underline" do %>
-                <%= icon "external-link", class: "size-3.5" %> Open original source
+          <% if src_file || legacy_url %>
+            <div class="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5 text-sm">
+              <%= link_to (src_file ? rails_blob_path(src_file, disposition: "inline") : legacy_url),
+                    target: "_blank", rel: "noopener",
+                    class: "inline-flex items-center gap-1.5 text-accent no-underline hover:underline" do %>
+                <%= icon "external-link", class: "size-3.5" %> Open original
+              <% end %>
+              <% if src_file %>
+                <span class="font-mono text-xs text-faint"><%= number_to_human_size(src_file.byte_size) %></span>
               <% end %>
             </div>
           <% end %>
@@ -207,9 +225,170 @@
           <% end %>
         </section>
 
+        <% ci         = @revision.canonical_invoice.to_h %>
+        <% inv        = (ci["invoice"] || {}) %>
+        <% supplier   = (ci["supplier"] || {}) %>
+        <% buyer      = (ci["buyer"] || {}) %>
+        <% payee      = ci["payee"].presence %>
+        <% line_items = Array(ci["line_items"]) %>
+        <% totals     = (ci["totals"] || {}) %>
+        <% tax_rows   = Array(ci["tax_breakdowns"]) %>
+        <% refs_list  = Array(ci["references"]) %>
+        <% currency   = inv["currency"].to_s %>
+        <% nz         = ->(v) { v.present? && v.to_f.abs > 0 } %>
+        <% money      = ->(v) { v.present? ? [v, currency.presence].compact.join(" ") : "—" } %>
+        <% addr_line  = ->(a) { a ||= {}; [Array(a["lines"]).join(", "), a["city"], a["postal_code"], a["country_code"]].reject(&:blank?).join(", ") } %>
+        <section class="card overflow-hidden" aria-label="Extracted record">
+          <div class="flex items-center justify-between gap-2 border-b border-line px-5 py-3">
+            <h2 class="text-sm font-medium text-ink">Extracted record</h2>
+            <span class="hidden text-xs text-muted sm:inline">Read-only · verify against the source</span>
+          </div>
+
+          <%# Parties %>
+          <div class="grid gap-px bg-line sm:grid-cols-2">
+            <% parties = [["Supplier", supplier], ["Buyer", buyer]] %>
+            <% parties << ["Payee", payee] if payee %>
+            <% parties.each do |role, p| %>
+              <div class="bg-surface p-5">
+                <p class="text-xs font-medium uppercase tracking-wide text-muted"><%= role %></p>
+                <p class="mt-1.5 text-sm font-medium text-ink"><%= p["display_name"].presence || "—" %></p>
+                <% if p["legal_name"].present? && p["legal_name"] != p["display_name"] %>
+                  <p class="text-xs text-muted"><%= p["legal_name"] %></p>
+                <% end %>
+                <% if addr_line.call(p["address"]).present? %>
+                  <p class="mt-1.5 text-xs text-muted"><%= addr_line.call(p["address"]) %></p>
+                <% end %>
+                <% Array(p["identifiers"]).each do |id| %>
+                  <p class="mt-1 font-mono text-xs text-muted"><%= id["scheme"] %> · <span class="text-ink"><%= id["value"] %></span></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <%# Invoice details %>
+          <div class="border-t border-line p-5">
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+              <% [["Number", inv["number"]], ["Currency", inv["currency"]],
+                  ["Issue date", inv["issue_date"]], ["Due date", inv["due_date"]],
+                  ["Tax point", inv["tax_point_date"]], ["Tax currency", inv["tax_currency"]]].each do |label, value| %>
+                <div>
+                  <dt class="text-xs text-muted"><%= label %></dt>
+                  <dd class="mt-0.5 font-mono text-xs text-ink"><%= value.presence || "—" %></dd>
+                </div>
+              <% end %>
+              <% if inv["payment_terms_text"].present? %>
+                <div class="col-span-2 sm:col-span-4">
+                  <dt class="text-xs text-muted">Payment terms</dt>
+                  <dd class="mt-0.5 text-xs text-ink"><%= inv["payment_terms_text"] %></dd>
+                </div>
+              <% end %>
+              <% if refs_list.any? %>
+                <div class="col-span-2 sm:col-span-4">
+                  <dt class="text-xs text-muted">References</dt>
+                  <dd class="mt-1 flex flex-wrap gap-1.5">
+                    <% refs_list.each do |r| %>
+                      <span class="inline-flex items-center gap-1 rounded-md bg-subtle px-1.5 py-0.5 font-mono text-xs text-muted">
+                        <%= r["type"].to_s.tr("_", " ") %> · <span class="text-ink"><%= r["value"] %></span>
+                      </span>
+                    <% end %>
+                  </dd>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+
+          <%# Line items %>
+          <% if line_items.any? %>
+            <div class="overflow-x-auto border-t border-line">
+              <table class="w-full text-sm">
+                <thead class="border-b border-line bg-subtle text-xs text-muted">
+                  <tr>
+                    <th class="px-5 py-2 text-left font-medium">#</th>
+                    <th class="px-3 py-2 text-left font-medium">Description</th>
+                    <th class="px-3 py-2 text-right font-medium">Qty</th>
+                    <th class="px-3 py-2 text-right font-medium">Unit price</th>
+                    <th class="px-3 py-2 text-right font-medium">Tax</th>
+                    <th class="px-5 py-2 text-right font-medium">Net</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                  <% line_items.each do |li| %>
+                    <% li_tax = Array(li["tax_breakdowns"]).first || {} %>
+                    <tr>
+                      <td class="px-5 py-2.5 align-top text-muted"><%= li["line_no"] || "—" %></td>
+                      <td class="px-3 py-2.5 align-top text-ink"><%= li["description"].presence || li["item_name"].presence || "—" %></td>
+                      <td class="whitespace-nowrap px-3 py-2.5 text-right align-top font-mono text-xs text-ink"><%= [li["quantity"], li["unit_code"]].compact.join(" ") %></td>
+                      <td class="px-3 py-2.5 text-right align-top font-mono text-xs text-ink"><%= li["unit_price"].presence || "—" %></td>
+                      <td class="px-3 py-2.5 text-right align-top font-mono text-xs text-muted"><%= li_tax["rate"].present? ? "#{li_tax["rate"]}%" : "—" %></td>
+                      <td class="px-5 py-2.5 text-right align-top font-mono text-xs text-ink"><%= li["line_net_amount"].presence || "—" %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+
+          <%# Totals %>
+          <div class="border-t border-line p-5">
+            <div class="ml-auto max-w-xs space-y-1.5 text-sm">
+              <% [["Line extension", totals["line_extension_amount"], :auto],
+                  ["Allowances", totals["allowance_total_amount"], :nz],
+                  ["Charges", totals["charge_total_amount"], :nz],
+                  ["Tax exclusive", totals["tax_exclusive_amount"], :always],
+                  ["Total tax", totals["total_tax_amount"], :always],
+                  ["Tax inclusive", totals["tax_inclusive_amount"], :always],
+                  ["Prepaid", totals["prepaid_amount"], :nz],
+                  ["Withholding", totals["withholding_total_amount"], :nz],
+                  ["Rounding", totals["rounding_amount"], :nz]].each do |label, value, mode| %>
+                <% next if mode == :nz && !nz.call(value) %>
+                <% next if mode == :auto && value.blank? %>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="text-muted"><%= label %></span>
+                  <span class="font-mono text-xs text-ink"><%= money.call(value) %></span>
+                </div>
+              <% end %>
+              <div class="mt-2 flex items-center justify-between gap-4 border-t border-line pt-2.5">
+                <span class="font-medium text-ink">Payable</span>
+                <span class="font-mono text-sm font-medium text-ink"><%= money.call(totals["payable_amount"]) %></span>
+              </div>
+            </div>
+          </div>
+
+          <%# Tax breakdown %>
+          <% if tax_rows.any? %>
+            <div class="border-t border-line px-5 py-4">
+              <p class="mb-2.5 text-xs font-medium uppercase tracking-wide text-muted">Tax breakdown</p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                  <thead class="text-muted">
+                    <tr>
+                      <th class="py-1 text-left font-medium">Type</th>
+                      <th class="py-1 text-left font-medium">Category</th>
+                      <th class="py-1 text-right font-medium">Rate</th>
+                      <th class="py-1 text-right font-medium">Taxable</th>
+                      <th class="py-1 text-right font-medium">Tax</th>
+                    </tr>
+                  </thead>
+                  <tbody class="font-mono text-ink">
+                    <% tax_rows.each do |t| %>
+                      <tr class="border-t border-line">
+                        <td class="py-1.5 pr-2"><%= t["tax_type"] %><%= " · RC" if t["reverse_charge"] %></td>
+                        <td class="py-1.5 pr-2 text-muted"><%= t["category_code"].presence || "—" %></td>
+                        <td class="py-1.5 text-right"><%= t["rate"].present? ? "#{t["rate"]}%" : "—" %></td>
+                        <td class="py-1.5 text-right"><%= t["taxable_amount"].presence || "—" %></td>
+                        <td class="py-1.5 text-right"><%= t["tax_amount"].presence || "—" %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% end %>
+        </section>
+
         <section class="card p-5" aria-label="Canonical editor">
-          <h2 class="text-sm font-medium text-ink">Canonical data</h2>
-          <p class="mt-1 text-sm text-muted">Correct high-risk fields, then save to create a new revision.</p>
+          <h2 class="text-sm font-medium text-ink">Correct high-risk fields</h2>
+          <p class="mt-1 text-sm text-muted">Only these high-risk fields are editable. Saving creates a new revision.</p>
 
           <%= form_with url: review_document_path(@document), method: :patch, id: "canonical-editor", class: "mt-4" do |form| %>
             <div class="space-y-4">

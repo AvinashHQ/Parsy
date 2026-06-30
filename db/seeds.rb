@@ -4,8 +4,8 @@
 
 tenant = Tenant.find_or_create_by!(slug: "default-tenant") do |t|
   t.name = "Default Tenant"
-  t.allowed_processing_regions = [ "eu-west-2" ]
-  t.allowed_providers = [ "fixture" ]
+  t.allowed_processing_regions = ["eu-west-2"]
+  t.allowed_providers = ["fixture"]
   t.monthly_spend_limit_cents = 100_00 # $100.00
 end
 
@@ -23,20 +23,27 @@ else
   puts "Default user operator@example.com already exists"
 end
 
-# Seed some sample batches and documents if they don't exist
+# Each sample fixture is paired with a real, renderable invoice from the synthetic
+# corpus so the side-by-side review screen shows an actual document in the source pane.
+corpus = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/documents")
+sample_fixtures = [
+  { filename: "fix_001_minimal_visual_usd.json", name: "Minimal USD Invoice",     source: "images/IMG-004_receipt.png",                             mime: "image/png" },
+  { filename: "fix_002_credit_note_gbp.json",    name: "Credit Note GBP",         source: "pdf/inv-009_eur_credit_note.pdf",                        mime: "application/pdf" },
+  { filename: "fix_005_generic_vat_eur.json",    name: "Generic VAT EUR Invoice", source: "pdf/inv-003_eu_cross-border_reverse-charge_invoice.pdf",  mime: "application/pdf" }
+]
+
+# The ingester derives source_sha256 from the canonical hash, so it is deterministic
+# and lets us re-find a seeded document on later runs to back-fill its source file.
+seed_source_sha = ->(filename) do
+  Digest::SHA256.hexdigest(JSON.parse(Rails.root.join("test/fixtures/files/canonical", filename).read).to_json)
+end
+
+# Seed the sample batch + documents once.
 if tenant.review_batches.empty?
   puts "Seeding sample review batches and documents..."
-
-  # Batch 1: Sample Invoices
   batch = tenant.review_batches.create!(name: "Sample Invoice Intake Batch")
 
-  fixtures = [
-    { filename: "fix_001_minimal_visual_usd.json", name: "Minimal USD Invoice" },
-    { filename: "fix_002_credit_note_gbp.json", name: "Credit Note GBP" },
-    { filename: "fix_005_generic_vat_eur.json", name: "Generic VAT EUR Invoice" }
-  ]
-
-  fixtures.each do |fixture_info|
+  sample_fixtures.each do |fixture_info|
     path = Rails.root.join("test/fixtures/files/canonical", fixture_info[:filename])
     invoice_hash = JSON.parse(path.read)
 
@@ -59,19 +66,18 @@ if tenant.review_batches.empty?
       def success? = true
     end.new(
       candidate: invoice,
-      attempts: [ attempt ],
+      attempts: [attempt],
       idempotency_key: "seed-#{fixture_info[:filename]}"
     )
 
-    document = Review::ProviderResultIngester.call(
+    Review::ProviderResultIngester.call(
       batch: batch,
       source_sha256: Digest::SHA256.hexdigest(invoice_hash.to_json),
       result: result,
       source_metadata: {
         "filename" => fixture_info[:filename],
-        "mime_type" => "application/pdf",
-        "page_count" => 1,
-        "safe_preview_path" => "https://example.com/preview/#{fixture_info[:filename]}"
+        "mime_type" => fixture_info[:mime],
+        "page_count" => 1
       }
     )
     puts "Ingested #{fixture_info[:name]} into batch."
@@ -79,3 +85,25 @@ if tenant.review_batches.empty?
 
   puts "Seeding complete!"
 end
+
+# Attach a real source document to each seeded document (idempotent — safe to re-run),
+# so the review screen renders an actual PDF rather than a broken preview.
+sample_fixtures.each do |fixture_info|
+  document = Review::Document.find_by(source_sha256: seed_source_sha.call(fixture_info[:filename]))
+  next if document.nil?
+
+  source_path = corpus.join(fixture_info[:source])
+  unless source_path.exist?
+    puts "Skipped source for #{fixture_info[:name]} (missing #{fixture_info[:source]})."
+    next
+  end
+
+  desired = File.basename(source_path)
+  next if document.source_file.attached? && document.source_file.filename.to_s == desired
+
+  document.source_file.purge if document.source_file.attached?
+  document.source_file.attach(io: File.open(source_path), filename: desired, content_type: fixture_info[:mime])
+  puts "Attached source #{desired} → #{fixture_info[:name]}."
+end
+
+
