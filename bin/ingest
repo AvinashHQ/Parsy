@@ -1,0 +1,122 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../config/environment"
+require "csv"
+require "json"
+require "digest"
+
+def print_usage
+  puts "Usage: bin/ingest [fixture_id | all] [batch_name]"
+  puts "\nAvailable Fixture IDs:"
+  manifest_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+  if manifest_path.file?
+    CSV.read(manifest_path, headers: true).each do |row|
+      puts "  - #{row['fixture_id'].ljust(10)} : #{row['notes']}"
+    end
+  end
+  puts "\nExamples:"
+  puts "  bin/ingest INV-014            # Ingest arithmetic mismatch invoice"
+  puts "  bin/ingest HYB-001            # Ingest hybrid PDF with embedded UBL XML"
+  puts "  bin/ingest all                # Ingest all 29 synthetic fixtures"
+  puts "  bin/ingest INV-005 'JPY Batch' # Ingest JPY invoice into a custom batch"
+end
+
+fixture_id = ARGV[0]
+batch_name = ARGV[1] || "Sample Invoice Intake Batch"
+
+if fixture_id.nil? || fixture_id == "-h" || fixture_id == "--help"
+  print_usage
+  exit 1
+end
+
+manifest_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+unless manifest_path.file?
+  puts "Error: Manifest not found at #{manifest_path}"
+  exit 1
+end
+
+rows = CSV.read(manifest_path, headers: true).map(&:to_h)
+
+selected_rows = if fixture_id.downcase == "all"
+                  rows
+                else
+                  matched = rows.select { |r| r["fixture_id"].downcase == fixture_id.downcase }
+                  if matched.empty?
+                    puts "Error: Fixture ID '#{fixture_id}' not found in manifest."
+                    exit 1
+                  end
+                  matched
+                end
+
+tenant = Tenant.find_or_create_by!(slug: "default-tenant") do |t|
+  t.name = "Default Tenant"
+  t.allowed_processing_regions = [ "eu-west-2" ]
+  t.allowed_providers = [ "fixture" ]
+  t.monthly_spend_limit_cents = 100_00
+end
+
+batch = tenant.review_batches.find_or_create_by!(name: batch_name)
+
+selected_rows.each do |row|
+  fid = row.fetch("fixture_id")
+  file_path = row.fetch("file")
+  gt_path = row.fetch("ground_truth")
+  expected_route = row.fetch("expected_route")
+  expected_status = row.fetch("expected_status")
+  sha = row.fetch("sha256")
+  
+  puts "Ingesting #{fid} (#{row['notes']})..."
+
+  # Load ground truth if present
+  if gt_path.present?
+    full_gt_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus", gt_path)
+    invoice_hash = JSON.parse(full_gt_path.read)
+    invoice = Canonical::Invoice.from_hash(invoice_hash)
+  else
+    invoice = nil
+  end
+
+  # Setup the mock result
+  attempt = Struct.new(:schema_version, :route, :region, :provider, :provider_version, :model, :model_version, :prompt_sha256, :latency_ms, :repair_attempt, keyword_init: true).new(
+    schema_version: "2.0",
+    route: expected_route,
+    region: "global_generic_v1",
+    provider: "fixture",
+    provider_version: "1.0",
+    model: "fixture-model",
+    model_version: "1.0",
+    prompt_sha256: Digest::SHA256.hexdigest(file_path),
+    latency_ms: 150,
+    repair_attempt: 0
+  )
+
+  # Check if it should fail/quarantine
+  is_success = (expected_status != "quarantined" && expected_status != "failed" && invoice.present?)
+  
+  result = Struct.new(:candidate, :attempts, :idempotency_key, :success, :error_code, keyword_init: true) do
+    def success? = success
+  end.new(
+    candidate: invoice,
+    attempts: [ attempt ],
+    idempotency_key: "ingest-#{fid}",
+    success: is_success,
+    error_code: is_success ? nil : (fid.start_with?("XML") ? "UNSUPPORTED_STRUCTURED_FORMAT" : "CORRUPT_DOCUMENT")
+  )
+
+  document = Review::ProviderResultIngester.call(
+    batch: batch,
+    source_sha256: sha,
+    result: result,
+    source_metadata: {
+      "filename" => File.basename(file_path),
+      "mime_type" => fid.start_with?("IMG") ? "image/jpeg" : (fid.start_with?("XML") ? "application/xml" : "application/pdf"),
+      "page_count" => 1,
+      "safe_preview_path" => "/assets/preview_placeholder.png"
+    }
+  )
+
+  puts "  -> Ingested as Document ID: #{document.id} (Status: #{document.status}, Risk Score: #{document.risk_score})"
+end
+
+puts "Done!"

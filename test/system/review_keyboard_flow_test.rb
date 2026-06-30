@@ -43,22 +43,23 @@ class ReviewKeyboardFlowTest < ApplicationSystemTestCase
     end
 
     visit review_batch_path(batch)
-    assert_selector "section[aria-label='Batch progress']", text: "0 / 50 complete (0%)"
-    assert_selector "section[aria-label='Risk-ranked review queue'] a[accesskey='n']", count: 50
+    assert_selector "section[aria-label='Batch progress']", text: "0 / 50 complete · 0%"
+    assert_selector "section[aria-label='Risk-ranked review queue'] a[accesskey='n']", count: 1
+    assert_selector "section[aria-label='Risk-ranked review queue'] tbody tr", count: 50
 
     50.times do
       document = Review::RiskQueue.call(batch.reload).first
       visit review_document_path(document)
 
       assert_selector "input[name='canonical_invoice[invoice][number]'][aria-describedby='evidence-invoice-number']"
-      assert_selector "input[accesskey='s']"
-      assert_selector "tr#evidence-invoice-number[tabindex='-1']"
+      assert_selector "button[accesskey='s']"
+      assert_selector "li#evidence-invoice-number[tabindex='-1']"
       find("button[accesskey='a']").send_keys(:enter)
       assert_text "Approved document"
     end
 
     visit review_batch_path(batch.reload)
-    assert_selector "section[aria-label='Batch progress']", text: "50 / 50 complete (100%)"
+    assert_selector "section[aria-label='Batch progress']", text: "50 / 50 complete · 100%"
     assert_equal "completed", batch.reload.status
     assert_equal 50, batch.documents.where(status: "approved").count
     assert_empty batch.documents.joins(:findings).merge(Review::ValidationFinding.unresolved.blocking)

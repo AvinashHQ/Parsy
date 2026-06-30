@@ -113,7 +113,7 @@ module UiHelper
   def severity_badge(severity)
     tone = SEVERITY_TONE[severity.to_s.downcase] || "plain"
     tag.span(class: "badge #{TONE_BADGE[tone]}") do
-      safe_join([tag.span("", class: "badge-dot #{TONE_DOT[tone]}"), severity.to_s.humanize])
+      safe_join([ tag.span("", class: "badge-dot #{TONE_DOT[tone]}"), severity.to_s.humanize ])
     end
   end
 
@@ -122,7 +122,7 @@ module UiHelper
     key = status.to_s.downcase
     tone = STATUS_TONE[key] || "plain"
     tag.span(class: "badge #{TONE_BADGE[tone]}") do
-      safe_join([icon(STATUS_ICON[key] || "circle-dot", class: "size-3.5"), status.to_s.humanize])
+      safe_join([ icon(STATUS_ICON[key] || "circle-dot", class: "size-3.5"), status.to_s.humanize ])
     end
   end
 
@@ -141,7 +141,7 @@ module UiHelper
       items = breadcrumbs.each_with_index.map do |(label, path), i|
         sep = i.zero? ? "".html_safe : icon("chevron-right", class: "size-3.5 text-faint")
         link = path ? link_to(label, path, class: "text-muted no-underline hover:text-ink hover:no-underline") : tag.span(label, class: "text-ink")
-        safe_join([sep, link])
+        safe_join([ sep, link ])
       end
       tag.nav(safe_join(items), class: "mb-2 flex items-center gap-1.5 text-xs", "aria-label": "Breadcrumb")
     end
@@ -170,7 +170,7 @@ module UiHelper
 
   # Accent-filled progress bar (0-100).
   def progress_bar(percent)
-    pct = [[percent.to_i, 0].max, 100].min
+    pct = [ [ percent.to_i, 0 ].max, 100 ].min
     tag.div(class: "h-2 w-full overflow-hidden rounded-full bg-subtle",
             role: "progressbar", "aria-valuenow": pct, "aria-valuemin": 0, "aria-valuemax": 100) do
       tag.div("", class: "h-full rounded-full bg-accent transition-[width] duration-500", style: "width: #{pct}%")
