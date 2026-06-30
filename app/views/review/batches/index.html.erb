@@ -1,6 +1,10 @@
 <% content_for :title, "Batches · Parsy" %>
 
-<%= page_header "Batches", subtitle: "Invoice processing batches for #{current_tenant&.name}." %>
+<%= page_header "Batches", subtitle: "Invoice processing batches for #{current_tenant&.name}." do %>
+  <%= link_to new_review_upload_path, class: "btn btn-primary" do %>
+    <%= icon "file-text", class: "size-4" %> Upload invoices
+  <% end %>
+<% end %>
 
 <% if @batches.any? %>
   <div class="card overflow-hidden">
@@ -40,4 +44,7 @@
   </div>
 <% else %>
   <%= empty_state "layers", "No batches yet", "Batches appear here once invoices are ingested into the pipeline." %>
+  <div class="mt-4 flex justify-center">
+    <%= link_to "Upload your first invoice", new_review_upload_path, class: "btn btn-primary mt-4" %>
+  </div>
 <% end %>

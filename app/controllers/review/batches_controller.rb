@@ -10,6 +10,7 @@ module Review
       @batch = tenant_batches.find(params[:id])
       @progress = Review::BatchProgress.call(@batch)
       @documents = Review::RiskQueue.call(@batch)
+      @intake_documents = @batch.documents.order(updated_at: :desc).includes(:current_revision)
     end
 
     def destroy

@@ -63,7 +63,7 @@ module LocalExtraction
       attempt = result.attempts.fetch(0)
       assert attempt.success?
       assert_equal "local_open_source", attempt.provider
-      assert_equal "qwen3-vl", attempt.model
+      assert_equal "qwen2.5-coder:1.5b", attempt.model
       assert_equal "qwen3-vl-2026-06", attempt.model_version
       assert_equal 41, attempt.latency_ms
       assert_equal result.idempotency_key, attempt.idempotency_key

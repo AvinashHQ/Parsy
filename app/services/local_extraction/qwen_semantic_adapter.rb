@@ -15,10 +15,10 @@ module LocalExtraction
     PROMPT_SHA256 = Digest::SHA256.hexdigest(PROMPT)
     PROVIDER_ID = "local_open_source"
     PROVIDER_VERSION = "qwen3-vl-boundary-v1"
-    MODEL = "qwen3-vl"
-    DEFAULT_MODEL_REVISION = "qwen3-vl-local-fixture"
-    DEFAULT_QUANTIZATION = "fixture-int4"
-    DEFAULT_RUNTIME = "fixture"
+    MODEL = "qwen2.5-coder:1.5b"
+    DEFAULT_MODEL_REVISION = "latest"
+    DEFAULT_QUANTIZATION = "int4"
+    DEFAULT_RUNTIME = "ollama"
     DEFAULT_DEVICE = "cpu"
     DEFAULT_TIMEOUT_MS = 30_000
     DEFAULT_DETERMINISTIC_SETTINGS = {

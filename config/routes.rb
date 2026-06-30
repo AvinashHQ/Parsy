@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resource :session, only: %i[new create destroy]
 
   namespace :review do
+    resource :upload, only: %i[new create]
     resources :batches, only: %i[index show destroy] do
       resources :exports, only: :create
       resources :export_downloads, only: :show

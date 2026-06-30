@@ -12,6 +12,17 @@ models:
     quantization: int4
     device_profile: apple_silicon_development
     promotion_state: selected_for_m2_5_fixture_route
+  - id: qwen2_5_coder_1_5b_instruct
+    repository: Qwen/Qwen2.5-Coder-1.5B-Instruct
+    role: canonical_semantic_extractor
+    license: Apache-2.0
+    deployment: local_inference_service
+    runtime: ollama
+    runtime_version: base_system
+    model_revision: latest
+    quantization: int4
+    device_profile: apple_silicon_development
+    promotion_state: selected_for_m2_5_production_route
   - id: paddleocr_vl_1_6
     repository: PaddlePaddle/PaddleOCR-VL-1.6
     role: layout_ocr_evidence

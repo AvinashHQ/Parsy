@@ -24,6 +24,51 @@
     </div>
   </section>
 
+  <section class="card overflow-hidden" aria-label="Intake results">
+    <div class="flex items-center gap-2 border-b border-line bg-subtle px-4 py-2.5">
+      <h2 class="text-sm font-medium text-ink">Intake results</h2>
+      <span class="rounded-full bg-surface px-2 py-0.5 text-xs text-muted"><%= @intake_documents.size %></span>
+    </div>
+
+    <% if @intake_documents.any? %>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-line bg-subtle text-xs">
+            <tr>
+              <th class="px-4 py-2.5 font-medium">Status</th>
+              <th class="px-4 py-2.5 font-medium">Document</th>
+              <th class="px-4 py-2.5 font-medium">Route</th>
+              <th class="px-4 py-2.5 font-medium">Updated</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            <% @intake_documents.each do |document| %>
+              <tr class="group relative transition-colors hover:bg-subtle">
+                <td class="px-4 py-3"><%= status_badge document.status %></td>
+                <td class="px-4 py-3">
+                  <%= link_to review_document_path(document),
+                        class: "font-mono text-xs text-accent no-underline after:absolute after:inset-0 group-hover:underline" do %>
+                    <%= document.source_sha256.first(12) %>
+                  <% end %>
+                </td>
+                <td class="px-4 py-3 text-muted"><%= document.route.presence || "—" %></td>
+                <td class="px-4 py-3 text-muted">
+                  <time datetime="<%= document.updated_at.iso8601 %>" title="<%= document.updated_at.strftime("%-d %b %Y, %H:%M") %>">
+                    <%= time_ago_in_words(document.updated_at) %> ago
+                  </time>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-5">
+        <%= empty_state "file-text", "No uploaded documents", "Upload an invoice or ZIP archive to populate this batch." %>
+      </div>
+    <% end %>
+  </section>
+
   <section aria-label="Risk-ranked review queue">
     <div class="mb-3 flex items-center gap-2">
       <h2 class="text-sm font-medium text-ink">Risk-ranked review queue</h2>

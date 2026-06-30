@@ -5,6 +5,9 @@
         breadcrumbs: [["Batches", review_batches_path], [@document.batch.name, review_batch_path(@document.batch)]] %>
   <%= empty_state "triangle-alert", "No candidate revision available",
         "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}. It may have failed extraction or been quarantined during intake." %>
+  <div class="mt-5">
+    <%= render "source_preview", document: @document, meta: (@document.source_metadata || {}) %>
+  </div>
   <div class="mt-4">
     <%= link_to review_batch_path(@document.batch), class: "btn btn-secondary btn-sm" do %>
       <%= icon "arrow-left", class: "size-4" %> Back to batch
@@ -82,62 +85,7 @@
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       <%# ---------- Left: source preview + profile ---------- %>
       <div class="space-y-5 lg:sticky lg:top-28 lg:self-start">
-        <% src_file    = @document.source_file if @document.source_file.attached? %>
-        <% src_mime    = (src_file&.content_type.presence || meta["mime_type"]).to_s %>
-        <% src_name    = src_file&.filename&.to_s.presence || meta["filename"].presence || "Source document" %>
-        <% src_pages   = meta["page_count"] || 1 %>
-        <% legacy_url  = meta["safe_preview_path"].presence %>
-        <% is_image    = src_mime.start_with?("image/") && !src_mime.include?("tiff") %>
-        <% is_pdf      = src_mime == "application/pdf" %>
-        <% inline_url  = src_file ? rails_blob_path(src_file, disposition: "inline") : (legacy_url if is_image) %>
-        <div class="card overflow-hidden">
-          <div class="flex items-center justify-between gap-2 border-b border-line bg-subtle px-4 py-2.5">
-            <div class="flex min-w-0 items-center gap-2 text-sm">
-              <%= icon "file-text", class: "size-4 shrink-0 text-faint" %>
-              <span class="truncate text-ink" title="<%= src_name %>"><%= src_name %></span>
-            </div>
-            <span class="shrink-0 text-xs text-muted"><%= pluralize(src_pages, "page") %></span>
-          </div>
-
-          <div class="bg-page">
-            <% if inline_url && is_image %>
-              <img src="<%= inline_url %>" alt="Source document preview" loading="lazy"
-                   class="mx-auto max-h-[70vh] w-full object-contain"
-                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div class="hidden min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
-                <%= icon "file-text", class: "size-7 text-faint" %>
-                <p class="text-sm text-muted">Preview could not be loaded.</p>
-              </div>
-            <% elsif inline_url && is_pdf %>
-              <iframe src="<%= inline_url %>" title="Source document preview" loading="lazy"
-                      class="h-[72vh] w-full border-0 bg-white"></iframe>
-            <% else %>
-              <div class="flex min-h-[280px] flex-col items-center justify-center gap-2 p-6 text-center">
-                <div class="grid size-12 place-items-center rounded-full bg-subtle"><%= icon "file-text", class: "size-6 text-muted" %></div>
-                <p class="text-sm font-medium text-ink"><%= src_file ? "No inline preview for this format" : "Source not available for preview" %></p>
-                <p class="text-xs text-muted"><%= [@document.source_format_family, src_mime.presence].compact.join(" · ").presence || "Structured or retained-elsewhere source" %></p>
-                <% if src_file %>
-                  <%= link_to rails_blob_path(src_file, disposition: "attachment"), class: "btn btn-secondary btn-sm mt-1" do %>
-                    <%= icon "download", class: "size-4" %> Download source
-                  <% end %>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-
-          <% if src_file || legacy_url %>
-            <div class="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5 text-sm">
-              <%= link_to (src_file ? rails_blob_path(src_file, disposition: "inline") : legacy_url),
-                    target: "_blank", rel: "noopener",
-                    class: "inline-flex items-center gap-1.5 text-accent no-underline hover:underline" do %>
-                <%= icon "external-link", class: "size-3.5" %> Open original
-              <% end %>
-              <% if src_file %>
-                <span class="font-mono text-xs text-faint"><%= number_to_human_size(src_file.byte_size) %></span>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
+        <%= render "source_preview", document: @document, meta: meta %>
 
         <section class="card p-5" aria-label="Source and profile">
           <h2 class="mb-3 text-sm font-medium text-ink">Source &amp; profile</h2>

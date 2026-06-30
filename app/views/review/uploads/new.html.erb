@@ -1,0 +1,27 @@
+<% content_for :title, "Upload invoices · Parsy" %>
+
+<%= page_header "Upload invoices", subtitle: "Create a review batch from one invoice file or a ZIP archive.", breadcrumbs: [["Batches", review_batches_path]] %>
+
+<section class="card p-5" aria-label="Upload invoices">
+  <%= form_with scope: :upload, url: review_upload_path, multipart: true, class: "space-y-5" do |form| %>
+    <div>
+      <%= form.label :name, "Batch name", class: "mb-1.5 block text-sm font-medium text-ink" %>
+      <%= form.text_field :name,
+            placeholder: "Operator upload #{Time.current.utc.strftime("%Y-%m-%d")}",
+            class: "block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" %>
+    </div>
+
+    <div>
+      <%= form.label :file, "Invoice or ZIP file", class: "mb-1.5 block text-sm font-medium text-ink" %>
+      <%= form.file_field :file,
+            required: true,
+            accept: ".pdf,.jpg,.jpeg,.png,.tif,.tiff,.xml,.zip,application/pdf,image/jpeg,image/png,image/tiff,application/xml,text/xml,application/zip",
+            class: "block w-full cursor-pointer rounded-lg border border-line bg-surface text-sm text-muted file:mr-4 file:border-0 file:bg-subtle file:px-4 file:py-2 file:text-sm file:font-medium file:text-ink hover:file:bg-line" %>
+      <p class="mt-2 text-sm text-muted">Upload one PDF, image, or UBL/CII XML invoice. For bulk intake, upload one ZIP archive containing invoice files.</p>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn-primary" do %>
+      <%= icon "file-text", class: "size-4" %> Upload invoices
+    <% end %>
+  <% end %>
+</section>

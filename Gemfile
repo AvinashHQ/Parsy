@@ -72,3 +72,4 @@ gem "caxlsx", "~> 4.5"
 gem "aws-sdk-s3", "~> 1.226"
 
 gem "csv", "~> 3.3"
+gem "rubyzip", "~> 3.4"

@@ -52,10 +52,15 @@
 
         <% if current_user %>
           <nav class="ml-2 hidden items-center gap-1 sm:flex">
-            <% review_active = controller_path.start_with?("review") %>
+            <% batches_active = controller_path == "review/batches" %>
+            <% upload_active = controller_path == "review/uploads" %>
             <a href="<%= review_batches_path %>"
-               class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= review_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
+               class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= batches_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
               <%= icon "layers", class: "size-4" %> Batches
+            </a>
+            <a href="<%= new_review_upload_path %>"
+               class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= upload_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
+              <%= icon "file-text", class: "size-4" %> Upload
             </a>
           </nav>
         <% end %>
