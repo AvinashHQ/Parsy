@@ -4,18 +4,16 @@ module Review
   class ProcessDocumentJob < ApplicationJob
     queue_as :review
 
-    def perform(document_id)
+    def perform(document_id, force: false)
       document = Review::Document.find(document_id)
       return if document.approved_revision_id.present? || document.status == "exported"
 
-      document.update!(status: "validating")
-      if document.current_revision.present?
+      if document.current_revision.present? && !force
         document.recompute_risk!
         document.mark_review_state!
         document.events.create!(batch: document.batch, candidate_revision: document.current_revision, actor: "system", action: "review_state_refreshed")
       else
-        document.update!(status: "needs_review")
-        document.events.create!(batch: document.batch, actor: "system", action: "review_waiting_for_candidate")
+        Extraction::DocumentExtractor.call(document: document)
       end
     end
   end

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "parsy-web",
+      "runtimeExecutable": "bin/rails",
+      "runtimeArgs": ["server", "-p", "3010"],
+      "port": 3010
+    }
+  ]
+}

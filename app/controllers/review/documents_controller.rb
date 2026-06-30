@@ -9,6 +9,7 @@ module Review
       @revision = @document.current_revision
       @decision = @revision ? Review::AcceptancePolicy.new(@revision).decision : nil
       @next_document = next_document
+      @events = @document.events.order(created_at: :desc).limit(20) if @revision.nil?
     end
 
     def update
@@ -41,6 +42,14 @@ module Review
       document.events.create!(batch: document.batch, candidate_revision: document.current_revision, actor: current_actor, action: "rejected", reason: params[:reason])
       document.batch.refresh_status!
       redirect_to review_batch_path(document.batch), notice: "Rejected document"
+    end
+
+    def extract
+      document = tenant_documents.find(params[:id])
+      document.update!(status: "extracting")
+      document.events.create!(batch: document.batch, actor: current_actor, action: "extraction_requested", reason: "operator retry")
+      Review::ProcessDocumentJob.perform_later(document.id, force: true)
+      redirect_to review_document_path(document), notice: "Extraction started — this page will update automatically."
     end
 
     private

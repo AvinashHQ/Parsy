@@ -240,8 +240,20 @@ module Intake
       end
 
       if target_status == "routed_visual"
-        Review::ProcessDocumentJob.perform_now(document.id)
-        document.reload.batch.refresh_status!
+        # Place the document in a sane queued state immediately, then run the
+        # real extraction out-of-band so the upload request never blocks on (or
+        # invokes) an extraction provider.
+        document.update!(status: "needs_review")
+        document.events.create!(
+          batch: document.batch,
+          actor: actor,
+          action: "extraction_enqueued",
+          reason: "operator upload",
+          metadata: { route: inspection.route }.compact
+        )
+        Review::ProcessDocumentJob.perform_later(document.id)
+        document.batch.refresh_status!
+        document.reload
       else
         document.batch.refresh_status!
         document.reload

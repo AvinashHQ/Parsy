@@ -1,31 +1,134 @@
 <% content_for :title, "Document review · Parsy" %>
 
 <% if @revision.nil? %>
-  <% processing_statuses = %w[uploaded inspecting routed_structured routed_visual extracting validating] %>
-  <% still_processing = processing_statuses.include?(@document.status) %>
-  <% if still_processing %>
-    <% content_for :head do %>
-      <meta name="turbo-refresh-method" content="morph">
-    <% end %>
-    <%= turbo_stream_from @document %>
+  <% content_for :head do %>
+    <meta name="turbo-refresh-method" content="morph">
   <% end %>
+  <%= turbo_stream_from @document %>
+
+  <% meta = @document.source_metadata || {} %>
+  <% prov = @document.processing_provenance || {} %>
+  <% extraction_error = prov.dig("extraction", "error_code") %>
+  <% intake_reason = meta["rejection_code"] || prov.dig("intake", "rejection_code") %>
+  <% reason_code = extraction_error || intake_reason %>
+  <% in_progress = %w[uploaded inspecting routed_structured routed_visual extracting validating].include?(@document.status.to_s) %>
+  <% state = case @document.status.to_s
+       when "uploaded", "inspecting", "routed_structured", "routed_visual", "extracting", "validating"
+         { tone: "info", icon: "loader", title: "Extraction in progress",
+           body: "The extractor is reading this document. This page will update automatically when the extracted record, findings, and evidence are ready." }
+       when "needs_review"
+         { tone: "warning", icon: "clock", title: "Awaiting extraction",
+           body: "This document is queued but has no candidate revision yet. Run extraction to populate the review record — this page will update automatically once a run starts." }
+       when "failed"
+         { tone: "danger", icon: "triangle-alert", title: "Extraction failed",
+           body: "The extractor could not produce a candidate record for this document. You can retry extraction below." }
+       when "quarantined"
+         { tone: "danger", icon: "shield", title: "Quarantined during intake",
+           body: "This document was held back during intake and was not extracted. Review the intake details below." }
+       else
+         { tone: "warning", icon: "triangle-alert", title: "No candidate revision available",
+           body: "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}." }
+     end %>
+  <% tone_classes = {
+       "info" => "border-info-line bg-info-subtle text-info-fg",
+       "warning" => "border-warning-line bg-warning-subtle text-warning-fg",
+       "danger" => "border-danger-line bg-danger-subtle text-danger-fg"
+     } %>
+
   <%= page_header "Document review",
-        breadcrumbs: [["Batches", review_batches_path], [@document.batch.name, review_batch_path(@document.batch)]] %>
-  <% if still_processing %>
-    <div class="mb-5 flex items-center gap-2.5 rounded-xl border border-info-line bg-info-subtle px-4 py-3 text-sm text-info-fg">
-      <%= icon "loader", class: "size-4 shrink-0 animate-spin" %>
-      <span>Extracting document data — this page will update automatically when ready.</span>
-    </div>
+        breadcrumbs: [["Batches", review_batches_path], [@document.batch.name, review_batch_path(@document.batch)]] do %>
+    <%= status_badge @document.status %>
+    <%= risk_chip @document.risk_score %>
   <% end %>
-  <%= empty_state "triangle-alert", "No candidate revision available",
-        still_processing ? "Extraction is in progress (#{@document.status.humanize.downcase})." : "This document has no candidate revision and remains in #{@document.status.to_s.humanize.downcase}. It may have failed extraction or been quarantined during intake." %>
-  <div class="mt-5">
-    <%= render "source_preview", document: @document, meta: (@document.source_metadata || {}) %>
-  </div>
-  <div class="mt-4">
-    <%= link_to review_batch_path(@document.batch), class: "btn btn-secondary btn-sm" do %>
-      <%= icon "arrow-left", class: "size-4" %> Back to batch
-    <% end %>
+
+  <%# Keep this phrase for accessibility + intake regression coverage %>
+  <p class="sr-only">No candidate revision available</p>
+
+  <section class="card border <%= tone_classes[state[:tone]] %> p-5" aria-label="Extraction status">
+    <div class="flex items-start gap-3">
+      <%= icon state[:icon], class: "mt-0.5 size-5 shrink-0 #{'animate-spin' if in_progress}" %>
+      <div class="min-w-0 flex-1">
+        <h2 class="text-sm font-semibold"><%= state[:title] %></h2>
+        <p class="mt-1 text-sm opacity-90"><%= state[:body] %></p>
+        <% if reason_code.present? %>
+          <p class="mt-2 inline-flex items-center gap-1.5 rounded-md bg-surface/60 px-2 py-1 font-mono text-xs">
+            <%= icon "info", class: "size-3.5" %> <%= reason_code %>
+          </p>
+        <% end %>
+      </div>
+      <% unless @document.status.to_s == "exported" %>
+        <%= button_to extract_review_document_path(@document), method: :post,
+              class: "btn btn-primary btn-sm shrink-0" do %>
+          <%= icon "refresh", class: "size-4" %> <%= @document.status.to_s == "failed" ? "Retry extraction" : "Run extraction" %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <%# ---------- Left: source preview ---------- %>
+    <div class="space-y-5 lg:sticky lg:top-28 lg:self-start">
+      <%= render "source_preview", document: @document, meta: meta %>
+    </div>
+
+    <%# ---------- Right: profile + intake + timeline ---------- %>
+    <div class="space-y-5">
+      <section class="card p-5" aria-label="Source and profile">
+        <h2 class="mb-3 text-sm font-medium text-ink">Source &amp; profile</h2>
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-3 text-sm sm:grid-cols-2">
+          <% profile_rows = {
+               "Document" => @document.source_sha256.to_s.first(12),
+               "Route" => @document.route,
+               "Source format" => [@document.source_format_family, @document.source_format_profile, @document.source_format_version].compact.join(" / ").presence,
+               "MIME type" => meta["mime_type"],
+               "Pages" => meta["page_count"],
+               "Size" => (number_to_human_size(meta["byte_size"].to_i) if meta["byte_size"].present?)
+             } %>
+          <% profile_rows.each do |label, value| %>
+            <div>
+              <dt class="text-xs text-muted"><%= label %></dt>
+              <dd class="mt-0.5 font-mono text-xs text-ink"><%= value.presence || "—" %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </section>
+
+      <section class="card overflow-hidden" aria-label="Processing timeline">
+        <div class="flex items-center gap-2 border-b border-line px-5 py-3">
+          <h2 class="text-sm font-medium text-ink">Processing timeline</h2>
+          <span class="rounded-full bg-subtle px-2 py-0.5 text-xs text-muted"><%= @events&.size.to_i %></span>
+        </div>
+        <% if @events&.any? %>
+          <ul class="divide-y divide-line">
+            <% @events.each do |event| %>
+              <li class="flex items-start gap-3 px-5 py-3">
+                <%= icon "circle-dot", class: "mt-0.5 size-3.5 shrink-0 text-faint" %>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span class="text-sm text-ink"><%= event.action.to_s.humanize %></span>
+                    <span class="font-mono text-xs text-faint"><%= event.actor %></span>
+                  </div>
+                  <% if event.reason.present? %>
+                    <p class="text-xs text-muted"><%= event.reason %></p>
+                  <% end %>
+                </div>
+                <time class="shrink-0 text-xs text-faint" datetime="<%= event.created_at.iso8601 %>" title="<%= event.created_at.strftime("%-d %b %Y, %H:%M") %>">
+                  <%= time_ago_in_words(event.created_at) %> ago
+                </time>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="px-5 py-8 text-center text-sm text-muted">No processing events recorded yet.</p>
+        <% end %>
+      </section>
+
+      <div>
+        <%= link_to review_batch_path(@document.batch), class: "btn btn-secondary btn-sm" do %>
+          <%= icon "arrow-left", class: "size-4" %> Back to batch
+        <% end %>
+      </div>
+    </div>
   </div>
 <% else %>
   <% meta = @document.source_metadata || {} %>
