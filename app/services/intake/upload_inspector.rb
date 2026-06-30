@@ -3,6 +3,7 @@
 require "digest"
 require "json"
 require "yaml"
+require "zlib"
 
 module Intake
   class UploadInspector
@@ -143,7 +144,7 @@ module Intake
 
       payloads = embedded_payloads(bytes)
       if payloads.any?
-        registry_detection("factur_x_zugferd", embedded_payloads: payloads)
+        registry_detection(hybrid_format_id(payloads), embedded_payloads: payloads)
       else
         registry_detection("visual_pdf")
       end
@@ -196,18 +197,48 @@ module Intake
       return [] unless bytes.include?("/EmbeddedFiles") || bytes.match?(/factur[-_ ]?x|zugferd/i)
 
       sample = bytes.byteslice(0, [ bytes.bytesize, 512.kilobytes ].min).to_s
-      recognized = sample.match?(/factur[-_]?x\.xml|zugferd[-_]?invoice\.xml/i) || sample.include?("urn:factur-x") || sample.include?("urn:ferd:CrossIndustryDocument")
-      return [] unless recognized
+      filename = sample[/[A-Za-z0-9_.-]+\.xml/i] || "embedded-invoice.xml"
+      xml_sources = embedded_xml_sources(bytes, sample)
 
-      xml_slice = sample[/<\?xml.*?(?:CrossIndustryInvoice|rsm:CrossIndustryInvoice|Invoice).*?>/m] || ""
-      [ FormatDetection::EmbeddedPayload.new(
-        filename: sample[/[A-Za-z0-9_.-]*(?:factur[-_]?x|zugferd)[A-Za-z0-9_.-]*\.xml/i] || "embedded-invoice.xml",
-        profile: "factur_x_zugferd",
-        namespace: xml_slice[/urn:[^\s"']+/, 0],
-        media_type: "application/xml",
-        byte_size: xml_slice.bytesize.zero? ? nil : xml_slice.bytesize,
-        sha256: xml_slice.empty? ? nil : Digest::SHA256.hexdigest(xml_slice)
-      ) ]
+      xml_sources.filter_map do |xml|
+        profile = embedded_xml_profile(xml, filename)
+        next unless profile
+
+        [ FormatDetection::EmbeddedPayload.new(
+          filename: filename,
+          profile: profile,
+          namespace: xml[/urn:[^\s"']+/, 0],
+          media_type: "application/xml",
+          byte_size: xml.bytesize,
+          sha256: Digest::SHA256.hexdigest(xml)
+        ) ]
+      end.flatten
+    end
+
+    def embedded_xml_sources(bytes, sample)
+      direct = sample[/<\?xml.*?(?:CrossIndustryInvoice|rsm:CrossIndustryInvoice|Invoice).*?>/m]
+      streams = sample.scan(%r{/Type\s*/EmbeddedFile.*?stream\r?\n(.*?)\r?\nendstream}m).filter_map do |(stream)|
+        stream = stream.b
+        begin
+          Zlib.inflate(stream)
+        rescue Zlib::Error
+          stream
+        end
+      end
+
+      ([ direct ] + streams).compact.select { |source| source.lstrip.start_with?("<") }
+    end
+
+    def embedded_xml_profile(xml, filename)
+      return "factur_x_zugferd" if filename.match?(/factur[-_]?x|zugferd/i) || xml.match?(/urn:factur-x|urn:ferd:CrossIndustryDocument|CrossIndustryInvoice/i)
+      return "oasis_ubl_invoice" if xml.include?("urn:oasis:names:specification:ubl:schema:xsd:Invoice-2") || xml.include?("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2")
+      return "uncefact_cii" if xml.include?("urn:un:unece:uncefact:data:standard:CrossIndustryInvoice")
+
+      nil
+    end
+
+    def hybrid_format_id(payloads)
+      payloads.any? { |payload| payload.profile == "factur_x_zugferd" } ? "factur_x_zugferd" : "pdf_embedded_invoice_xml"
     end
 
     def pdf_page_count(bytes)

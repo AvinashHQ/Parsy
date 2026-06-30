@@ -25,6 +25,11 @@ formats:
     detection: [pdf_embedded_xml, factur_x_filename_or_namespace]
     route: hybrid_compare
     mvp_status: experimental
+  - id: pdf_embedded_invoice_xml
+    family: hybrid_pdf_xml
+    detection: [pdf_embedded_xml, invoice_xml_namespace]
+    route: hybrid_compare
+    mvp_status: experimental
   - id: oasis_ubl_invoice
     family: ubl
     detection: [xml_namespace_urn_oasis_ubl_invoice]
