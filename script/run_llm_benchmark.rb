@@ -143,8 +143,8 @@ module Evaluation
     end
 
     def extract_pdf_text(pdf_path)
-      python_cmd = "python3 -c \"import pypdf; reader = pypdf.PdfReader('#{pdf_path}'); print('\\n'.join(page.extract_text() for page in reader.pages))\""
-      stdout, stderr, status = Open3.capture3(python_cmd)
+      python_script = "import pypdf, sys; reader = pypdf.PdfReader(sys.argv[1]); print('\\n'.join(page.extract_text() for page in reader.pages))"
+      stdout, _stderr, status = Open3.capture3("python3", "-c", python_script, pdf_path)
       if status.success?
         stdout
       else
