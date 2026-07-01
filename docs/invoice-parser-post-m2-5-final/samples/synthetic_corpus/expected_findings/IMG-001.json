@@ -1,8 +1,0 @@
-[
-  {
-    "code": "LOW_IMAGE_QUALITY",
-    "severity": "MEDIUM",
-    "field_paths": [],
-    "resolution": "normalize_or_review"
-  }
-]

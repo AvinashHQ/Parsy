@@ -1,8 +1,0 @@
-[
-  {
-    "code": "UNSUPPORTED_STRUCTURED_PROFILE",
-    "severity": "HIGH",
-    "field_paths": [],
-    "resolution": "quarantine"
-  }
-]

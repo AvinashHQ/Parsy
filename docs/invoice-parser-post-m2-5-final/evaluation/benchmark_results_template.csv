@@ -1,1 +1,0 @@
-run_id,fixture_id,corpus_version,route,model_id,model_revision,quantization,runtime,runtime_version,device,prompt_hash,schema_version,profile_version,schema_valid,supplier_exact,invoice_number_exact,issue_date_exact,currency_exact,payable_exact,tax_exact,line_count_exact,evidence_coverage,hallucinated_field_count,latency_ms,peak_memory_mb,repair_used,final_status,notes

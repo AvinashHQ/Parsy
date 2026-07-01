@@ -1,8 +1,0 @@
-[
-  {
-    "code": "STRUCTURED_PROFILE_NOT_OFFICIALLY_CONFORMANT",
-    "severity": "INFO",
-    "field_paths": [],
-    "resolution": "functional_fixture_only"
-  }
-]

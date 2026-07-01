@@ -1,8 +1,0 @@
-sequence,issue_id,work,depends_on,primary_test_output
-1,M1-01,Canonical Invoice v2 value objects and contract validation,M0-04,Contract fixtures
-2,M1-07,Version compatibility and migration policy,M1-01,Migration fixtures
-3,M1-02,Decimal parser and currency minor-unit registry,M1-01,USD/JPY/KWD tests
-4,M1-03,"Generic parties, identifiers, taxes, references and line items",M1-01,Domain fixtures
-5,M1-04,Universal deterministic validation and severity findings,"M1-02,M1-03",Validation report
-6,M1-05,Tenant-scoped duplicate fingerprint and search keys,M1-03,Duplicate pair suite
-7,M1-06,"Canonical JSON, CSV and XLSX exports","M1-01,M1-04",Reconciled export fixtures

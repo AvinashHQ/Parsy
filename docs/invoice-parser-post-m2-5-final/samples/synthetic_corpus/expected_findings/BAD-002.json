@@ -1,8 +1,0 @@
-[
-  {
-    "code": "CORRUPT_PDF",
-    "severity": "HIGH",
-    "field_paths": [],
-    "resolution": "quarantine"
-  }
-]

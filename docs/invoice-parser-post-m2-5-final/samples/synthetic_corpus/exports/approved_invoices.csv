@@ -1,9 +1,0 @@
-document_id,document_type,supplier_name,buyer_name,invoice_number,issue_date,currency,tax_exclusive_amount,total_tax_amount,withholding_total_amount,payable_amount,source_family,review_status
-synthetic_inv_001,invoice,Blue Mesa Office Supply LLC,Cobalt Workshop Inc,US-260629-001,2026-06-29,USD,358.00,29.54,0.00,387.54,visual_pdf,APPROVED
-synthetic_inv_002,invoice,Northstar Services Ltd,Example Buyer SAS,INV-2026-1042,2026-06-29,GBP,1250.00,250.00,0.00,1500.00,visual_pdf,APPROVED
-synthetic_inv_003,invoice,Rhein Data GmbH,Example Buyer SAS,RD-2026-771,2026-06-29,EUR,1760.00,0.00,0.00,1760.00,visual_pdf,APPROVED
-synthetic_inv_004,invoice,Saffron Cloud Solutions Pvt Ltd,Riverstone Retail LLP,SC-4521,2026-06-29,INR,40000.00,7200.00,0.00,47200.00,visual_pdf,APPROVED
-synthetic_inv_005,invoice,Hikari Office Systems KK,Aoba Design Studio,HOS-8841,2026-06-29,JPY,41300,0,0,41300,visual_pdf,APPROVED
-synthetic_inv_006,invoice,Pearl Gulf Trading WLL,Harbour Analytics LLC,PG-000981,2026-06-29,KWD,157.875,0.000,0.000,157.875,visual_pdf,APPROVED
-synthetic_inv_007,invoice,Desert Byte Technologies FZ-LLC,Harbour Analytics LLC,DBT-2026-611,2026-06-29,AED,2400.00,120.00,0.00,2520.00,visual_pdf,APPROVED
-synthetic_inv_008,invoice,Maple Ridge Equipment Inc,Northern Trail Foods Ltd,MRE-22671,2026-06-29,CAD,738.00,95.94,0.00,833.94,visual_pdf,APPROVED

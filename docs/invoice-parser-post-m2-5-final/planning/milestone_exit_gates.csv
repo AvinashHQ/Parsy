@@ -1,9 +1,0 @@
-milestone,goal,exit_gate,live_blocker
-M0,Pilot contract and scope freeze,Two pilots; corpus; fields; formats; security plan agreed,yes
-M1,Country-neutral deterministic core,Global schema and currency/tax arithmetic fixtures pass,yes
-M2,Safe intake and provider-neutral extraction foundation,"Provider contract, routing, provenance, repair contract, and benchmark harness complete",yes
-M2.5,Open-source extraction upgrade,"Selected local route passes functional benchmark, provenance, resource, failure, and rollback gates",yes
-M3,Human review and safe acceptance,50-document end-to-end flow; no blocking finding auto-accepts,yes
-M4,Security reliability deployment,Isolation deletion restore logging and cost controls pass,yes
-M5,Closed live MVP test,Safety/time/cost/commercial go gate evaluated,no
-M6,First demanded regional capability,Independent regional profile gate passes,no

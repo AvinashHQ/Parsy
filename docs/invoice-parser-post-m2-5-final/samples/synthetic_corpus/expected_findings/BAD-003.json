@@ -1,8 +1,0 @@
-[
-  {
-    "code": "MIME_MAGIC_MISMATCH",
-    "severity": "HIGH",
-    "field_paths": [],
-    "resolution": "quarantine"
-  }
-]
