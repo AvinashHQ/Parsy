@@ -13,10 +13,14 @@ module Extraction
   class DocumentExtractor
     EXTRACTION_ERROR = "EXTRACTION_ERROR"
     SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
+    INVALID_PROVIDER = "INVALID_EXTRACTION_PROVIDER"
     IMAGE_MIME_TYPES = %w[image/jpeg image/png].freeze
-    # PARSY_EXTRACTION_PROVIDER values that opt into the local fallback (ADR-026);
-    # anything else (including unset) selects the cloud default.
+    # PARSY_EXTRACTION_PROVIDER (ADR-026): blank/unset selects the documented
+    # cloud default; these values opt into the local fallback; anything else is
+    # a misconfiguration and fails safe (see #call) rather than silently
+    # guessing a provider.
     LOCAL_PROVIDER_VALUES = %w[ollama local local_open_source].freeze
+    CLOUD_PROVIDER_VALUES = %w[gemini cloud].freeze
     CLOUD_PROVIDER_VERSION = "gemini-cloud-v1"
     CLOUD_PROVIDER_TIMEOUT_MS = 120_000
 
@@ -37,8 +41,11 @@ module Extraction
       @route_composer = route_composer || self.class.default_route_composer
     end
 
+    # nil when PARSY_EXTRACTION_PROVIDER is misconfigured — #call fails safe
+    # rather than guessing a provider (see configured_provider).
     def self.default_route_composer
-      LocalExtraction::RouteComposer.new(semantic_adapter: default_semantic_adapter)
+      adapter = default_semantic_adapter
+      adapter && LocalExtraction::RouteComposer.new(semantic_adapter: adapter)
     end
 
     # ADR-026: Google Gemini (cloud) is the MVP default; PARSY_EXTRACTION_PROVIDER
@@ -46,9 +53,10 @@ module Extraction
     # LocalExtraction::QwenSemanticAdapter's idempotency/repair/provenance
     # machinery — see that class for why a cloud client fits the same adapter.
     def self.default_semantic_adapter
-      if local_provider_requested?
+      case configured_provider
+      when :local
         LocalExtraction::QwenSemanticAdapter.new(client: LocalExtraction::OllamaClient.new)
-      else
+      when :cloud
         LocalExtraction::QwenSemanticAdapter.new(
           client: RemoteVision::GeminiClient.new,
           provider_id: RemoteVision::GeminiClient::PROVIDER,
@@ -62,11 +70,20 @@ module Extraction
       end
     end
 
-    def self.local_provider_requested?
-      LOCAL_PROVIDER_VALUES.include?(ENV["PARSY_EXTRACTION_PROVIDER"].to_s.strip.downcase)
+    # :invalid (any non-blank value that isn't a recognized cloud/local alias)
+    # falls through to nil rather than a client, on purpose: silently routing a
+    # typo'd config value to the cloud provider would spend real API calls the
+    # operator never intended.
+    def self.configured_provider
+      value = ENV["PARSY_EXTRACTION_PROVIDER"].to_s.strip.downcase
+      return :cloud if value.empty? || CLOUD_PROVIDER_VALUES.include?(value)
+      return :local if LOCAL_PROVIDER_VALUES.include?(value)
+
+      :invalid
     end
 
     def call
+      return record_failure(INVALID_PROVIDER, status: "failed") if route_composer.nil?
       return record_failure(SOURCE_UNAVAILABLE, status: "failed") unless source_bytes
 
       inspection = inspector.inspect_bytes(source_bytes, filename: source_filename, content_type: source_content_type)

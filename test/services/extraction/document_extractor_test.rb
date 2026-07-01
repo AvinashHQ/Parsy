@@ -246,9 +246,19 @@ module Extraction
       with_extraction_provider("LOCAL_OPEN_SOURCE") { assert_instance_of LocalExtraction::OllamaClient, DocumentExtractor.default_semantic_adapter.client }
     end
 
-    test "an unrecognized PARSY_EXTRACTION_PROVIDER value falls back to the documented cloud default" do
+    test "PARSY_EXTRACTION_PROVIDER=gemini and =cloud also select the cloud default explicitly" do
+      with_extraction_provider("gemini") { assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client }
+      with_extraction_provider("CLOUD") { assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client }
+    end
+
+    # #84's acceptance criterion: "unknown value fails safe with a clear error" —
+    # NOT silently routed to the cloud provider, which would spend real API
+    # calls on what is likely an operator typo.
+    test "an unrecognized PARSY_EXTRACTION_PROVIDER value is nil, not a silent guess" do
       with_extraction_provider("bogus") do
-        assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client
+        assert_equal :invalid, DocumentExtractor.configured_provider
+        assert_nil DocumentExtractor.default_semantic_adapter
+        assert_nil DocumentExtractor.default_route_composer
       end
     end
 
@@ -259,6 +269,20 @@ module Extraction
         assert_instance_of LocalExtraction::RouteComposer, composer
         assert_instance_of LocalExtraction::OllamaClient, composer.semantic_adapter.client
       end
+    end
+
+    test "an unrecognized provider fails a real document safely instead of guessing or crashing" do
+      tenant = Tenant.create!(name: "Invalid Provider Tenant", slug: "invalid-provider-#{SecureRandom.hex(4)}")
+      batch = tenant.review_batches.create!(name: "Invalid Provider Batch")
+      document = batch.documents.create!(source_sha256: "sha-invalid-provider", status: "needs_review", route: "visual_model")
+      document.source_file.attach(io: StringIO.new("%PDF-1.7\n%%EOF".b), filename: "invoice.pdf", content_type: "application/pdf")
+
+      with_extraction_provider("bogus") { DocumentExtractor.call(document: document) }
+
+      document.reload
+      assert_equal "failed", document.status
+      assert_equal DocumentExtractor::INVALID_PROVIDER, document.processing_provenance.dig("extraction", "error_code")
+      assert_equal 1, document.events.where(action: "extraction_failed").count
     end
 
     private

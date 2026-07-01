@@ -79,6 +79,7 @@ timeout 120 rbenv exec ruby bin/rails test test/services/intake/upload_inspector
 ```bash
 rbenv local 3.4.8
 bundle install
+cp .env.example .env
 bin/rails db:prepare
 ```
 
@@ -87,6 +88,16 @@ If `bin/rails` resolves to the macOS system Ruby, run Rails commands through rbe
 ```bash
 RBENV_VERSION=3.4.8 rbenv exec ruby bin/rails zeitwerk:check
 ```
+
+## Extraction provider (M4.5)
+
+`PARSY_EXTRACTION_PROVIDER` selects the semantic extraction backend (ADR-026):
+
+- Unset, `gemini`, or `cloud` — Google Gemini, the MVP default. Requires `GEMINI_API_KEY` (see `.env.example`); read from ENV only, never committed or logged.
+- `ollama`, `local`, or `local_open_source` — the local `qwen3-vl:4b` fallback via Ollama.
+- Any other value fails safe (`Extraction::DocumentExtractor::INVALID_PROVIDER`) rather than silently guessing a provider.
+
+`bin/dev` loads `.env` automatically via foreman; `bin/rails console`/`runner`/`test` need the `dotenv-rails` gem (already a dependency) or the variables exported in your shell.
 
 ## Create a local operator
 
