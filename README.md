@@ -16,7 +16,8 @@ The active implementation source is `docs/invoice-parser-post-m2-5-final/`.
 | M2.5 — Open-source extraction upgrade | Complete | Local parser/semantic route/benchmark tests over the final synthetic corpus manifest |
 | M3 — Human review and safe acceptance | Complete | Review workflow, 50-document keyboard system flow, immutable approval, and approved-only export tests |
 | M4 — Security, privacy, reliability, deployment | Complete | Tenant isolation, private storage, purge, content-free logging, quota, restore, privacy, production config, upload-abuse, Brakeman, and dependency-audit gates |
-| M5 — Closed live MVP test | Planned | Requires real supervised pilot operating evidence |
+| M4.5 — Cloud extraction and database delivery | Planned | MVP pivot: cloud vision extraction (fixes the 0% schema-valid local model) + push approved invoices into an operator-configured external database. See `docs/invoice-parser-post-m2-5-final/docs/25_ZIP_TO_DB_MVP_PLAN.md` and GitHub milestone M4.5 |
+| M5 — Closed live MVP test | Planned | Pilots the M4.5 flow; requires M4.5 delivery, then real supervised pilot operating evidence |
 | M6 — First demanded regional capability | Deferred | Chosen only after M5 demand evidence |
 
 Boundary: M0-M2 include owner-declared/product evidence plus implemented regressions where present. M2.5-M4 are backed by current automated tests. Real production hosting, real customer corpus accuracy, and closed-pilot operating metrics remain M5 evidence, not M4 evidence.

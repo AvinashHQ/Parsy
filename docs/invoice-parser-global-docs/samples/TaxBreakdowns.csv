@@ -1,3 +1,0 @@
-tax_id,document_id,line_id,tax_type,component,jurisdiction_code,category_code,rate,taxable_amount,tax_amount,payable_effect,exemption_code,exemption_reason,reverse_charge,source_label
-tax_doc_1,doc_demo_global_0001,,VAT,,GB,S,20,1000.00,200.00,add,,,false,VAT 20%
-tax_line_1,doc_demo_global_0001,line_1,VAT,,GB,S,20,1000.00,200.00,add,,,false,VAT 20%
