@@ -13,17 +13,22 @@ module Extraction
   class DocumentExtractor
     EXTRACTION_ERROR = "EXTRACTION_ERROR"
     SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
+    IMAGE_MIME_TYPES = %w[image/jpeg image/png].freeze
 
     def self.call(document:, **options)
       new(document:, **options).call
     end
 
     def initialize(document:, actor: "system", inspector: Intake::UploadInspector.new,
-                   pdf_parser: LocalExtraction::DigitalPdfParser.new, route_composer: nil)
+                   pdf_parser: LocalExtraction::DigitalPdfParser.new,
+                   ocr_adapter: LocalExtraction::OcrEvidenceAdapter.new(client: LocalExtraction::GlmOcrClient.new),
+                   pdf_rasterizer: LocalExtraction::PdfRasterizer.new, route_composer: nil)
       @document = document
       @actor = actor
       @inspector = inspector
       @pdf_parser = pdf_parser
+      @ocr_adapter = ocr_adapter
+      @pdf_rasterizer = pdf_rasterizer
       @route_composer = route_composer || self.class.default_route_composer
     end
 
@@ -37,7 +42,14 @@ module Extraction
       return record_failure(SOURCE_UNAVAILABLE, status: "failed") unless source_bytes
 
       inspection = inspector.inspect_bytes(source_bytes, filename: source_filename, content_type: source_content_type)
-      result = route_composer.call(inspection:, parser_output: parser_output(inspection), ocr_output: {})
+      parser_result = parser_output(inspection)
+      image_bytes = visual_bytes(inspection, parser_result)
+      result = route_composer.call(
+        inspection:,
+        parser_output: parser_result,
+        ocr_output: ocr_output(image_bytes),
+        images_bytes: image_bytes ? [ image_bytes ] : []
+      )
 
       if result.success?
         ingest_candidate(result, inspection)
@@ -51,7 +63,7 @@ module Extraction
 
     private
 
-    attr_reader :document, :actor, :inspector, :pdf_parser, :route_composer
+    attr_reader :document, :actor, :inspector, :pdf_parser, :ocr_adapter, :pdf_rasterizer, :route_composer
 
     def ingest_candidate(result, inspection)
       original_route = document.route
@@ -111,6 +123,38 @@ module Extraction
       end
       {
         "version" => LocalExtraction::DigitalPdfParser::VERSION,
+        "page_count" => pages.size,
+        "pages" => pages,
+        "text" => pages.map { |page| page["text"] }.reject(&:blank?).join("\n")
+      }
+    rescue StandardError
+      {}
+    end
+
+    # Raw page bytes for the OCR/vision stage. A raster image is used as-is;
+    # a PDF is rasterized only when it has no usable digital text (a
+    # genuinely scanned/photographed document) so a digital PDF that already
+    # parsed cleanly doesn't pay for an extra OCR+vision round trip.
+    def visual_bytes(inspection, parser_result)
+      case inspection.sniffed_mime_type
+      when *IMAGE_MIME_TYPES
+        source_bytes
+      when "application/pdf"
+        parser_result["text"].present? ? nil : pdf_rasterizer.call(bytes: source_bytes)
+      end
+    end
+
+    def ocr_output(image_bytes)
+      return {} unless image_bytes
+
+      result = ocr_adapter.call(bytes: image_bytes)
+      return {} unless result.accepted?
+
+      pages = Array(result.document&.pages).map do |page|
+        { "number" => page.number, "text" => page_text(page) }
+      end
+      {
+        "version" => LocalExtraction::OcrEvidenceAdapter::VERSION,
         "page_count" => pages.size,
         "pages" => pages,
         "text" => pages.map { |page| page["text"] }.reject(&:blank?).join("\n")

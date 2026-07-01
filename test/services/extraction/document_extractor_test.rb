@@ -13,12 +13,52 @@ module Extraction
     # RouteComposer -> QwenSemanticAdapter -> ProviderAdapter path runs
     # deterministically without a live model.
     class FixtureClient
+      attr_reader :requests
+
       def initialize(json_text:)
         @json_text = json_text
+        @requests = []
       end
 
-      def extract_invoice(_request) = { json_text: @json_text, metadata: { latency_ms: 12 } }
+      def extract_invoice(request)
+        @requests << request
+        { json_text: @json_text, metadata: { latency_ms: 12 } }
+      end
+
       def repair_invoice(_request) = { patch: {} }
+    end
+
+    # Stand-in for the OCR boundary client (LocalExtraction::GlmOcrClient in
+    # production): records the bytes it was asked to OCR and returns canned text.
+    class FixtureOcrClient
+      attr_reader :calls
+
+      def initialize(text:)
+        @text = text
+        @calls = []
+      end
+
+      def call(bytes:, metadata: {}, options: {})
+        @calls << bytes
+        { pages: [ { number: 1, text: @text } ] }
+      end
+    end
+
+    # Stand-in for LocalExtraction::PdfRasterizer: records the bytes it was
+    # asked to rasterize and returns canned PNG-shaped output without shelling
+    # out to python3/pymupdf.
+    class FixtureRasterizer
+      attr_reader :calls
+
+      def initialize(image_bytes:)
+        @image_bytes = image_bytes
+        @calls = []
+      end
+
+      def call(bytes:)
+        @calls << bytes
+        @image_bytes
+      end
     end
 
     setup do
@@ -29,7 +69,7 @@ module Extraction
     test "successful extraction creates a candidate revision and populates the review record" do
       document = document_with_source("sha-success")
 
-      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer(canonical_json))
+      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer(canonical_json), **no_visual_content)
 
       document.reload
       assert document.current_revision.present?, "expected a candidate revision"
@@ -41,7 +81,7 @@ module Extraction
     test "schema-invalid model output degrades to needs_review without nuking the document" do
       document = document_with_source("sha-schema-invalid")
 
-      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer("{}"))
+      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer("{}"), **no_visual_content)
 
       document.reload
       assert_nil document.current_revision
@@ -56,7 +96,7 @@ module Extraction
       exploding = Object.new
       def exploding.call(**) = raise "model exploded"
 
-      Extraction::DocumentExtractor.call(document: document, route_composer: exploding)
+      Extraction::DocumentExtractor.call(document: document, route_composer: exploding, **no_visual_content)
 
       document.reload
       assert_nil document.current_revision
@@ -68,19 +108,102 @@ module Extraction
     test "missing source file fails safely" do
       document = @batch.documents.create!(source_sha256: "sha-no-source", status: "needs_review", route: "visual_model")
 
-      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer(canonical_json))
+      Extraction::DocumentExtractor.call(document: document, route_composer: fixture_composer(canonical_json), **no_visual_content)
 
       document.reload
       assert_equal "failed", document.status
       assert_equal "SOURCE_UNAVAILABLE", document.processing_provenance.dig("extraction", "error_code")
     end
 
+    test "raw image upload runs OCR and forwards the page image to the semantic client" do
+      image_bytes = "\x89PNG\r\n\x1A\n".b + ("fake-png-body" * 4).b
+      document = @batch.documents.create!(source_sha256: "sha-image", status: "needs_review", route: "visual_model", source_format_family: "image")
+      document.source_file.attach(io: StringIO.new(image_bytes), filename: "invoice.png", content_type: "image/png")
+
+      semantic_client = FixtureClient.new(json_text: canonical_json)
+      ocr_client = FixtureOcrClient.new(text: "OCR'd invoice text")
+      rasterizer = FixtureRasterizer.new(image_bytes: nil)
+
+      Extraction::DocumentExtractor.call(
+        document: document,
+        route_composer: LocalExtraction::RouteComposer.new(
+          semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: semantic_client)
+        ),
+        ocr_adapter: LocalExtraction::OcrEvidenceAdapter.new(client: ocr_client),
+        pdf_rasterizer: rasterizer
+      )
+
+      assert_equal [ image_bytes ], ocr_client.calls, "a raw image upload should be OCR'd directly without rasterization"
+      assert_empty rasterizer.calls, "rasterization is only for PDFs"
+
+      request = semantic_client.requests.first
+      assert_equal [ image_bytes ], request.fetch(:images_bytes), "the semantic client should receive the page image bytes"
+      assert_includes request.fetch(:ocr_output).fetch(:pages).first.fetch(:text), "OCR'd invoice text"
+    end
+
+    test "scanned PDF with no digital text is rasterized and OCR'd" do
+      document = document_with_source("sha-scanned-pdf")
+      rasterized_png = "\x89PNG\r\n\x1A\n".b + ("rendered-page".b * 4)
+
+      semantic_client = FixtureClient.new(json_text: canonical_json)
+      ocr_client = FixtureOcrClient.new(text: "scanned page text")
+      rasterizer = FixtureRasterizer.new(image_bytes: rasterized_png)
+
+      Extraction::DocumentExtractor.call(
+        document: document,
+        route_composer: LocalExtraction::RouteComposer.new(
+          semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: semantic_client)
+        ),
+        ocr_adapter: LocalExtraction::OcrEvidenceAdapter.new(client: ocr_client),
+        pdf_rasterizer: rasterizer
+      )
+
+      assert_equal [ PDF_BYTES ], rasterizer.calls, "a PDF with no digital text layer must be rasterized"
+      assert_equal [ rasterized_png ], ocr_client.calls, "the rasterized page should be sent to OCR"
+      assert_equal [ rasterized_png ], semantic_client.requests.first.fetch(:images_bytes)
+    end
+
+    test "digital PDF with extractable text skips rasterization and OCR" do
+      document = document_with_source("sha-digital-pdf", bytes: digital_pdf_bytes)
+
+      semantic_client = FixtureClient.new(json_text: canonical_json)
+      ocr_client = FixtureOcrClient.new(text: "should not be called")
+      rasterizer = FixtureRasterizer.new(image_bytes: "should not be called")
+
+      Extraction::DocumentExtractor.call(
+        document: document,
+        route_composer: LocalExtraction::RouteComposer.new(
+          semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: semantic_client)
+        ),
+        ocr_adapter: LocalExtraction::OcrEvidenceAdapter.new(client: ocr_client),
+        pdf_rasterizer: rasterizer
+      )
+
+      assert_empty rasterizer.calls, "a digital PDF with a usable text layer should not be rasterized"
+      assert_empty ocr_client.calls
+      assert_empty semantic_client.requests.first.fetch(:images_bytes)
+    end
+
     private
 
-    def document_with_source(sha)
+    def document_with_source(sha, bytes: PDF_BYTES)
       document = @batch.documents.create!(source_sha256: sha, status: "needs_review", route: "visual_model", source_format_family: "visual_pdf")
-      document.source_file.attach(io: StringIO.new(PDF_BYTES), filename: "invoice.pdf", content_type: "application/pdf")
+      document.source_file.attach(io: StringIO.new(bytes), filename: "invoice.pdf", content_type: "application/pdf")
       document
+    end
+
+    # PDF_BYTES has no Tj/TJ text-showing operators, so DigitalPdfParser
+    # reports SCANNED_PDF_REQUIRES_OCR for it; this fixture instead carries a
+    # minimal real text-showing operator so the digital-text path is exercised.
+    def digital_pdf_bytes
+      "%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\nBT (Northstar Invoice INV-1) Tj ET\n%%EOF".b
+    end
+
+    # Tests that only care about the schema/status outcome, not the visual
+    # pipeline, opt out of rasterization/OCR so they stay hermetic (no python3
+    # subprocess, no Ollama network call).
+    def no_visual_content
+      { ocr_adapter: LocalExtraction::OcrEvidenceAdapter.new(client: FixtureOcrClient.new(text: "")), pdf_rasterizer: FixtureRasterizer.new(image_bytes: nil) }
     end
 
     def fixture_composer(json_text)
