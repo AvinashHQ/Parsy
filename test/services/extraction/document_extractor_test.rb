@@ -216,4 +216,59 @@ module Extraction
       JSON.generate(JSON.parse(FIXTURE_PATH.read))
     end
   end
+
+  # ADR-026 provider selection: PARSY_EXTRACTION_PROVIDER picks the semantic
+  # client the default route composer wires up. Only inspects the constructed
+  # adapter's client/provider_id/model — never calls out to a real API.
+  class DocumentExtractorProviderSelectionTest < ActiveSupport::TestCase
+    test "unset PARSY_EXTRACTION_PROVIDER selects the Gemini cloud default" do
+      with_extraction_provider(nil) do
+        adapter = DocumentExtractor.default_semantic_adapter
+
+        assert_instance_of RemoteVision::GeminiClient, adapter.client
+        assert_equal RemoteVision::GeminiClient::PROVIDER, adapter.provider_id
+        assert_equal RemoteVision::GeminiClient::DEFAULT_MODEL, adapter.model
+      end
+    end
+
+    test "PARSY_EXTRACTION_PROVIDER=ollama selects the local fallback" do
+      with_extraction_provider("ollama") do
+        adapter = DocumentExtractor.default_semantic_adapter
+
+        assert_instance_of LocalExtraction::OllamaClient, adapter.client
+        assert_equal "local_open_source", adapter.provider_id
+        assert_equal "qwen3-vl:4b", adapter.model
+      end
+    end
+
+    test "PARSY_EXTRACTION_PROVIDER=local and =LOCAL_OPEN_SOURCE also select the local fallback" do
+      with_extraction_provider("local") { assert_instance_of LocalExtraction::OllamaClient, DocumentExtractor.default_semantic_adapter.client }
+      with_extraction_provider("LOCAL_OPEN_SOURCE") { assert_instance_of LocalExtraction::OllamaClient, DocumentExtractor.default_semantic_adapter.client }
+    end
+
+    test "an unrecognized PARSY_EXTRACTION_PROVIDER value falls back to the documented cloud default" do
+      with_extraction_provider("bogus") do
+        assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client
+      end
+    end
+
+    test "default_route_composer wraps the selected adapter in a RouteComposer" do
+      with_extraction_provider("ollama") do
+        composer = DocumentExtractor.default_route_composer
+
+        assert_instance_of LocalExtraction::RouteComposer, composer
+        assert_instance_of LocalExtraction::OllamaClient, composer.semantic_adapter.client
+      end
+    end
+
+    private
+
+    def with_extraction_provider(value)
+      original = ENV["PARSY_EXTRACTION_PROVIDER"]
+      value.nil? ? ENV.delete("PARSY_EXTRACTION_PROVIDER") : ENV["PARSY_EXTRACTION_PROVIDER"] = value
+      yield
+    ensure
+      original.nil? ? ENV.delete("PARSY_EXTRACTION_PROVIDER") : ENV["PARSY_EXTRACTION_PROVIDER"] = original
+    end
+  end
 end

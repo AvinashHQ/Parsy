@@ -14,6 +14,11 @@ module Extraction
     EXTRACTION_ERROR = "EXTRACTION_ERROR"
     SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
     IMAGE_MIME_TYPES = %w[image/jpeg image/png].freeze
+    # PARSY_EXTRACTION_PROVIDER values that opt into the local fallback (ADR-026);
+    # anything else (including unset) selects the cloud default.
+    LOCAL_PROVIDER_VALUES = %w[ollama local local_open_source].freeze
+    CLOUD_PROVIDER_VERSION = "gemini-cloud-v1"
+    CLOUD_PROVIDER_TIMEOUT_MS = 120_000
 
     def self.call(document:, **options)
       new(document:, **options).call
@@ -33,9 +38,32 @@ module Extraction
     end
 
     def self.default_route_composer
-      LocalExtraction::RouteComposer.new(
-        semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: LocalExtraction::OllamaClient.new)
-      )
+      LocalExtraction::RouteComposer.new(semantic_adapter: default_semantic_adapter)
+    end
+
+    # ADR-026: Google Gemini (cloud) is the MVP default; PARSY_EXTRACTION_PROVIDER
+    # opts into the local qwen3-vl/Ollama fallback. Both routes reuse
+    # LocalExtraction::QwenSemanticAdapter's idempotency/repair/provenance
+    # machinery — see that class for why a cloud client fits the same adapter.
+    def self.default_semantic_adapter
+      if local_provider_requested?
+        LocalExtraction::QwenSemanticAdapter.new(client: LocalExtraction::OllamaClient.new)
+      else
+        LocalExtraction::QwenSemanticAdapter.new(
+          client: RemoteVision::GeminiClient.new,
+          provider_id: RemoteVision::GeminiClient::PROVIDER,
+          provider_version: CLOUD_PROVIDER_VERSION,
+          model: RemoteVision::GeminiClient::DEFAULT_MODEL,
+          runtime: "gemini_cloud",
+          quantization: "n/a",
+          device: "managed_cloud",
+          timeout_ms: CLOUD_PROVIDER_TIMEOUT_MS
+        )
+      end
+    end
+
+    def self.local_provider_requested?
+      LOCAL_PROVIDER_VALUES.include?(ENV["PARSY_EXTRACTION_PROVIDER"].to_s.strip.downcase)
     end
 
     def call
