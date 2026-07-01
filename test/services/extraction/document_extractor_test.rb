@@ -216,4 +216,108 @@ module Extraction
       JSON.generate(JSON.parse(FIXTURE_PATH.read))
     end
   end
+
+  # ADR-026 provider selection: PARSY_EXTRACTION_PROVIDER picks the semantic
+  # client the default route composer wires up. Only inspects the constructed
+  # adapter's client/provider_id/model — never calls out to a real API.
+  class DocumentExtractorProviderSelectionTest < ActiveSupport::TestCase
+    test "unset PARSY_EXTRACTION_PROVIDER selects the Gemini cloud default" do
+      with_extraction_provider(nil) do
+        adapter = DocumentExtractor.default_semantic_adapter
+
+        assert_instance_of RemoteVision::GeminiClient, adapter.client
+        assert_equal RemoteVision::GeminiClient::PROVIDER, adapter.provider_id
+        assert_equal RemoteVision::GeminiClient::DEFAULT_MODEL, adapter.model
+      end
+    end
+
+    test "PARSY_EXTRACTION_PROVIDER=ollama selects the local fallback" do
+      with_extraction_provider("ollama") do
+        adapter = DocumentExtractor.default_semantic_adapter
+
+        assert_instance_of LocalExtraction::OllamaClient, adapter.client
+        assert_equal "local_open_source", adapter.provider_id
+        assert_equal "qwen3-vl:4b", adapter.model
+      end
+    end
+
+    test "PARSY_EXTRACTION_PROVIDER=local and =LOCAL_OPEN_SOURCE also select the local fallback" do
+      with_extraction_provider("local") { assert_instance_of LocalExtraction::OllamaClient, DocumentExtractor.default_semantic_adapter.client }
+      with_extraction_provider("LOCAL_OPEN_SOURCE") { assert_instance_of LocalExtraction::OllamaClient, DocumentExtractor.default_semantic_adapter.client }
+    end
+
+    test "PARSY_EXTRACTION_PROVIDER=gemini and =cloud also select the cloud default explicitly" do
+      with_extraction_provider("gemini") { assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client }
+      with_extraction_provider("CLOUD") { assert_instance_of RemoteVision::GeminiClient, DocumentExtractor.default_semantic_adapter.client }
+    end
+
+    # #84's acceptance criterion: "unknown value fails safe with a clear error" —
+    # NOT silently routed to the cloud provider, which would spend real API
+    # calls on what is likely an operator typo.
+    test "an unrecognized PARSY_EXTRACTION_PROVIDER value is nil, not a silent guess" do
+      with_extraction_provider("bogus") do
+        assert_equal :invalid, DocumentExtractor.configured_provider
+        assert_nil DocumentExtractor.default_semantic_adapter
+        assert_nil DocumentExtractor.default_route_composer
+      end
+    end
+
+    test "default_route_composer wraps the selected adapter in a RouteComposer" do
+      with_extraction_provider("ollama") do
+        composer = DocumentExtractor.default_route_composer
+
+        assert_instance_of LocalExtraction::RouteComposer, composer
+        assert_instance_of LocalExtraction::OllamaClient, composer.semantic_adapter.client
+      end
+    end
+
+    test "an unrecognized provider fails a real document safely instead of guessing or crashing" do
+      tenant = Tenant.create!(name: "Invalid Provider Tenant", slug: "invalid-provider-#{SecureRandom.hex(4)}")
+      batch = tenant.review_batches.create!(name: "Invalid Provider Batch")
+      document = batch.documents.create!(source_sha256: "sha-invalid-provider", status: "needs_review", route: "visual_model")
+      document.source_file.attach(io: StringIO.new("%PDF-1.7\n%%EOF".b), filename: "invoice.pdf", content_type: "application/pdf")
+
+      with_extraction_provider("bogus") { DocumentExtractor.call(document: document) }
+
+      document.reload
+      assert_equal "failed", document.status
+      assert_equal DocumentExtractor::INVALID_PROVIDER, document.processing_provenance.dig("extraction", "error_code")
+      assert_equal 1, document.events.where(action: "extraction_failed").count
+    end
+
+    # #84's other acceptance criterion: "Missing key produces a safe failure,
+    # not a crash or a leak." RemoteVision::GeminiClient::MissingApiKey isn't
+    # rescued by QwenSemanticAdapter#extract, so it must propagate up to
+    # DocumentExtractor#call's own StandardError rescue (MissingApiKey < GenerationError
+    # < StandardError) to degrade safely instead of crashing ProcessDocumentJob.
+    # Real GeminiClient with a blank key — fails closed before any network call.
+    test "a missing GEMINI_API_KEY fails the document safely instead of crashing the job" do
+      tenant = Tenant.create!(name: "Missing Key Tenant", slug: "missing-key-#{SecureRandom.hex(4)}")
+      batch = tenant.review_batches.create!(name: "Missing Key Batch")
+      document = batch.documents.create!(source_sha256: "sha-missing-key", status: "needs_review", route: "visual_model")
+      document.source_file.attach(io: StringIO.new("%PDF-1.7\nBT (text) Tj ET\n%%EOF".b), filename: "invoice.pdf", content_type: "application/pdf")
+
+      route_composer = LocalExtraction::RouteComposer.new(
+        semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: RemoteVision::GeminiClient.new(api_key: ""))
+      )
+
+      assert_nothing_raised { DocumentExtractor.call(document: document, route_composer: route_composer) }
+
+      document.reload
+      assert_equal "failed", document.status
+      serialized = document.processing_provenance.to_s
+      refute_includes serialized, "api_key"
+      assert_equal 1, document.events.where(action: "extraction_failed").count
+    end
+
+    private
+
+    def with_extraction_provider(value)
+      original = ENV["PARSY_EXTRACTION_PROVIDER"]
+      value.nil? ? ENV.delete("PARSY_EXTRACTION_PROVIDER") : ENV["PARSY_EXTRACTION_PROVIDER"] = value
+      yield
+    ensure
+      original.nil? ? ENV.delete("PARSY_EXTRACTION_PROVIDER") : ENV["PARSY_EXTRACTION_PROVIDER"] = original
+    end
+  end
 end

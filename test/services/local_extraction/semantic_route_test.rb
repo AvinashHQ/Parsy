@@ -81,6 +81,31 @@ module LocalExtraction
       refute_includes provenance.to_s, "confidence"
     end
 
+    test "provider_id/model/provider_version are configurable so a cloud client can reuse this adapter" do
+      client = FixtureClient.new(json_text: valid_json, metadata: { latency_ms: 22 })
+      adapter = QwenSemanticAdapter.new(
+        client:,
+        provider_id: "google_gemini",
+        model: "gemini-2.5-flash",
+        provider_version: "gemini-cloud-v1",
+        runtime: "gemini_cloud",
+        quantization: "n/a",
+        device: "managed_cloud"
+      )
+      result = RouteComposer.new(semantic_adapter: adapter).call(inspection:, parser_output:, ocr_output:)
+
+      assert result.success?
+      attempt = result.attempts.fetch(0)
+      assert_equal "google_gemini", attempt.provider
+      assert_equal "gemini-2.5-flash", attempt.model
+      assert_equal "gemini-2.5-flash", result.provenance.fetch(:model)
+      assert_equal "gemini_cloud", result.provenance.fetch(:runtime)
+      assert_equal "n/a", result.provenance.fetch(:quantization)
+      assert_equal "managed_cloud", result.provenance.fetch(:device)
+      # the shared prompt (field contract + worked example) is provider-independent
+      assert_equal QwenSemanticAdapter::PROMPT_SHA256, client.extract_requests.first.fetch(:prompt_sha256)
+    end
+
     test "schema invalid fixture is explicit schema error and ignores model confidence" do
       attributes = valid_attributes
       attributes.delete("document_type")

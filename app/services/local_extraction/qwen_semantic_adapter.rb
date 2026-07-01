@@ -5,6 +5,14 @@ require "json"
 require "timeout"
 
 module LocalExtraction
+  # Idempotency, repair, provenance, and SafeFailure-mapping machinery shared by
+  # every vision provider. Named for the first (local Qwen3-VL/Ollama) route it
+  # served; provider_id/model/provider_version/runtime/quantization/device are
+  # instance-configurable (defaults preserve that original behavior unchanged),
+  # so RemoteVision::GeminiClient reuses this same class for the cloud route
+  # (ADR-026) rather than duplicating this logic. See
+  # Extraction::DocumentExtractor.default_semantic_adapter for the construction
+  # site that picks between them.
   class QwenSemanticAdapter
     PROMPT_ID = "local_qwen3_vl_invoice_v2"
 
@@ -357,14 +365,18 @@ module LocalExtraction
       end
     end
 
-    attr_reader :client, :cache, :model_revision, :quantization, :runtime, :device, :timeout_ms,
-                :deterministic_settings
+    attr_reader :client, :cache, :provider_id, :model, :model_revision, :quantization, :runtime, :device,
+                :timeout_ms, :deterministic_settings
 
-    def initialize(client:, cache: {}, provider_adapter: nil, model_revision: DEFAULT_MODEL_REVISION,
+    def initialize(client:, cache: {}, provider_adapter: nil, provider_id: PROVIDER_ID, model: MODEL,
+                   provider_version: PROVIDER_VERSION, model_revision: DEFAULT_MODEL_REVISION,
                    quantization: DEFAULT_QUANTIZATION, runtime: DEFAULT_RUNTIME, device: DEFAULT_DEVICE,
                    timeout_ms: DEFAULT_TIMEOUT_MS, deterministic_settings: {})
       @client = client
       @cache = cache
+      @provider_id = provider_id.to_s
+      @model = model.to_s
+      @provider_version_prefix = provider_version.to_s
       @model_revision = model_revision.to_s
       @quantization = quantization.to_s
       @runtime = runtime.to_s
@@ -498,8 +510,8 @@ module LocalExtraction
         schema_version: Canonical::Invoice::SCHEMA_VERSION,
         prompt_id: PROMPT_ID,
         prompt: PROMPT,
-        provider_id: PROVIDER_ID,
-        model: MODEL,
+        provider_id: provider_id,
+        model: model,
         model_version: model_revision,
         route_profile_version: route_profile_version(context),
         region_pack_version: context[:detection_version],
@@ -532,7 +544,7 @@ module LocalExtraction
         images_bytes: request[:images_bytes] || [],
         deterministic_settings: deterministic_settings,
         timeout_ms: timeout_ms,
-        model: MODEL,
+        model: model,
         model_revision: model_revision,
         quantization: quantization,
         runtime: runtime,
@@ -559,7 +571,7 @@ module LocalExtraction
         schema_error_types: result.attempts.last&.schema_error_types || [],
         deterministic_settings: deterministic_settings,
         timeout_ms: timeout_ms,
-        model: MODEL,
+        model: model,
         model_revision: model_revision,
         quantization: quantization,
         runtime: runtime,
@@ -650,7 +662,7 @@ module LocalExtraction
           page_count: context[:page_count],
           parser_version: context[:parser_version],
           ocr_version: context[:ocr_version],
-          model: MODEL,
+          model: model,
           model_revision: model_revision,
           quantization: quantization,
           runtime: runtime,
@@ -670,7 +682,7 @@ module LocalExtraction
     def client_metadata(metadata, latency_ms:)
       SafeFailure.content_free(metadata).merge(
         provider_version: provider_version,
-        model: MODEL,
+        model: model,
         model_version: model_revision,
         latency_ms: latency_ms,
         model_revision: model_revision,
@@ -710,7 +722,7 @@ module LocalExtraction
     end
 
     def provider_version
-      [ PROVIDER_VERSION, runtime, quantization ].join("/")
+      [ @provider_version_prefix, runtime, quantization ].join("/")
     end
 
     def route_profile_version(context)
