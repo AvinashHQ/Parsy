@@ -27,7 +27,7 @@ module Evaluation
   class LLMBenchmark
     MANIFEST_PATH = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
     CORPUS_ROOT = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus")
-    CSV_HEADERS = %w[fixture_id expected_route schema_valid fields_matched fields_total accuracy latency_ms error_code].freeze
+    CSV_HEADERS = %w[fixture_id expected_route expected_status result_status schema_valid fields_matched fields_total accuracy latency_ms memory_kb error_code].freeze
 
     FIELDS = [
       { pointer: "/document_type", comparison: "exact" },
@@ -39,21 +39,27 @@ module Evaluation
       { pointer: "/totals/tax_amount", comparison: "decimal" }
     ].freeze
 
-    SUBSET = %w[INV-001 INV-002 INV-003 INV-014 INV-016 IMG-001 IMG-002 IMG-003 HYB-001].freeze
-
-    def initialize(models:)
+    def initialize(models:, fixture_ids: nil)
       @models = models
+      @fixture_ids = fixture_ids
       @inspector = Intake::UploadInspector.new
       @ocr_client = LocalExtraction::GlmOcrClient.new
       @rasterizer = LocalExtraction::PdfRasterizer.new
     end
 
+    # Runs every fixture in the manifest (or just `fixture_ids`, if given —
+    # useful for a quick smoke test before a full multi-hour run). The 4
+    # fixtures with no ground_truth (BAD-001/002/003, XML-002) are
+    # unsafe/unsupported-input negatives with no "correct extraction" to
+    # score against; they still run end-to-end so the failure/quarantine
+    # behavior of the real Intake::UploadInspector is exercised and
+    # reported, just without field-level scoring.
     def run
       manifest_rows = CSV.read(MANIFEST_PATH, headers: true).map(&:to_h)
-      scored_rows = manifest_rows.select { |row| row["ground_truth"].present? && SUBSET.include?(row["fixture_id"]) }
+      manifest_rows = manifest_rows.select { |row| @fixture_ids.include?(row.fetch("fixture_id")) } if @fixture_ids
 
-      puts "Preparing #{scored_rows.length} fixture inputs (real pypdf text + real glm-ocr OCR/vision bytes, shared across models)..."
-      prepared = scored_rows.to_h { |row| [ row.fetch("fixture_id"), prepare_fixture(row) ] }
+      puts "Preparing #{manifest_rows.length} fixture inputs (real pypdf text + real glm-ocr OCR/vision bytes, shared across models)..."
+      prepared = manifest_rows.to_h { |row| [ row.fetch("fixture_id"), prepare_fixture(row) ] }
 
       results = {}
       @models.each do |model|
@@ -65,13 +71,14 @@ module Evaluation
         FileUtils.mkdir_p(File.dirname(csv_path))
         CSV.open(csv_path, "w") { |csv| csv << CSV_HEADERS }
 
-        scored_rows.each do |row|
+        manifest_rows.each do |row|
           fixture_id = row.fetch("fixture_id")
           puts "Processing #{fixture_id}..."
           score = run_fixture(prepared.fetch(fixture_id), route_composer)
           puts "  Schema errors: #{score['schema_errors'].join(', ')}" if score["schema_errors"]&.any?
           score["fixture_id"] = fixture_id
           score["expected_route"] = row.fetch("expected_route")
+          score["expected_status"] = row.fetch("expected_status")
           model_results << score
           append_to_report(csv_path, score)
         end
@@ -96,20 +103,23 @@ module Evaluation
     def prepare_fixture(row)
       file_rel = row.fetch("file")
       full_path = CORPUS_ROOT.join(file_rel)
-      gt_path = CORPUS_ROOT.join(row.fetch("ground_truth"))
       bytes = full_path.binread
 
       inspection = @inspector.inspect_bytes(bytes, filename: File.basename(file_rel), content_type: nil)
       parser_result = parser_output(inspection, full_path)
       image_bytes = visual_bytes(inspection, parser_result, bytes)
+      # ground_truth is blank (CSV parses it as nil) for the 4 unsafe/
+      # unsupported-input negative fixtures — they have no "correct
+      # extraction" to compare against.
+      expected = row["ground_truth"].present? ? JSON.parse(CORPUS_ROOT.join(row["ground_truth"]).read) : nil
 
-      { inspection:, parser_result:, ocr_result: ocr_output(image_bytes), image_bytes:, expected: JSON.parse(gt_path.read) }
+      { inspection:, parser_result:, ocr_result: ocr_output(image_bytes), image_bytes:, expected: }
     rescue StandardError => e
       { error: "PREP_ERROR: #{e.class}: #{e.message}" }
     end
 
     def run_fixture(inputs, route_composer)
-      return score_result(nil, nil, inputs[:error], 0) if inputs[:error]
+      return score_result(nil, nil, inputs[:error], 0).merge("memory_kb" => LocalExtraction::DigitalPdfParser.current_memory_kb) if inputs[:error]
 
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       result = nil
@@ -125,8 +135,11 @@ module Evaluation
         error_code = "BENCHMARK_HARNESS_ERROR: #{e.class}: #{e.message}"
       end
       latency_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round
+      # Point-in-time RSS taken right after the call, not a continuous sample
+      # during it, so this is a lower bound on peak memory, not the true peak.
+      memory_kb = LocalExtraction::DigitalPdfParser.current_memory_kb
 
-      score_result(inputs[:expected], result, error_code, latency_ms)
+      score_result(inputs[:expected], result, error_code, latency_ms).merge("memory_kb" => memory_kb)
     end
 
     # Mirrors Extraction::DocumentExtractor#parser_output: only a digital PDF
@@ -168,22 +181,34 @@ module Evaluation
       status.success? ? stdout : ""
     end
 
+    # `expected` (ground truth) is nil for the 4 unsafe/unsupported-input
+    # fixtures (BAD-001/002/003, XML-002) — those still produce a real
+    # result (quarantined/unsupported_route) that must be scored on its own
+    # terms (schema_valid/status/error_code), just without a FIELDS diff.
+    # Forcing schema_valid to false whenever there's no ground truth would
+    # misreport every one of those fixtures as a model failure even when the
+    # pipeline did exactly what it should.
     def score_result(expected, result, error_code, latency_ms)
       out = {
         "schema_valid" => false,
+        "status" => "harness_error",
         "error_code" => error_code,
         "latency_ms" => latency_ms,
         "fields_matched" => 0,
-        "fields_total" => FIELDS.length,
+        "fields_total" => 0,
         "details" => {}
       }
-      return out if error_code || result.nil? || expected.nil?
+      return out if error_code || result.nil?
 
       out["schema_valid"] = result.success?
+      out["status"] = result.status
       out["error_code"] = result.error_code
       out["schema_errors"] = result.success? ? [] : Array(result.failure&.metadata&.dig(:schema_error_types)).map(&:to_s)
 
+      return out if expected.nil?
+
       actual = result.success? ? result.attributes : result.provider_result&.attributes
+      out["fields_total"] = FIELDS.length
       matched_count = 0
 
       FIELDS.each do |spec|
@@ -240,11 +265,14 @@ module Evaluation
     end
 
     def append_to_report(csv_path, r)
-      accuracy = r["fields_total"].zero? ? 0.0 : (r["fields_matched"].to_f / r["fields_total"])
+      # nil (blank in the CSV), not 0.0, when there's no ground truth to
+      # score against — "not applicable" must stay distinguishable from "0%
+      # accurate" for the 4 unsafe/unsupported-input fixtures.
+      accuracy = r["fields_total"].zero? ? nil : (r["fields_matched"].to_f / r["fields_total"]).round(4)
       CSV.open(csv_path, "a") do |csv|
         csv << [
-          r["fixture_id"], r["expected_route"], r["schema_valid"], r["fields_matched"], r["fields_total"],
-          accuracy.round(4), r["latency_ms"], r["error_code"]
+          r["fixture_id"], r["expected_route"], r["expected_status"], r["status"], r["schema_valid"],
+          r["fields_matched"], r["fields_total"], accuracy, r["latency_ms"], r["memory_kb"], r["error_code"]
         ]
       end
     end
