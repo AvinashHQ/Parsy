@@ -285,6 +285,31 @@ module Extraction
       assert_equal 1, document.events.where(action: "extraction_failed").count
     end
 
+    # #84's other acceptance criterion: "Missing key produces a safe failure,
+    # not a crash or a leak." RemoteVision::GeminiClient::MissingApiKey isn't
+    # rescued by QwenSemanticAdapter#extract, so it must propagate up to
+    # DocumentExtractor#call's own StandardError rescue (MissingApiKey < GenerationError
+    # < StandardError) to degrade safely instead of crashing ProcessDocumentJob.
+    # Real GeminiClient with a blank key — fails closed before any network call.
+    test "a missing GEMINI_API_KEY fails the document safely instead of crashing the job" do
+      tenant = Tenant.create!(name: "Missing Key Tenant", slug: "missing-key-#{SecureRandom.hex(4)}")
+      batch = tenant.review_batches.create!(name: "Missing Key Batch")
+      document = batch.documents.create!(source_sha256: "sha-missing-key", status: "needs_review", route: "visual_model")
+      document.source_file.attach(io: StringIO.new("%PDF-1.7\nBT (text) Tj ET\n%%EOF".b), filename: "invoice.pdf", content_type: "application/pdf")
+
+      route_composer = LocalExtraction::RouteComposer.new(
+        semantic_adapter: LocalExtraction::QwenSemanticAdapter.new(client: RemoteVision::GeminiClient.new(api_key: ""))
+      )
+
+      assert_nothing_raised { DocumentExtractor.call(document: document, route_composer: route_composer) }
+
+      document.reload
+      assert_equal "failed", document.status
+      serialized = document.processing_provenance.to_s
+      refute_includes serialized, "api_key"
+      assert_equal 1, document.events.where(action: "extraction_failed").count
+    end
+
     private
 
     def with_extraction_provider(value)
