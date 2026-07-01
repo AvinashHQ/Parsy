@@ -10,11 +10,11 @@ module LocalExtraction
       @semantic_adapter = semantic_adapter
     end
 
-    def call(inspection:, parser_output: {}, ocr_output: {})
+    def call(inspection:, parser_output: {}, ocr_output: {}, images_bytes: [])
       return failure_for_inspection(inspection) unless inspection.accepted?
       return unsupported_route(inspection) unless LOCAL_ROUTES.include?(inspection.route.to_s)
 
-      semantic_adapter.extract(inspection:, parser_output:, ocr_output:)
+      semantic_adapter.extract(inspection:, parser_output:, ocr_output:, images_bytes:)
     end
 
     def repair(result:, inspection:, allowed_paths:, parser_output: {}, ocr_output: {})

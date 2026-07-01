@@ -1,17 +1,39 @@
-registry_version: 1.0.0
-updated_at: 2026-06-29
+registry_version: 1.1.0
+updated_at: 2026-07-01
 models:
   - id: qwen3_vl_4b_instruct
     repository: Qwen/Qwen3-VL-4B-Instruct
     role: canonical_semantic_extractor
     license: Apache-2.0
     deployment: local_inference_service
-    runtime: mlx_vlm
-    runtime_version: pinned-in-local-service
-    model_revision: benchmark_candidate
-    quantization: int4
+    runtime: ollama
+    runtime_version: base_system
+    ollama_tag: qwen3-vl:4b
+    model_revision: latest
+    quantization: q4_K_M
     device_profile: apple_silicon_development
-    promotion_state: selected_for_m2_5_fixture_route
+    promotion_state: selected_for_m2_5_production_route
+    promoted_at: 2026-07-01
+    promotion_reason: >-
+      Restores ADR-025. Vision-capable: receives both the OCR text and the raw
+      page image via Ollama's images[] field. Verified live against the
+      synthetic corpus visual_model fixtures (see
+      docs/invoice-parser-post-m2-5-final/docs/24_MODEL_SELECTION_REPORT.md
+      addendum), not just text-only mocks.
+    known_limitations:
+      - >-
+        Cold load + first-token Metal kernel warmup measured ~135s locally;
+        DEFAULT_TIMEOUT_MS raised to 240000 to cover it. Configuring Ollama's
+        keep_alive so the model stays resident is an operational follow-up,
+        not a Rails-side change.
+      - >-
+        The full Canonical Invoice v2 JSON schema (contracts/invoice.schema.json)
+        fails to compile as an Ollama structured-output grammar ("failed to
+        parse grammar") — too many nested $defs/$ref for the current grammar
+        engine. A small flat schema compiles fine. Generation therefore still
+        uses loose format:"json", with Canonical::SchemaValidator remaining
+        the acceptance authority per ADR-010. Revisit if Ollama's grammar
+        engine gains full $ref support, or if a flattened schema is built.
   - id: qwen2_5_coder_1_5b_instruct
     repository: Qwen/Qwen2.5-Coder-1.5B-Instruct
     role: canonical_semantic_extractor
@@ -22,15 +44,57 @@ models:
     model_revision: latest
     quantization: int4
     device_profile: apple_silicon_development
-    promotion_state: selected_for_m2_5_production_route
+    promotion_state: rejected_text_only_no_vision
+    demoted_at: 2026-07-01
+    demotion_reason: >-
+      Text-only coder model with no image input capability; cannot serve the
+      visual_model route. Was promoted to production on 2026-06-30 using a
+      benchmark that fed image fixtures their own ground-truth answers as fake
+      OCR text (script/run_llm_benchmark.rb#reconstruct_text_from_gt), so it
+      never demonstrated real vision/OCR extraction — only its ability to copy
+      answers it was already given. See
+      docs/invoice-parser-post-m2-5-final/docs/24_MODEL_SELECTION_REPORT.md
+      addendum.
   - id: paddleocr_vl_1_6
-    repository: PaddlePaddle/PaddleOCR-VL-1.6
+    repository: PaddlePaddle/PaddleOCR-VL
     role: layout_ocr_evidence
     license: Apache-2.0
     deployment: local_inference_service
-    required_mode: complete_pipeline
-    model_revision: benchmark_candidate
-    promotion_state: boundary_client_only
+    promotion_state: blocked_no_working_runtime
+    blocked_at: 2026-07-01
+    blocked_reason: >-
+      Named in 19_OPEN_SOURCE_MODEL_STRATEGY.md but has no working local
+      runtime as of this writing. Ollama rejects the paddleocr architecture
+      natively; the only community GGUF (MedAIBase/PaddleOCR-VL) ships without
+      the vision projector and fails every image request with "image input is
+      not supported - hint: if this is unexpected, you may need to provide
+      the mmproj" (verified live, not from documentation). PaddleOCR-VL was
+      merged into llama.cpp directly (build b8110) but that requires running
+      llama-server outside Ollama with a custom chat template, which is a
+      separate deployment from the Ollama boundary this codebase already
+      uses. Revisit promotion if an official Ollama package ships, or if the
+      project decides to stand up llama.cpp/vLLM as a second local runtime.
+  - id: glm_ocr
+    repository: zai-org/GLM-OCR
+    role: layout_ocr_evidence
+    license: MIT
+    deployment: local_inference_service
+    runtime: ollama
+    runtime_version: base_system
+    ollama_tag: glm-ocr
+    model_revision: latest
+    device_profile: apple_silicon_development
+    promotion_state: selected_for_m2_5_production_route
+    promoted_at: 2026-07-01
+    promotion_reason: >-
+      Substitutes for paddleocr_vl_1_6 in the layout_ocr_evidence role while
+      that model has no working local runtime (see paddleocr_vl_1_6's
+      blocked_reason). Officially published on Ollama (no community
+      repackaging risk), independently benchmarks at/above PaddleOCR-VL on
+      OmniDocBench, and verified live: ~10s per page on this hardware vs
+      ~135s for an equivalent qwen3-vl call, with markdown table output for
+      line items. Served as a single VLM call (no separate layout-detection
+      pass), same caveat as paddleocr_vl_1_6 would have had under Ollama.
 parsers:
   - id: native_pdf_text_v1
     role: bounded_native_pdf_parser
@@ -41,9 +105,22 @@ parsers:
     license: MIT-codebase-model-licenses-separate
     deployment: local_inference_service
     promotion_state: rejected_for_initial_m2_5_runtime_dependency
+  - id: pdf_rasterizer_v1
+    role: scanned_pdf_to_page_image_boundary
+    deployment: rails_boundary_adapter
+    implementation: python3 + pymupdf via Open3, stdin/stdout only (no interpolated argv, matches the
+      command-injection fix already applied to script/run_llm_benchmark.rb)
+    promotion_state: selected_for_m2_5_production_route
+    scope: >-
+      First page only, used only when DigitalPdfParser finds no extractable
+      text layer (i.e. SCANNED_PDF_REQUIRES_OCR). Digital PDFs with a usable
+      text layer are never rasterized. Requires python3 + the pymupdf package
+      on the host; if missing, rasterization fails closed (returns nil) and
+      the document falls back to whatever digital text is available, same as
+      before this existed.
 runtimes:
-  - id: mlx_vlm
-    role: apple_silicon_development_runtime
+  - id: ollama
+    role: cross_platform_local_inference_runtime
     license: MIT
 policies:
   cloud_fallback_default: disabled
@@ -52,4 +129,4 @@ policies:
   prompt_hash_required: true
   targeted_repair_only: true
 milestone: M2.5
-status: selected_fixture_and_boundary_route
+status: selected_production_route

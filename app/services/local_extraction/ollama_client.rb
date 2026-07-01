@@ -3,6 +3,7 @@
 require "net/http"
 require "json"
 require "uri"
+require "base64"
 
 module LocalExtraction
   # Boundary client that drives a local Ollama runtime to produce Canonical
@@ -10,13 +11,14 @@ module LocalExtraction
   # LocalExtraction::QwenSemanticAdapter.
   #
   # The client is intentionally thin: it composes a prompt from the document
-  # context plus any machine-readable text, asks Ollama for strict JSON, and
-  # hands the raw text back to the adapter. The adapter owns JSON parsing,
-  # schema validation, and provenance — this class never decides acceptance.
+  # context plus any machine-readable text and page image, asks Ollama for
+  # strict JSON, and hands the raw text back to the adapter. The adapter owns
+  # JSON parsing, schema validation, and provenance — this class never
+  # decides acceptance.
   class OllamaClient
     DEFAULT_BASE_URL = "http://localhost:11434"
-    DEFAULT_MODEL = "qwen2.5-coder:1.5b"
-    MAX_TEXT_BYTES = 12_000
+    DEFAULT_MODEL = "qwen3-vl:4b"
+    MAX_TEXT_BYTES = 24_000
 
     # Raised for connection/protocol failures so the caller can map them to a
     # safe failure instead of crashing the job.
@@ -37,7 +39,8 @@ module LocalExtraction
       model = model_for(request)
       prompt = compose_prompt(request)
       options = generation_options(request)
-      response = post_generate(model:, prompt:, options:, read_timeout: read_timeout_for(request))
+      images = encode_images(request)
+      response = post_generate(model:, prompt:, options:, images:, read_timeout: read_timeout_for(request))
 
       {
         json_text: self.class.extract_json(response_text(response)),
@@ -97,7 +100,7 @@ module LocalExtraction
         allowances_charges, totals, tax_breakdowns, line_items, payment, evidence, uncertainties.
         Use null for any value you cannot read from the document. Do not invent values.
         Output JSON only — no prose, no markdown fences.
-
+        #{image_instructions(request)}
         Document metadata:
         #{JSON.pretty_generate(document)}
 
@@ -106,17 +109,31 @@ module LocalExtraction
       PROMPT
     end
 
+    def image_instructions(request)
+      return "" if Array(request["images_bytes"]).empty?
+
+      "\nA page image is attached. Read it directly for any field the extracted text below is missing or got wrong.\n"
+    end
+
+    # Pulls text out of both the digital-parser output and the OCR output —
+    # whichever is present — so a scanned/photographed page that only has OCR
+    # text still reaches the model.
     def extracted_text(request)
-      parser_output = request["parser_output"] || {}
-      texts = []
-      texts << parser_output["text"] if parser_output.is_a?(Hash)
-      Array(parser_output.is_a?(Hash) ? parser_output["pages"] : nil).each do |page|
-        texts << page["text"] if page.is_a?(Hash)
-        Array(page.is_a?(Hash) ? page["layout"] : nil).each do |block|
-          texts << block["text"] if block.is_a?(Hash)
-        end
-      end
+      texts = page_texts(request["parser_output"]) + page_texts(request["ocr_output"])
       texts.compact.map(&:to_s).reject(&:empty?).uniq.join("\n").byteslice(0, MAX_TEXT_BYTES).to_s
+    end
+
+    def page_texts(output)
+      return [] unless output.is_a?(Hash)
+
+      texts = [ output["text"] ]
+      Array(output["pages"]).each do |page|
+        next unless page.is_a?(Hash)
+
+        texts << page["text"]
+        Array(page["layout"]).each { |block| texts << block["text"] if block.is_a?(Hash) }
+      end
+      texts
     end
 
     def generation_options(request)
@@ -136,16 +153,30 @@ module LocalExtraction
       [ seconds, 120 ].max
     end
 
-    def post_generate(model:, prompt:, options:, read_timeout:)
+    # Raw image bytes travel through the request hash as binary strings (see
+    # LocalExtraction::QwenSemanticAdapter#client_request); base64 only at the
+    # wire boundary, right before they go into the Ollama payload.
+    def encode_images(request)
+      Array(request["images_bytes"]).filter_map do |bytes|
+        next if bytes.to_s.empty?
+
+        Base64.strict_encode64(bytes.to_s.b)
+      end
+    end
+
+    def post_generate(model:, prompt:, options:, images:, read_timeout:)
       uri = URI.join("#{base_url}/", "api/generate")
       http = Net::HTTP.new(uri.host, uri.port)
       http.open_timeout = open_timeout
       http.read_timeout = read_timeout
       http.use_ssl = (uri.scheme == "https")
 
+      body = { model:, prompt:, stream: false, format: "json", options: }
+      body[:images] = images if images.present?
+
       request = Net::HTTP::Post.new(uri)
       request["Content-Type"] = "application/json"
-      request.body = JSON.generate(model:, prompt:, stream: false, format: "json", options:)
+      request.body = JSON.generate(body)
 
       response = http.request(request)
       raise GenerationError, "ollama returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)

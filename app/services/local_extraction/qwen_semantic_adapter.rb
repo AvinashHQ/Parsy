@@ -15,12 +15,16 @@ module LocalExtraction
     PROMPT_SHA256 = Digest::SHA256.hexdigest(PROMPT)
     PROVIDER_ID = "local_open_source"
     PROVIDER_VERSION = "qwen3-vl-boundary-v1"
-    MODEL = "qwen2.5-coder:1.5b"
+    MODEL = "qwen3-vl:4b"
     DEFAULT_MODEL_REVISION = "latest"
-    DEFAULT_QUANTIZATION = "int4"
+    DEFAULT_QUANTIZATION = "q4_K_M"
     DEFAULT_RUNTIME = "ollama"
     DEFAULT_DEVICE = "cpu"
-    DEFAULT_TIMEOUT_MS = 30_000
+    # A cold vision-model load plus first-token Metal/GPU kernel warmup
+    # measured ~135s locally, and a genuinely degraded (blurred/low-res) page
+    # can push generation well past that; 300s leaves headroom above both
+    # without waiting forever when Ollama is genuinely unreachable.
+    DEFAULT_TIMEOUT_MS = 300_000
     DEFAULT_DETERMINISTIC_SETTINGS = {
       temperature: 0,
       top_p: 1,
@@ -98,8 +102,8 @@ module LocalExtraction
       )
     end
 
-    def extract(inspection:, parser_output: {}, ocr_output: {})
-      request_context = request_context(inspection:, parser_output:, ocr_output:)
+    def extract(inspection:, parser_output: {}, ocr_output: {}, images_bytes: [])
+      request_context = request_context(inspection:, parser_output:, ocr_output:, images_bytes:)
       provider_result = provider_adapter.extract(**provider_request(request_context))
 
       semantic_result_from(provider_result:, route: request_context.fetch(:route), provenance: provenance_for(request_context, provider_result:))
@@ -189,7 +193,7 @@ module LocalExtraction
       normalized.fetch(:patch)
     end
 
-    def request_context(inspection:, parser_output:, ocr_output:)
+    def request_context(inspection:, parser_output:, ocr_output:, images_bytes: [])
       parser = hash_like(parser_output)
       ocr = hash_like(ocr_output)
       raise CorruptDocument if corrupt_output?(parser) || corrupt_output?(ocr)
@@ -206,7 +210,8 @@ module LocalExtraction
         parser_version: parser[:version],
         ocr_version: ocr[:version],
         parser_output: parser,
-        ocr_output: ocr
+        ocr_output: ocr,
+        images_bytes: Array(images_bytes)
       }
     end
 
@@ -232,6 +237,7 @@ module LocalExtraction
         }.compact,
         parser_output: context.fetch(:parser_output),
         ocr_output: context.fetch(:ocr_output),
+        images_bytes: context[:images_bytes] || [],
         deterministic_settings: deterministic_settings,
         prompt_sha256: PROMPT_SHA256,
         timeout_ms: timeout_ms
@@ -247,6 +253,7 @@ module LocalExtraction
         document: request.fetch(:document),
         parser_output: request.fetch(:parser_output),
         ocr_output: request.fetch(:ocr_output),
+        images_bytes: request[:images_bytes] || [],
         deterministic_settings: deterministic_settings,
         timeout_ms: timeout_ms,
         model: MODEL,
