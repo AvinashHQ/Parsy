@@ -36,7 +36,7 @@ module Evaluation
       { pointer: "/invoice/issue_date", comparison: "exact" },
       { pointer: "/invoice/currency", comparison: "exact" },
       { pointer: "/totals/payable_amount", comparison: "decimal" },
-      { pointer: "/totals/tax_amount", comparison: "decimal" }
+      { pointer: "/totals/total_tax_amount", comparison: "decimal" }
     ].freeze
 
     def initialize(models:, fixture_ids: nil)
