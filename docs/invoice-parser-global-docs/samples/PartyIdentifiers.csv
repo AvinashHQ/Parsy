@@ -1,3 +1,0 @@
-party_id,document_id,role,scheme,value,issuing_country,purpose
-party_supplier_1,doc_demo_global_0001,supplier,VAT,GB123456789,GB,tax
-party_buyer_1,doc_demo_global_0001,buyer,VAT,FRXX123456789,FR,tax

@@ -102,7 +102,7 @@
 
 
 ## ADR-021: Open-source-first local extraction
-**Status:** Accepted  
+**Status:** Accepted; amended by ADR-026 (cloud extraction is the MVP default; local route becomes a selectable fallback)  
 **Decision:** Implement Docling/native parsing, PaddleOCR-VL-1.6, and Qwen3-VL-4B-Instruct as M2.5 candidates behind the provider-neutral contract completed in M2. External APIs remain disabled by default.  
 **Reason:** Preserve the completed milestone history while gaining local privacy, model control, and a benchmark path without coupling Rails to one runtime.
 
@@ -122,10 +122,23 @@
 **Reason:** Milestone history must reflect actual sequencing; completed milestones must not be retroactively expanded.
 
 ## ADR-025: M2.5 local model selection, rollout, and rollback
-**Status:** Accepted
+**Status:** Accepted; amended by ADR-026 (external cloud provider re-enabled as MVP default)
 **Decision:** Select the M2.5 local open-source route only through the frozen M2 provider adapter: deterministic parser/OCR boundary objects feed a deterministic local semantic client, and Rails stores only Canonical Invoice v2 candidates, bounded findings, and content-free benchmark metadata. The selected configuration for the first local route is the benchmarked Docling/native digital parser where applicable, PaddleOCR-VL layout/OCR for scanned/image inputs, and Qwen3-VL-4B-Instruct through an injected local client fixture or external worker boundary; Rails does not import Python, model weights, CUDA, MLX, Docling, PaddleOCR, Qwen, or OCR runtime dependencies.
 **Rejected configs:** Direct model calls from Rails, controller-time inference, external API fallback as an M2.5 dependency, confidence-threshold auto-acceptance, unbounded retries, unsupported structured profiles falling back to vision, and benchmark reports that merge synthetic functional fixtures with permissioned real-corpus accuracy claims.
 **Support boundaries:** Synthetic fixtures prove functional routing, schema, validation, evidence plumbing, safe rejection, repair, and rollback only. Permissioned real ground-truth rows are required for field, evidence, hallucination, latency, memory, failure, repair, and quarantine scorecards. Nulls and ambiguity are preserved; deterministic validation remains the acceptance authority.
 **Disabled routes:** External APIs, fine-tuning, custom pretraining, unsupported e-invoice profiles, direct ERP posting, and any local runtime that cannot emit version/options/peak-memory metadata are disabled until a separate ADR and benchmark gate approve them.
 **Monitoring:** M2.5 reports must record model revision, quantization, runtime, prompt hash, parser/OCR versions, device profile, p95 latency, peak memory, OOM rate, repair rate, quarantine rate, evidence coverage, hallucinated non-null field rate, and safe-failure counts without raw source text, evidence snippets, party names, or invoice numbers.
 **Rollback rules:** A feature-flag disablement must restore the existing provider without schema migration or Canonical Invoice v2 changes. Rollback verification is recorded in the benchmark/ADR evidence before pilot enablement, and any local route that violates the provider contract, content-free logging rule, memory limit, or safe-failure path is disabled rather than patched around in controllers.
+
+## ADR-026: Cloud vision extraction is the MVP default
+**Status:** Accepted (amends ADR-021 and ADR-025)
+**Decision:** The default extraction provider for the MVP is a managed cloud vision LLM (Google Gemini) driven through the frozen M2 provider contract. The local open-source route (Qwen3-VL-4B + GLM-OCR) remains selectable as a fallback via `PARSY_EXTRACTION_PROVIDER`. The extraction prompt embeds the Canonical Invoice v2 field schema and one worked example regardless of provider.
+**Reason:** The local route scores 0% schema-valid on the synthetic corpus and needs ~16 GB RAM and 40–240 s/invoice (`24_MODEL_SELECTION_REPORT.md` §8). A cloud vision model with structured JSON output is the fastest path to schema-valid, deliverable output for the MVP.
+**Reversal:** ADR-021 and ADR-025 disabled external APIs by default; this ADR re-enables a managed provider as the MVP default. Cloud egress is opt-in, tenant-disclosed, and the API key is a managed secret (not committed, not logged).
+**Boundaries preserved:** Controllers never call models (ADR-023) — inference stays in jobs/services behind the provider contract. Deterministic schema validation remains the acceptance authority (ADR-010). Content-free logging (M4-04) applies to all provider metadata.
+
+## ADR-027: External database as an approved-invoice delivery target
+**Status:** Accepted (extends ADR-019; gated by ADR-001)
+**Decision:** In addition to canonical JSON/CSV/XLSX file exports, the MVP can push **approved** invoices into an operator-configured external database. The operator configures a connection (encrypted credentials, adapter allowlist), Parsy introspects the target schema, and the operator maps the canonical relational tables (Invoices / Parties / PartyIdentifiers / TaxBreakdowns / LineItems) to target tables and columns. Writes are approval-gated, parameterized, identifier-quoted, and idempotent (keyed on `document_id`).
+**Reason:** Direct database delivery is the MVP goal, and the canonical relational decomposition already exists (`Canonical::Exports::NormalizedCsv`), so the writer reuses it.
+**Boundaries:** This is a generic row writer, not an ERP-protocol integration (ADR-019's ERP adapters stay deferred) and not automated accounting posting — ADR-001's human-in-the-loop gate is preserved: nothing is written until an operator approves. Credentials are encrypted at rest; connection targets are validated; SQL injection is prevented via parameterization and quoted identifiers.

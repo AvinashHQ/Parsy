@@ -1,5 +1,7 @@
 # Remaining Work After Frozen M2
 
+> **Superseded (2026-07-01):** the MVP critical path now runs through **M4.5 — cloud extraction & database delivery** (cloud vision extraction + external-database delivery) before the M5 pilot. See `25_ZIP_TO_DB_MVP_PLAN.md` and ADR-026/ADR-027. The local-only / file-export framing below is retained as history.
+
 ## Corrected critical path
 
 `M2.5 open-source extraction upgrade -> M3 review workflow -> M4 production safety -> M5 closed pilot`

@@ -1,9 +1,0 @@
-priority,profile,trigger,minimum_dataset,required_capabilities,not_in_scope
-TBD,india_gst_v1,Pilot demand for India GST/Tally,"100 holdout; multiple states/vendors; credit notes","GSTIN; GST components; Tally adapter tests",tax advice or filing
-TBD,peppol_billing_3_read_v1,Structured Peppol volume,"Official/synthetic fixtures plus customer samples","profile detection; XSD/Schematron; canonical mapping",access point transmission
-TBD,eu_vat_core_v1,EU/UK bookkeeping demand,"Country/vendor diversity and VAT edge cases","VAT ID/category mapping; exemptions; reverse charge findings",legal compliance certification
-TBD,us_sales_tax_core_v1,US AP demand,"Multi-state/local tax samples","tax component mapping and arithmetic",nexus or rate determination
-TBD,anz_peppol_read_v1,Australia/NZ structured volume,"A-NZ profile fixtures and samples","Peppol mapping and local profile rules",network accreditation
-TBD,singapore_invoicenow_read_v1,Singapore demand,"InvoiceNow profile fixtures and samples","Peppol mapping and SG identifiers",access point accreditation
-TBD,fatturapa_read_v1,Italy structured volume,"Official fixtures and customer samples","FatturaPA validation/mapping",SdI transmission/signing
-TBD,brazil_nfe_read_v1,Brazil structured volume,"NF-e fixtures and samples","NF-e schema/rule mapping",tax filing or authorization
