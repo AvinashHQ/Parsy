@@ -11,6 +11,9 @@ module LocalExtraction
       Extract one invoice or credit note as Canonical Invoice v2 JSON only.
       Preserve nulls for absent optional fields, keep ambiguous fields null, and return no explanation.
       Do not use model confidence to accept or reject the result; schema validation is authoritative.
+      For tax rates (e.g. in tax_breakdowns), output the bare numeric decimal value as a string without a percent sign (e.g. "8.25" not "8.25%").
+      All money and amount values (e.g. in totals, line_items, tax_breakdowns) MUST be pure numeric decimal strings without currency symbols or letters (e.g. "387.54" not "USD 387.54" and not "GBP 1500.00").
+      Always include required schema fields like tax_point_date, payee, and line-item service_period as null if they are absent or not found in the document.
     PROMPT
     PROMPT_SHA256 = Digest::SHA256.hexdigest(PROMPT)
     PROVIDER_ID = "local_open_source"
