@@ -7,13 +7,285 @@ require "timeout"
 module LocalExtraction
   class QwenSemanticAdapter
     PROMPT_ID = "local_qwen3_vl_invoice_v2"
+
+    # Provider-independent field dictionary for Canonical Invoice v2 (ADR-026).
+    # Every model that drives the extraction contract receives this so it emits the
+    # exact nested field names the schema requires — the 0% schema-valid root cause
+    # in 24_MODEL_SELECTION_REPORT.md §8.6 was the model guessing plausible-but-wrong
+    # names (name/amount_due/ein/line_net) because the prompt only listed the 10
+    # top-level keys. Derived from contracts/invoice.schema.json and
+    # reference/field_dictionary.yaml; Canonical::SchemaValidator stays the
+    # acceptance authority (ADR-010), so this is guidance, not a grammar.
+    FIELD_CONTRACT = <<~CONTRACT
+      Emit EXACTLY these field names — do not rename, translate, add, or drop keys. The JSON is
+      validated with additionalProperties:false, so any extra or misspelled key fails. Every field
+      listed for an object must be present on it; use null for an absent scalar and [] for an absent
+      array. Objects marked "or null" may be the JSON literal null when the whole thing is absent.
+
+      Top-level object (all keys required):
+      - schema_version: the string "2.0"
+      - document_id: string, at least 8 characters (if the document shows no system id, reuse the
+        invoice number, extending it to 8+ characters)
+      - document_type: one of invoice, tax_invoice, commercial_invoice, receipt, credit_note,
+        debit_note, proforma_invoice, self_billed_invoice, unknown
+      - source: object (see below)
+      - locale: object (see below)
+      - supplier: party object (see below)
+      - buyer: party object or null
+      - payee: party object or null
+      - invoice: object (see below)
+      - references: array of reference objects, or []
+      - allowances_charges: array of allowance/charge objects, or []
+      - totals: object (see below)
+      - tax_breakdowns: array of tax-breakdown objects, or []
+      - line_items: array of line-item objects, or []
+      - payment: payment object or null
+      - evidence: array of evidence objects, or [] when you cannot cite exact source text
+      - uncertainties: array of uncertainty objects, or []
+
+      party object (supplier / buyer / payee): display_name (string|null), legal_name (string|null),
+        trading_name (string|null), identifiers (array — put every tax/registration id such as
+        VAT/GST/EIN/ABN/PAN HERE, one entry each as {scheme, value, issuing_country, purpose} with
+        purpose one of tax|business|electronic_address|government|other; NEVER a top-level "ein" or
+        "tax_id"), address ({lines (array of strings), city, subdivision, postal_code, country_code}
+        or null), electronic_addresses (array shaped like identifiers, or [])
+
+      invoice object: number (string|null), issue_date, due_date, tax_point_date (dates), currency
+        (ISO-4217 alpha-3 like "EUR", or null), tax_currency (like currency, or null), service_period
+        ({start_date, end_date} or null), payment_terms_text (string|null)
+
+      totals object — every value is a decimal string like "1200.00" or null. Use exactly these keys
+        (NOT amount_due / subtotal / tax_total): line_extension_amount, allowance_total_amount,
+        charge_total_amount, tax_exclusive_amount, total_tax_amount, tax_inclusive_amount,
+        prepaid_amount, withholding_total_amount, rounding_amount, payable_amount
+
+      tax-breakdown object: tax_type (VAT|GST|SALES_TAX|WITHHOLDING|DUTY|EXCISE|CESS|OTHER),
+        component (string|null), jurisdiction_code (string|null), category_code (string|null),
+        rate (decimal string like "20", no "%"), taxable_amount (decimal string|null),
+        tax_amount (decimal string|null), payable_effect (add|subtract|none),
+        exemption_code (string|null), exemption_reason (string|null),
+        reverse_charge (true|false|null), source_label (string|null)
+
+      line-item object: line_id (non-empty string), line_no (integer >= 1), description (string|null),
+        item_name (string|null), seller_item_id (string|null), buyer_item_id (string|null),
+        classifications (array of {scheme, value}, or []), quantity (decimal string|null),
+        unit_code (string|null — the key is unit_code, NOT unit), unit_price (decimal string|null),
+        price_base_quantity (decimal string|null), allowances_charges (array, usually []),
+        line_net_amount (decimal string|null — the key is line_net_amount, NOT line_net),
+        tax_breakdowns (array of tax-breakdown objects, or []), line_gross_amount (decimal string|null),
+        service_period ({start_date, end_date} or null)
+
+      source object — exactly these seven keys, NEVER add sha256 or byte_size:
+        family (visual_pdf|image|hybrid_pdf_xml|ubl|cii|peppol_bis|xrechnung|fatturapa|
+        india_einvoice|brazil_nfe|unknown_structured|unknown_visual),
+        route (visual_model|structured_parser|hybrid_compare|quarantine), mime_type (string|null),
+        profile (string|null), profile_version (string|null), page_count (integer|null),
+        has_embedded_structured_data (true|false)
+
+      locale object: document_language (BCP-47 like "en-GB", or null), script (like "Latn", or null),
+        supplier_country (ISO-3166-1 alpha-2 like "GB", or null), buyer_country (like supplier_country),
+        jurisdiction_candidates (array of country codes, or []), applied_region_pack ({id, version,
+        resolution}; when unknown use {"id": "global_generic_v1", "version": "1.0.0",
+        "resolution": "generic_fallback"})
+
+      reference object: type (purchase_order|contract|delivery_note|original_invoice|project|
+        buyer_accounting|government|tax_platform|other), value (non-empty string), scheme (string|null),
+        issue_date (date|null)
+      allowance/charge object: charge_indicator (true for a charge, false for an allowance),
+        amount (decimal string|null), base_amount (decimal string|null), percentage (decimal string|null),
+        reason_code (string|null), reason (string|null)
+      payment object: means (array of {type_code, type_label, payment_reference, account_last4,
+        iban_last4, bic}, or []), terms_text (string|null — the key is terms_text, NOT terms)
+      evidence object: field_path (JSON pointer like "/invoice/number"), source_kind
+        (visual|embedded_structured|standalone_structured), page (integer|null), source_path
+        (string|null), text (string|null), bbox ({x1, y1, x2, y2} as numbers 0..1, or null)
+      uncertainty object: code (UPPER_SNAKE_CASE string), field_paths (array of pointers),
+        message (string), candidate_values (array)
+
+      Formatting rules:
+      - Money/amounts are pure numeric decimal strings, no currency symbol or letters ("387.54",
+        not "USD 387.54" and not "GBP 1500.00").
+      - Tax rate is a bare numeric decimal string, no percent sign ("8.25", not "8.25%").
+      - Dates are "YYYY-MM-DD" strings or null. Country codes are ISO-3166-1 alpha-2. Currency is
+        ISO-4217 alpha-3.
+      - Preserve nulls for absent or ambiguous fields; do not invent values.
+    CONTRACT
+
+    # One worked example: an unrelated but fully valid Canonical Invoice v2 instance so the model
+    # can pattern-match every required key (especially source/locale/evidence, which it otherwise
+    # invents). Kept as its own constant so a test can assert it stays schema-valid.
+    WORKED_EXAMPLE = <<~JSON
+      {
+        "schema_version": "2.0",
+        "document_id": "doc_demo_global_0001",
+        "document_type": "invoice",
+        "source": {
+          "family": "visual_pdf",
+          "route": "visual_model",
+          "mime_type": "application/pdf",
+          "profile": null,
+          "profile_version": null,
+          "page_count": 1,
+          "has_embedded_structured_data": false
+        },
+        "locale": {
+          "document_language": "en-GB",
+          "script": "Latn",
+          "supplier_country": "GB",
+          "buyer_country": "FR",
+          "jurisdiction_candidates": ["GB", "FR"],
+          "applied_region_pack": {
+            "id": "global_generic_v1",
+            "version": "1.0.0",
+            "resolution": "generic_fallback"
+          }
+        },
+        "supplier": {
+          "display_name": "Blue Harbor Consulting Ltd",
+          "legal_name": "Blue Harbor Consulting Ltd",
+          "trading_name": null,
+          "identifiers": [
+            { "scheme": "VAT", "value": "GB123456789", "issuing_country": "GB", "purpose": "tax" }
+          ],
+          "address": {
+            "lines": ["10 Example Street"],
+            "city": "London",
+            "subdivision": null,
+            "postal_code": "EC1A 1AA",
+            "country_code": "GB"
+          },
+          "electronic_addresses": []
+        },
+        "buyer": {
+          "display_name": "Example Buyer SAS",
+          "legal_name": "Example Buyer SAS",
+          "trading_name": null,
+          "identifiers": [
+            { "scheme": "VAT", "value": "FRXX123456789", "issuing_country": "FR", "purpose": "tax" }
+          ],
+          "address": {
+            "lines": ["20 Rue Exemple"],
+            "city": "Paris",
+            "subdivision": null,
+            "postal_code": "75001",
+            "country_code": "FR"
+          },
+          "electronic_addresses": []
+        },
+        "payee": null,
+        "invoice": {
+          "number": "AC-4477",
+          "issue_date": "2026-06-15",
+          "due_date": "2026-07-15",
+          "tax_point_date": null,
+          "currency": "EUR",
+          "tax_currency": null,
+          "service_period": null,
+          "payment_terms_text": "Payment due in 30 days"
+        },
+        "references": [
+          { "type": "purchase_order", "value": "PO-8842", "scheme": null, "issue_date": null }
+        ],
+        "allowances_charges": [],
+        "totals": {
+          "line_extension_amount": "1000.00",
+          "allowance_total_amount": "0.00",
+          "charge_total_amount": "0.00",
+          "tax_exclusive_amount": "1000.00",
+          "total_tax_amount": "200.00",
+          "tax_inclusive_amount": "1200.00",
+          "prepaid_amount": "0.00",
+          "withholding_total_amount": "0.00",
+          "rounding_amount": "0.00",
+          "payable_amount": "1200.00"
+        },
+        "tax_breakdowns": [
+          {
+            "tax_type": "VAT",
+            "component": null,
+            "jurisdiction_code": "GB",
+            "category_code": "S",
+            "rate": "20",
+            "taxable_amount": "1000.00",
+            "tax_amount": "200.00",
+            "payable_effect": "add",
+            "exemption_code": null,
+            "exemption_reason": null,
+            "reverse_charge": false,
+            "source_label": "VAT 20%"
+          }
+        ],
+        "line_items": [
+          {
+            "line_id": "line_1",
+            "line_no": 1,
+            "description": "Consulting services",
+            "item_name": "Consulting services",
+            "seller_item_id": null,
+            "buyer_item_id": null,
+            "classifications": [],
+            "quantity": "1",
+            "unit_code": "EA",
+            "unit_price": "1000.00",
+            "price_base_quantity": "1",
+            "allowances_charges": [],
+            "line_net_amount": "1000.00",
+            "tax_breakdowns": [
+              {
+                "tax_type": "VAT",
+                "component": null,
+                "jurisdiction_code": "GB",
+                "category_code": "S",
+                "rate": "20",
+                "taxable_amount": "1000.00",
+                "tax_amount": "200.00",
+                "payable_effect": "add",
+                "exemption_code": null,
+                "exemption_reason": null,
+                "reverse_charge": false,
+                "source_label": "VAT 20%"
+              }
+            ],
+            "line_gross_amount": "1200.00",
+            "service_period": null
+          }
+        ],
+        "payment": {
+          "means": [
+            {
+              "type_code": "30",
+              "type_label": "Credit transfer",
+              "payment_reference": "AC-4477",
+              "account_last4": null,
+              "iban_last4": "1234",
+              "bic": "EXAMPLEBIC"
+            }
+          ],
+          "terms_text": "Payment due in 30 days"
+        },
+        "evidence": [
+          {
+            "field_path": "/invoice/number",
+            "source_kind": "visual",
+            "page": 1,
+            "source_path": null,
+            "text": "Invoice No. AC-4477",
+            "bbox": null
+          }
+        ],
+        "uncertainties": []
+      }
+    JSON
+
     PROMPT = <<~PROMPT.freeze
-      Extract one invoice or credit note as Canonical Invoice v2 JSON only.
-      Preserve nulls for absent optional fields, keep ambiguous fields null, and return no explanation.
-      Do not use model confidence to accept or reject the result; schema validation is authoritative.
-      For tax rates (e.g. in tax_breakdowns), output the bare numeric decimal value as a string without a percent sign (e.g. "8.25" not "8.25%").
-      All money and amount values (e.g. in totals, line_items, tax_breakdowns) MUST be pure numeric decimal strings without currency symbols or letters (e.g. "387.54" not "USD 387.54" and not "GBP 1500.00").
-      Always include required schema fields like tax_point_date, payee, and line-item service_period as null if they are absent or not found in the document.
+      Extract one invoice or credit note as Canonical Invoice v2 JSON only. Return a single JSON
+      object and no explanation. Do not use model confidence to accept or reject the result;
+      deterministic schema validation is authoritative.
+
+      #{FIELD_CONTRACT}
+      Worked example — an UNRELATED invoice showing the exact shape. Match its structure and key
+      names, never its values:
+      #{WORKED_EXAMPLE}
     PROMPT
     PROMPT_SHA256 = Digest::SHA256.hexdigest(PROMPT)
     PROVIDER_ID = "local_open_source"
@@ -224,6 +496,7 @@ module LocalExtraction
         route: context.fetch(:route),
         region: context[:profile],
         schema_version: Canonical::Invoice::SCHEMA_VERSION,
+        prompt_id: PROMPT_ID,
         prompt: PROMPT,
         provider_id: PROVIDER_ID,
         model: MODEL,

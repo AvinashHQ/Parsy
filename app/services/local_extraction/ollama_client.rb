@@ -16,9 +16,13 @@ module LocalExtraction
   # JSON parsing, schema validation, and provenance — this class never
   # decides acceptance.
   class OllamaClient
+    # Prompt/text composition (compose_prompt, extracted_text, ...) is shared with
+    # the cloud vision client via this mixin so the field contract + worked example
+    # reach every provider identically (ADR-026).
+    include Extraction::VisionDocumentContext
+
     DEFAULT_BASE_URL = "http://localhost:11434"
     DEFAULT_MODEL = "qwen3-vl:4b"
-    MAX_TEXT_BYTES = 24_000
 
     # Raised for connection/protocol failures so the caller can map them to a
     # safe failure instead of crashing the job.
@@ -84,56 +88,6 @@ module LocalExtraction
     def response_text(payload)
       response = payload["response"].to_s
       response.strip.empty? ? payload["thinking"].to_s : response
-    end
-
-    def compose_prompt(request)
-      base = request["prompt"].to_s
-      document = request["document"] || {}
-      text = extracted_text(request)
-
-      <<~PROMPT
-        #{base}
-
-        Return a single JSON object that conforms to the Canonical Invoice v2 schema.
-        Required top-level keys: schema_version ("#{Canonical::Invoice::SCHEMA_VERSION}"), document_id,
-        document_type, source, locale, supplier, buyer, payee, invoice, references,
-        allowances_charges, totals, tax_breakdowns, line_items, payment, evidence, uncertainties.
-        Use null for any value you cannot read from the document. Do not invent values.
-        Output JSON only — no prose, no markdown fences.
-        #{image_instructions(request)}
-        Document metadata:
-        #{JSON.pretty_generate(document)}
-
-        Extracted document text:
-        #{text.empty? ? '(no machine-readable text was available)' : text}
-      PROMPT
-    end
-
-    def image_instructions(request)
-      return "" if Array(request["images_bytes"]).empty?
-
-      "\nA page image is attached. Read it directly for any field the extracted text below is missing or got wrong.\n"
-    end
-
-    # Pulls text out of both the digital-parser output and the OCR output —
-    # whichever is present — so a scanned/photographed page that only has OCR
-    # text still reaches the model.
-    def extracted_text(request)
-      texts = page_texts(request["parser_output"]) + page_texts(request["ocr_output"])
-      texts.compact.map(&:to_s).reject(&:empty?).uniq.join("\n").byteslice(0, MAX_TEXT_BYTES).to_s
-    end
-
-    def page_texts(output)
-      return [] unless output.is_a?(Hash)
-
-      texts = [ output["text"] ]
-      Array(output["pages"]).each do |page|
-        next unless page.is_a?(Hash)
-
-        texts << page["text"]
-        Array(page["layout"]).each { |block| texts << block["text"] if block.is_a?(Hash) }
-      end
-      texts
     end
 
     def generation_options(request)

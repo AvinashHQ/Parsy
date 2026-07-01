@@ -45,6 +45,32 @@ module LocalExtraction
       refute_includes without_image, "page image is attached"
     end
 
+    test "compose_prompt carries the shared field contract through the base prompt" do
+      client = OllamaClient.new
+      request = {
+        "prompt" => QwenSemanticAdapter::PROMPT,
+        "document" => { "family" => "visual_pdf", "route" => "visual_model", "page_count" => 1 },
+        "parser_output" => { "text" => "digital layer text" }
+      }
+
+      composed = client.send(:compose_prompt, request)
+
+      # the nested contract reaches the model, not just the 10 top-level keys
+      assert_includes composed, "line_net_amount"
+      assert_includes composed, "payable_amount"
+      assert_includes composed, "Worked example"
+      assert_includes composed, "digital layer text"
+    end
+
+    test "compose_prompt no longer re-lists only the top-level keys and blocks stray source keys" do
+      client = OllamaClient.new
+      composed = client.send(:compose_prompt, { "prompt" => "BASE_PROMPT", "document" => { "family" => "image" } })
+
+      assert_includes composed, "BASE_PROMPT"
+      refute_includes composed, "Required top-level keys:"
+      assert_includes composed, "never add sha256 or byte_size"
+    end
+
     test "encode_images base64-encodes raw image bytes and drops blanks" do
       client = OllamaClient.new
       images = client.send(:encode_images, { "images_bytes" => [ "\x89PNG".b, "", nil ] })
