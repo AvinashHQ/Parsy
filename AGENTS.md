@@ -34,6 +34,8 @@ Rails 8.1.3 on Ruby 3.4.8 with PostgreSQL, default Rails layout, minitest (no rs
 
 - Workspace memory page: `../avinashhq_brain/projects/parsy.md`
 - Registry entry: `../projects.yaml` (slug: `parsy`)
+- Memory search (works from any cwd): `qmd search "<term>" -c avinashhq -n 5`; semantic: `env -u CI qmd query "<question>" -c avinashhq --no-rerank -n 5`
+- Session wrap-up: `../scripts/session-close --project parsy --summary -`
 
 
 ## Do not
