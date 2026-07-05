@@ -1,0 +1,8 @@
+[
+  {
+    "code": "PASSWORD_PROTECTED",
+    "severity": "HIGH",
+    "field_paths": [],
+    "resolution": "quarantine"
+  }
+]

@@ -68,6 +68,8 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Enforce the local CI coverage gate without slowing focused TDD runs.
+  gem "simplecov", "~> 0.22.0", require: false
 end
 
 gem "json_schemer", "~> 2.5"

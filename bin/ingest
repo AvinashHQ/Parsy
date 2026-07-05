@@ -9,7 +9,7 @@ require "digest"
 def print_usage
   puts "Usage: bin/ingest [fixture_id | all] [batch_name]"
   puts "\nAvailable Fixture IDs:"
-  manifest_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+  manifest_path = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/manifest.csv")
   if manifest_path.file?
     CSV.read(manifest_path, headers: true).each do |row|
       puts "  - #{row['fixture_id'].ljust(10)} : #{row['notes']}"
@@ -30,7 +30,7 @@ if fixture_id.nil? || fixture_id == "-h" || fixture_id == "--help"
   exit 1
 end
 
-manifest_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+manifest_path = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/manifest.csv")
 unless manifest_path.file?
   puts "Error: Manifest not found at #{manifest_path}"
   exit 1
@@ -70,7 +70,7 @@ selected_rows.each do |row|
 
   # Load ground truth if present
   if gt_path.present?
-    full_gt_path = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus", gt_path)
+    full_gt_path = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus", gt_path)
     invoice_hash = JSON.parse(full_gt_path.read)
     invoice = Canonical::Invoice.from_hash(invoice_hash)
   else

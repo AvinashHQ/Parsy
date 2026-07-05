@@ -1,0 +1,218 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_inv_013",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "MX",
+    "buyer_country": "MX",
+    "jurisdiction_candidates": [
+      "MX"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Luz Verde Consultoria SA de CV",
+    "legal_name": "Luz Verde Consultoria SA de CV",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "RFC",
+        "value": "LVC260101AB1",
+        "issuing_country": "MX",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "Paseo de la Reforma 120"
+      ],
+      "city": "Mexico City",
+      "subdivision": null,
+      "postal_code": "06600",
+      "country_code": "MX"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Orion Logistics Mexico SA",
+    "legal_name": "Orion Logistics Mexico SA",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "RFC",
+        "value": "OLM260110ZZ4",
+        "issuing_country": "MX",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "Avenida Hidalgo 88"
+      ],
+      "city": "Monterrey",
+      "subdivision": null,
+      "postal_code": "64000",
+      "country_code": "MX"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "LVC-2026-321",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "MXN",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Bank transfer within 10 days"
+  },
+  "references": [],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "18000.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "18000.00",
+    "total_tax_amount": "2880.00",
+    "tax_inclusive_amount": "20880.00",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "1800.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "19080.00"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "VAT",
+      "component": "IVA",
+      "jurisdiction_code": "MX",
+      "category_code": "STANDARD",
+      "rate": "16",
+      "taxable_amount": "18000.00",
+      "tax_amount": "2880.00",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "IVA 16%"
+    },
+    {
+      "tax_type": "WITHHOLDING",
+      "component": "ISR",
+      "jurisdiction_code": "MX",
+      "category_code": "WITHHELD",
+      "rate": "10",
+      "taxable_amount": "18000.00",
+      "tax_amount": "1800.00",
+      "payable_effect": "subtract",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "ISR withholding 10%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Professional advisory services",
+      "item_name": "Professional advisory services",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "18000.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "18000.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": "IVA",
+          "jurisdiction_code": "MX",
+          "category_code": "STANDARD",
+          "rate": "16",
+          "taxable_amount": "18000.00",
+          "tax_amount": "2880.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "IVA 16%"
+        },
+        {
+          "tax_type": "WITHHOLDING",
+          "component": "ISR",
+          "jurisdiction_code": "MX",
+          "category_code": "WITHHELD",
+          "rate": "10",
+          "taxable_amount": "18000.00",
+          "tax_amount": "1800.00",
+          "payable_effect": "subtract",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "ISR withholding 10%"
+        }
+      ],
+      "line_gross_amount": "19080.00",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "LVC-2026-321",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Bank transfer within 10 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "LVC-2026-321",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "MXN 19080.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "code": "PAYABLE_AMOUNT_MISMATCH",
+    "severity": "CRITICAL",
+    "field_paths": [
+      "/totals/payable_amount"
+    ],
+    "expected": "138.60",
+    "observed": "151.00",
+    "resolution": "operator_correction_required"
+  }
+]

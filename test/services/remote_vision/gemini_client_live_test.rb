@@ -13,7 +13,7 @@ module RemoteVision
   #     test/services/remote_vision/gemini_client_live_test.rb
   class GeminiClientLiveTest < ActiveSupport::TestCase
     IMAGE_FIXTURE = Rails.root.join(
-      "docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/documents/images/IMG-004_receipt.png"
+      "test/fixtures/files/invoice_parser/samples/synthetic_corpus/documents/images/IMG-004_receipt.png"
     )
 
     setup do

@@ -6,17 +6,17 @@ Parsy normalizes invoices into Canonical Invoice Schema v2, routes visual/struct
 
 ## Current milestone status
 
-The active implementation source is `docs/invoice-parser-post-m2-5-final/`.
+The retained executable evidence lives in `test/fixtures/files/invoice_parser/samples/`; broad historical product docs were intentionally removed from the app repo.
 
 | Milestone | Status | Current evidence |
 | --- | --- | --- |
-| M0 — Pilot contract and scope freeze | Complete, owner-declared | `docs/invoice-parser-post-m2-5-final/planning/milestone_status.csv`; GitHub milestone has no open issues |
+| M0 — Pilot contract and scope freeze | Complete, owner-declared | GitHub milestone has no open issues |
 | M1 — Canonical contract and deterministic core | Complete | Canonical schema/domain/currency/validator/export tests |
 | M2 — Safe intake and reproducible extraction | Complete | Upload inspection, routing, provider contract, repair, provenance, and structured-adapter tests |
 | M2.5 — Open-source extraction upgrade | Complete | Local parser/semantic route/benchmark tests over the final synthetic corpus manifest |
 | M3 — Human review and safe acceptance | Complete | Review workflow, 50-document keyboard system flow, immutable approval, and approved-only export tests |
 | M4 — Security, privacy, reliability, deployment | Complete | Tenant isolation, private storage, purge, content-free logging, quota, restore, privacy, production config, upload-abuse, Brakeman, and dependency-audit gates |
-| M4.5 — Cloud extraction and database delivery | Planned | MVP pivot: cloud vision extraction (fixes the 0% schema-valid local model) + push approved invoices into an operator-configured external database. See `docs/invoice-parser-post-m2-5-final/docs/25_ZIP_TO_DB_MVP_PLAN.md` and GitHub milestone M4.5 |
+| M4.5 — Cloud extraction and database delivery | Planned | MVP pivot: cloud vision extraction (fixes the 0% schema-valid local model) + push approved invoices into an operator-configured external database. See GitHub milestone M4.5 |
 | M5 — Closed live MVP test | Planned | Pilots the M4.5 flow; requires M4.5 delivery, then real supervised pilot operating evidence |
 | M6 — First demanded regional capability | Deferred | Chosen only after M5 demand evidence |
 
@@ -32,12 +32,12 @@ Boundary: M0-M2 include owner-declared/product evidence plus implemented regress
 - Review batches/documents/revisions/findings/evidence, risk queue, high-risk evidence focus, locale/profile overrides, immutable approved revisions, and approved-only exports.
 - Invite/operator-token authentication, tenant-scoped controllers, private Active Storage export downloads, retention purge evidence, restore verification, privacy launch checks, spend guard/circuit breaker, and production security config invariants.
 
-## Final docs sample coverage
+## Retained sample fixture coverage
 
-The final docs sample package lives at:
+The retained sample package lives at:
 
 ```text
-docs/invoice-parser-post-m2-5-final/samples/
+test/fixtures/files/invoice_parser/samples/
 ```
 
 Automated sample coverage:
@@ -57,18 +57,18 @@ Automated sample coverage:
 Run the focused sample gate:
 
 ```bash
-timeout 120 rbenv exec ruby bin/rails test test/services/evaluation/final_docs_samples_test.rb
+ruby bin/rails test test/services/evaluation/final_docs_samples_test.rb
 ```
 
 Run the focused intake regression gate:
 
 ```bash
-timeout 120 rbenv exec ruby bin/rails test test/services/intake/upload_inspector_test.rb
+ruby bin/rails test test/services/intake/upload_inspector_test.rb
 ```
 
 ## Prerequisites
 
-- Ruby 3.4.8 via rbenv.
+- Ruby 3.4.8. On this workstation Ruby is managed by mise; run Rails through `ruby bin/rails ...`.
 - PostgreSQL available locally.
 - Bundler.
 - Chrome/Chromium for Selenium system tests.
@@ -77,16 +77,10 @@ timeout 120 rbenv exec ruby bin/rails test test/services/intake/upload_inspector
 ## Local setup
 
 ```bash
-rbenv local 3.4.8
 bundle install
 cp .env.example .env
-bin/rails db:prepare
-```
-
-If `bin/rails` resolves to the macOS system Ruby, run Rails commands through rbenv explicitly:
-
-```bash
-RBENV_VERSION=3.4.8 rbenv exec ruby bin/rails zeitwerk:check
+brew services start postgresql@16
+ruby bin/rails db:prepare
 ```
 
 ## Extraction provider (M4.5)
@@ -104,7 +98,7 @@ RBENV_VERSION=3.4.8 rbenv exec ruby bin/rails zeitwerk:check
 The app is invite/operator-token gated. Seeds are intentionally empty, so create a development tenant and operator in the Rails console:
 
 ```bash
-rbenv exec ruby bin/rails console
+ruby bin/rails console
 ```
 
 ```ruby
@@ -147,37 +141,60 @@ http://localhost:3000
 Routes:
 
 - `/session/new` — operator-token sign in.
+- `/review/upload/new` — operator ZIP/PDF/image/XML intake.
 - `/review/batches` — tenant-scoped batch list.
 - `/review/batches/:id` — batch progress and risk queue.
 - `/review/documents/:id` — evidence-backed document review/editor.
 - `/up` — health check.
 
-Current UI scope: review and export workflows. There is no public upload form route yet; intake/extraction are service-layer/test-harness workflows at this milestone.
+Current UI scope: authenticated upload, review, approval, and export workflows. Remaining M4.5 external-database push work is intentionally outside the current demo scope until the DB mapping feature is implemented.
+
+## Engineering workflow
+
+Parsy follows a red-green-refactor loop:
+
+1. Write or update the smallest behavior test that captures the contract.
+2. Run the focused test file while iterating.
+3. Refactor behind the green test, keeping service objects small and dependencies injected at boundaries.
+4. Run the local CI gate before merging.
+
+Service boundaries should stay SOLID-friendly:
+
+- Controllers authenticate, authorize tenant scope, and orchestrate only.
+- Intake, extraction, validation, review, export, and security behavior lives in explicit service/value objects.
+- External providers sit behind adapter/client interfaces; tests use deterministic fakes at those boundaries.
+- Approval-gated actions remain explicit operator decisions, never hidden callbacks.
 
 ## Verification commands
 
 Run the complete local CI gate:
 
 ```bash
-timeout 180 rbenv exec ruby bin/ci
+ruby bin/ci
 ```
 
 Run Rails tests only:
 
 ```bash
-timeout 180 rbenv exec ruby bin/rails test
+ruby bin/rails test
+```
+
+Run Rails tests with the enforced line-coverage gate:
+
+```bash
+COVERAGE=true ruby bin/rails test
 ```
 
 Run system tests only:
 
 ```bash
-timeout 120 rbenv exec ruby bin/rails test:system
+ruby bin/rails test:system
 ```
 
 Run the milestone/sample gate used for M1-M4 validation:
 
 ```bash
-timeout 180 rbenv exec ruby bin/rails test test/models test/services test/controllers test/config test/system
+ruby bin/rails test test/models test/services test/controllers test/config test/system
 ```
 
 CI includes:
@@ -187,7 +204,7 @@ CI includes:
 - bundler-audit
 - importmap audit
 - Brakeman with warnings as failures
-- Rails tests
+- Rails tests with `COVERAGE=true` and a 90% minimum line-coverage gate
 - Selenium system tests
 - seed replant
 
@@ -212,5 +229,6 @@ Do not claim launch readiness from CI alone. M5 still needs real closed-pilot op
 - `config/format_registry.yml` — format and route registry.
 - `config/validation_rules.yml` — deterministic validation rules.
 - `prompts/` — extraction and repair prompts.
-- `docs/invoice-parser-post-m2-5-final/` — current product, architecture, planning, sample, and evidence pack.
+- `test/fixtures/files/invoice_parser/samples/` — retained sample corpus required by automated tests.
+- `config/blocking_errors.yml` — pilot blocking-error severity and behavior rules consumed by `Canonical::UniversalEngine`.
 - `test/services/evaluation/final_docs_samples_test.rb` — final docs sample verification.

@@ -12,11 +12,15 @@ session wrap-up protocol live in `../AGENTS.md` (auto-loaded by most harnesses).
 <!-- Verified commands only. Keep in sync with `commands:` in ../projects.yaml. -->
 - `dev`: `bin/rails server`
 - `test`: `bin/rails test`
+- `coverage`: `COVERAGE=true ruby bin/rails test` (90% minimum line coverage)
+- `ci`: `ruby bin/ci`
 
 ## Architecture
 
 Rails 8.1.3 on Ruby 3.4.8 with PostgreSQL, default Rails layout, minitest (no rspec).
-<!-- Deepen this module map after the next substantive session. -->
+Current demo scope is authenticated upload/review/approval/export; remaining M4.5 external-database delivery is not part of the stabilized demo unless explicitly requested.
+
+Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped requests only; intake/extraction/validation/review/export behavior belongs in service/value objects; external providers stay behind adapters/clients with deterministic fakes in tests; approval-gated side effects require explicit operator action.
 
 ## Dev environment (this machine)
 

@@ -1,0 +1,10 @@
+[
+  {
+    "code": "AMBIGUOUS_INVOICE_NUMBER",
+    "severity": "HIGH",
+    "field_paths": [
+      "/invoice/number"
+    ],
+    "resolution": "operator_confirmation_required"
+  }
+]

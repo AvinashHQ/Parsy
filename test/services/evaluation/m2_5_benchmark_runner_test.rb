@@ -6,7 +6,7 @@ require_relative "../../../app/services/evaluation/m2_5_benchmark_runner"
 
 module Evaluation
   class M25BenchmarkRunnerTest < Minitest::Test
-    MANIFEST_PATH = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+    MANIFEST_PATH = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/manifest.csv")
 
     def test_report_represents_all_29_synthetic_fixtures
       report = run_report
