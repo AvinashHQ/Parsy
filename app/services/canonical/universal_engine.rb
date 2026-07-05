@@ -14,7 +14,7 @@ module Canonical
       /totals/payable_amount
     ].freeze
 
-    def initialize(schema_validator: SchemaValidator.new, validation_rules_path: Rails.root.join("config/validation_rules.yml"), blocking_rules_path: Rails.root.join("docs/invoice-parser-m0-approved-handoff/pilot/BLOCKING_ERRORS_V1.yaml"))
+    def initialize(schema_validator: SchemaValidator.new, validation_rules_path: Rails.root.join("config/validation_rules.yml"), blocking_rules_path: Rails.root.join("config/blocking_errors.yml"))
       @schema_validator = schema_validator
       @validation_rules_path = Pathname(validation_rules_path)
       @blocking_rules_path = Pathname(blocking_rules_path)

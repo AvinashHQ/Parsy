@@ -1,0 +1,223 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_inv_008",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "CA",
+    "buyer_country": "CA",
+    "jurisdiction_candidates": [
+      "CA"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Maple Ridge Equipment Inc",
+    "legal_name": "Maple Ridge Equipment Inc",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "BN",
+        "value": "812345678RT0001",
+        "issuing_country": "CA",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "120 King Street West"
+      ],
+      "city": "Toronto",
+      "subdivision": null,
+      "postal_code": "M5V 2T6",
+      "country_code": "CA"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Northern Trail Foods Ltd",
+    "legal_name": "Northern Trail Foods Ltd",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "BN",
+        "value": "701234567RT0001",
+        "issuing_country": "CA",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "55 Water Street"
+      ],
+      "city": "Vancouver",
+      "subdivision": null,
+      "postal_code": "V6B 1A1",
+      "country_code": "CA"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "MRE-22671",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "CAD",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "738.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "738.00",
+    "total_tax_amount": "95.94",
+    "tax_inclusive_amount": "833.94",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "833.94"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "GST",
+      "component": "HST",
+      "jurisdiction_code": "CA-ON",
+      "category_code": "STANDARD",
+      "rate": "13",
+      "taxable_amount": "738.00",
+      "tax_amount": "95.94",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "HST 13%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Commercial mixer replacement part",
+      "item_name": "Commercial mixer replacement part",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "EA",
+      "unit_price": "345.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "690.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "GST",
+          "component": "HST",
+          "jurisdiction_code": "CA-ON",
+          "category_code": "STANDARD",
+          "rate": "13",
+          "taxable_amount": "690.00",
+          "tax_amount": "89.70",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "HST 13%"
+        }
+      ],
+      "line_gross_amount": "779.70",
+      "service_period": null
+    },
+    {
+      "line_id": "line_2",
+      "line_no": 2,
+      "description": "Courier freight",
+      "item_name": "Courier freight",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "48.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "48.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "GST",
+          "component": "HST",
+          "jurisdiction_code": "CA-ON",
+          "category_code": "STANDARD",
+          "rate": "13",
+          "taxable_amount": "48.00",
+          "tax_amount": "6.24",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "HST 13%"
+        }
+      ],
+      "line_gross_amount": "54.24",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "MRE-22671",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "MRE-22671",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "CAD 833.94",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

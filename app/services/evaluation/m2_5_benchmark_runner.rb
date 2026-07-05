@@ -6,7 +6,7 @@ require "digest"
 
 module Evaluation
   class M25BenchmarkRunner
-    DEFAULT_MANIFEST = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
+    DEFAULT_MANIFEST = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/manifest.csv")
 
     def initialize(manifest_path: DEFAULT_MANIFEST, route_runner:, version_context: {}, real_corpus_report: nil)
       @manifest_path = Pathname(manifest_path)

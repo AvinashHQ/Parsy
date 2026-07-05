@@ -1,0 +1,13 @@
+[
+  {
+    "code": "DUPLICATE_CANDIDATE",
+    "severity": "HIGH",
+    "field_paths": [
+      "/supplier/identifiers",
+      "/invoice/number",
+      "/totals/payable_amount"
+    ],
+    "duplicate_of": "INV-017A",
+    "resolution": "operator_confirmation_required"
+  }
+]

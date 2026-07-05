@@ -25,8 +25,8 @@ module Evaluation
   # ones Extraction::DocumentExtractor uses in production) so image fixtures
   # are actually read from pixels.
   class LLMBenchmark
-    MANIFEST_PATH = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/manifest.csv")
-    CORPUS_ROOT = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus")
+    MANIFEST_PATH = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/manifest.csv")
+    CORPUS_ROOT = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus")
     CSV_HEADERS = %w[fixture_id expected_route expected_status result_status schema_valid fields_matched fields_total accuracy latency_ms memory_kb error_code].freeze
 
     FIELDS = [

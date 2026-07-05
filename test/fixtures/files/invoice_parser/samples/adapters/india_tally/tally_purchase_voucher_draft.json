@@ -1,0 +1,31 @@
+{
+  "_notice": "Illustrative draft only. Confirm ledger names and current TallyPrime import schema in a test company before use.",
+  "voucher": {
+    "voucher_type": "Purchase",
+    "date": "20260615",
+    "reference": "INV-1042",
+    "party_ledger": "Example Supplies Pvt Ltd",
+    "entries": [
+      {
+        "ledger": "Purchase @ 18%",
+        "amount": 1000.0,
+        "debit": true
+      },
+      {
+        "ledger": "Input CGST",
+        "amount": 90.0,
+        "debit": true
+      },
+      {
+        "ledger": "Input SGST",
+        "amount": 90.0,
+        "debit": true
+      },
+      {
+        "ledger": "Example Supplies Pvt Ltd",
+        "amount": 1180.0,
+        "debit": false
+      }
+    ]
+  }
+}

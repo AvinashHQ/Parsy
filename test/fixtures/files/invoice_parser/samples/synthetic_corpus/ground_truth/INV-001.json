@@ -1,0 +1,230 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_inv_001",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "US",
+    "buyer_country": "US",
+    "jurisdiction_candidates": [
+      "US"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Blue Mesa Office Supply LLC",
+    "legal_name": "Blue Mesa Office Supply LLC",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "EIN",
+        "value": "84-7392011",
+        "issuing_country": "US",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "401 Congress Avenue"
+      ],
+      "city": "Austin",
+      "subdivision": null,
+      "postal_code": "78701",
+      "country_code": "US"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Cobalt Workshop Inc",
+    "legal_name": "Cobalt Workshop Inc",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "EIN",
+        "value": "91-4920071",
+        "issuing_country": "US",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "81 Pine Street"
+      ],
+      "city": "Seattle",
+      "subdivision": null,
+      "postal_code": "98101",
+      "country_code": "US"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "US-260629-001",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "USD",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [
+    {
+      "type": "purchase_order",
+      "value": "PO-9821",
+      "scheme": null,
+      "issue_date": null
+    }
+  ],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "358.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "358.00",
+    "total_tax_amount": "29.54",
+    "tax_inclusive_amount": "387.54",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "387.54"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "SALES_TAX",
+      "component": null,
+      "jurisdiction_code": "US-TX",
+      "category_code": "STANDARD",
+      "rate": "8.25",
+      "taxable_amount": "358.00",
+      "tax_amount": "29.54",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "Texas sales tax 8.25%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Ergonomic keyboard",
+      "item_name": "Ergonomic keyboard",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "EA",
+      "unit_price": "89.50",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "179.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "SALES_TAX",
+          "component": null,
+          "jurisdiction_code": "US-TX",
+          "category_code": "STANDARD",
+          "rate": "8.25",
+          "taxable_amount": "179.00",
+          "tax_amount": "14.77",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "Texas sales tax 8.25%"
+        }
+      ],
+      "line_gross_amount": "193.77",
+      "service_period": null
+    },
+    {
+      "line_id": "line_2",
+      "line_no": 2,
+      "description": "USB-C docking station",
+      "item_name": "USB-C docking station",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "179.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "179.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "SALES_TAX",
+          "component": null,
+          "jurisdiction_code": "US-TX",
+          "category_code": "STANDARD",
+          "rate": "8.25",
+          "taxable_amount": "179.00",
+          "tax_amount": "14.77",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "Texas sales tax 8.25%"
+        }
+      ],
+      "line_gross_amount": "193.77",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "US-260629-001",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "US-260629-001",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "USD 387.54",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

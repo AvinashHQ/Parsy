@@ -10,9 +10,8 @@ module LocalExtraction
   # page image bytes into OCR text. Responds to #call (and #extract) as
   # expected by LocalExtraction::OcrEvidenceAdapter.
   #
-  # PaddleOCR-VL-1.6 is the OCR model named in
-  # docs/invoice-parser-post-m2-5-final/docs/19_OPEN_SOURCE_MODEL_STRATEGY.md,
-  # but the only Ollama-packaged build available (MedAIBase/PaddleOCR-VL) ships
+  # PaddleOCR-VL-1.6 was the originally planned OCR model, but the only
+  # Ollama-packaged build available (MedAIBase/PaddleOCR-VL) ships
   # without the vision projector and rejects image input outright ("image
   # input is not supported - hint: if this is unexpected, you may need to
   # provide the mmproj"). GLM-OCR is officially published on Ollama, MIT

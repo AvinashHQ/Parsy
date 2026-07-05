@@ -1,0 +1,201 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_img_004",
+  "document_type": "receipt",
+  "source": {
+    "family": "image",
+    "route": "visual_model",
+    "mime_type": "image/png",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "US",
+    "buyer_country": null,
+    "jurisdiction_candidates": [
+      "US"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Blue Mesa Office Supply LLC",
+    "legal_name": "Blue Mesa Office Supply LLC",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "EIN",
+        "value": "84-7392011",
+        "issuing_country": "US",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "401 Congress Avenue"
+      ],
+      "city": "Austin",
+      "subdivision": null,
+      "postal_code": "78701",
+      "country_code": "US"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": null,
+  "payee": null,
+  "invoice": {
+    "number": "R-884201",
+    "issue_date": "2026-06-29",
+    "due_date": null,
+    "tax_point_date": null,
+    "currency": "USD",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Paid by card"
+  },
+  "references": [],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "22.25",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "22.25",
+    "total_tax_amount": "1.84",
+    "tax_inclusive_amount": "24.09",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "24.09"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "SALES_TAX",
+      "component": null,
+      "jurisdiction_code": "US-TX",
+      "category_code": "STANDARD",
+      "rate": "8.25",
+      "taxable_amount": "22.25",
+      "tax_amount": "1.84",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "Sales tax 8.25%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Notebook",
+      "item_name": "Notebook",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "EA",
+      "unit_price": "6.50",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "13.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "SALES_TAX",
+          "component": null,
+          "jurisdiction_code": "US-TX",
+          "category_code": "STANDARD",
+          "rate": "8.25",
+          "taxable_amount": "13.00",
+          "tax_amount": "1.08",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "Sales tax 8.25%"
+        }
+      ],
+      "line_gross_amount": "14.08",
+      "service_period": null
+    },
+    {
+      "line_id": "line_2",
+      "line_no": 2,
+      "description": "Gel pen pack",
+      "item_name": "Gel pen pack",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "9.25",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "9.25",
+      "tax_breakdowns": [
+        {
+          "tax_type": "SALES_TAX",
+          "component": null,
+          "jurisdiction_code": "US-TX",
+          "category_code": "STANDARD",
+          "rate": "8.25",
+          "taxable_amount": "9.25",
+          "tax_amount": "0.76",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "Sales tax 8.25%"
+        }
+      ],
+      "line_gross_amount": "10.01",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "48",
+        "type_label": "Payment card",
+        "payment_reference": "R-884201",
+        "account_last4": "4242",
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Paid"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "R-884201",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "USD 24.09",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

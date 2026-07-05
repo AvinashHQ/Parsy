@@ -1,0 +1,1551 @@
+{
+  "schema_version": "2.0",
+  "document_id": "synthetic_img_005",
+  "document_type": "invoice",
+  "source": {
+    "family": "image",
+    "route": "visual_model",
+    "mime_type": "image/tiff",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 2,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en",
+    "script": "Latn",
+    "supplier_country": "DE",
+    "buyer_country": "FR",
+    "jurisdiction_candidates": [
+      "DE",
+      "FR"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Rhein Data GmbH",
+    "legal_name": "Rhein Data GmbH",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "DE321654987",
+        "issuing_country": "DE",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "22 Lindenstrasse"
+      ],
+      "city": "Berlin",
+      "subdivision": null,
+      "postal_code": "10115",
+      "country_code": "DE"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Example Buyer SAS",
+    "legal_name": "Example Buyer SAS",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "FRXX123456789",
+        "issuing_country": "FR",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "20 Rue Exemple"
+      ],
+      "city": "Paris",
+      "subdivision": null,
+      "postal_code": "75001",
+      "country_code": "FR"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "RD-2026-889",
+    "issue_date": "2026-06-29",
+    "due_date": "2026-07-29",
+    "tax_point_date": null,
+    "currency": "EUR",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [
+    {
+      "type": "project",
+      "value": "MIGRATION-ALPHA",
+      "scheme": null,
+      "issue_date": null
+    }
+  ],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "20636.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "20636.00",
+    "total_tax_amount": "3920.84",
+    "tax_inclusive_amount": "24556.84",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "24556.84"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "VAT",
+      "component": null,
+      "jurisdiction_code": "DE",
+      "category_code": "S",
+      "rate": "19",
+      "taxable_amount": "20636.00",
+      "tax_amount": "3920.84",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "VAT 19%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Migration work package 01",
+      "item_name": "Migration work package 01",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "83.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "166.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "166.00",
+          "tax_amount": "31.54",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "197.54",
+      "service_period": null
+    },
+    {
+      "line_id": "line_2",
+      "line_no": 2,
+      "description": "Migration work package 02",
+      "item_name": "Migration work package 02",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "91.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "273.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "273.00",
+          "tax_amount": "51.87",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "324.87",
+      "service_period": null
+    },
+    {
+      "line_id": "line_3",
+      "line_no": 3,
+      "description": "Migration work package 03",
+      "item_name": "Migration work package 03",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "99.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "99.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "99.00",
+          "tax_amount": "18.81",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "117.81",
+      "service_period": null
+    },
+    {
+      "line_id": "line_4",
+      "line_no": 4,
+      "description": "Migration work package 04",
+      "item_name": "Migration work package 04",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "107.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "214.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "214.00",
+          "tax_amount": "40.66",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "254.66",
+      "service_period": null
+    },
+    {
+      "line_id": "line_5",
+      "line_no": 5,
+      "description": "Migration work package 05",
+      "item_name": "Migration work package 05",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "115.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "345.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "345.00",
+          "tax_amount": "65.55",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "410.55",
+      "service_period": null
+    },
+    {
+      "line_id": "line_6",
+      "line_no": 6,
+      "description": "Migration work package 06",
+      "item_name": "Migration work package 06",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "123.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "123.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "123.00",
+          "tax_amount": "23.37",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "146.37",
+      "service_period": null
+    },
+    {
+      "line_id": "line_7",
+      "line_no": 7,
+      "description": "Migration work package 07",
+      "item_name": "Migration work package 07",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "131.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "262.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "262.00",
+          "tax_amount": "49.78",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "311.78",
+      "service_period": null
+    },
+    {
+      "line_id": "line_8",
+      "line_no": 8,
+      "description": "Migration work package 08",
+      "item_name": "Migration work package 08",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "139.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "417.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "417.00",
+          "tax_amount": "79.23",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "496.23",
+      "service_period": null
+    },
+    {
+      "line_id": "line_9",
+      "line_no": 9,
+      "description": "Migration work package 09",
+      "item_name": "Migration work package 09",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "147.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "147.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "147.00",
+          "tax_amount": "27.93",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "174.93",
+      "service_period": null
+    },
+    {
+      "line_id": "line_10",
+      "line_no": 10,
+      "description": "Migration work package 10",
+      "item_name": "Migration work package 10",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "155.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "310.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "310.00",
+          "tax_amount": "58.90",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "368.90",
+      "service_period": null
+    },
+    {
+      "line_id": "line_11",
+      "line_no": 11,
+      "description": "Migration work package 11",
+      "item_name": "Migration work package 11",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "163.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "489.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "489.00",
+          "tax_amount": "92.91",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "581.91",
+      "service_period": null
+    },
+    {
+      "line_id": "line_12",
+      "line_no": 12,
+      "description": "Migration work package 12",
+      "item_name": "Migration work package 12",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "171.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "171.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "171.00",
+          "tax_amount": "32.49",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "203.49",
+      "service_period": null
+    },
+    {
+      "line_id": "line_13",
+      "line_no": 13,
+      "description": "Migration work package 13",
+      "item_name": "Migration work package 13",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "179.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "358.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "358.00",
+          "tax_amount": "68.02",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "426.02",
+      "service_period": null
+    },
+    {
+      "line_id": "line_14",
+      "line_no": 14,
+      "description": "Migration work package 14",
+      "item_name": "Migration work package 14",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "187.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "561.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "561.00",
+          "tax_amount": "106.59",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "667.59",
+      "service_period": null
+    },
+    {
+      "line_id": "line_15",
+      "line_no": 15,
+      "description": "Migration work package 15",
+      "item_name": "Migration work package 15",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "195.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "195.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "195.00",
+          "tax_amount": "37.05",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "232.05",
+      "service_period": null
+    },
+    {
+      "line_id": "line_16",
+      "line_no": 16,
+      "description": "Migration work package 16",
+      "item_name": "Migration work package 16",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "203.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "406.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "406.00",
+          "tax_amount": "77.14",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "483.14",
+      "service_period": null
+    },
+    {
+      "line_id": "line_17",
+      "line_no": 17,
+      "description": "Migration work package 17",
+      "item_name": "Migration work package 17",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "211.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "633.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "633.00",
+          "tax_amount": "120.27",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "753.27",
+      "service_period": null
+    },
+    {
+      "line_id": "line_18",
+      "line_no": 18,
+      "description": "Migration work package 18",
+      "item_name": "Migration work package 18",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "219.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "219.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "219.00",
+          "tax_amount": "41.61",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "260.61",
+      "service_period": null
+    },
+    {
+      "line_id": "line_19",
+      "line_no": 19,
+      "description": "Migration work package 19",
+      "item_name": "Migration work package 19",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "227.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "454.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "454.00",
+          "tax_amount": "86.26",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "540.26",
+      "service_period": null
+    },
+    {
+      "line_id": "line_20",
+      "line_no": 20,
+      "description": "Migration work package 20",
+      "item_name": "Migration work package 20",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "235.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "705.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "705.00",
+          "tax_amount": "133.95",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "838.95",
+      "service_period": null
+    },
+    {
+      "line_id": "line_21",
+      "line_no": 21,
+      "description": "Migration work package 21",
+      "item_name": "Migration work package 21",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "243.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "243.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "243.00",
+          "tax_amount": "46.17",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "289.17",
+      "service_period": null
+    },
+    {
+      "line_id": "line_22",
+      "line_no": 22,
+      "description": "Migration work package 22",
+      "item_name": "Migration work package 22",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "251.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "502.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "502.00",
+          "tax_amount": "95.38",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "597.38",
+      "service_period": null
+    },
+    {
+      "line_id": "line_23",
+      "line_no": 23,
+      "description": "Migration work package 23",
+      "item_name": "Migration work package 23",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "259.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "777.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "777.00",
+          "tax_amount": "147.63",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "924.63",
+      "service_period": null
+    },
+    {
+      "line_id": "line_24",
+      "line_no": 24,
+      "description": "Migration work package 24",
+      "item_name": "Migration work package 24",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "267.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "267.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "267.00",
+          "tax_amount": "50.73",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "317.73",
+      "service_period": null
+    },
+    {
+      "line_id": "line_25",
+      "line_no": 25,
+      "description": "Migration work package 25",
+      "item_name": "Migration work package 25",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "275.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "550.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "550.00",
+          "tax_amount": "104.50",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "654.50",
+      "service_period": null
+    },
+    {
+      "line_id": "line_26",
+      "line_no": 26,
+      "description": "Migration work package 26",
+      "item_name": "Migration work package 26",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "283.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "849.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "849.00",
+          "tax_amount": "161.31",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1010.31",
+      "service_period": null
+    },
+    {
+      "line_id": "line_27",
+      "line_no": 27,
+      "description": "Migration work package 27",
+      "item_name": "Migration work package 27",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "291.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "291.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "291.00",
+          "tax_amount": "55.29",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "346.29",
+      "service_period": null
+    },
+    {
+      "line_id": "line_28",
+      "line_no": 28,
+      "description": "Migration work package 28",
+      "item_name": "Migration work package 28",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "299.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "598.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "598.00",
+          "tax_amount": "113.62",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "711.62",
+      "service_period": null
+    },
+    {
+      "line_id": "line_29",
+      "line_no": 29,
+      "description": "Migration work package 29",
+      "item_name": "Migration work package 29",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "307.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "921.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "921.00",
+          "tax_amount": "174.99",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1095.99",
+      "service_period": null
+    },
+    {
+      "line_id": "line_30",
+      "line_no": 30,
+      "description": "Migration work package 30",
+      "item_name": "Migration work package 30",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "315.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "315.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "315.00",
+          "tax_amount": "59.85",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "374.85",
+      "service_period": null
+    },
+    {
+      "line_id": "line_31",
+      "line_no": 31,
+      "description": "Migration work package 31",
+      "item_name": "Migration work package 31",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "323.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "646.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "646.00",
+          "tax_amount": "122.74",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "768.74",
+      "service_period": null
+    },
+    {
+      "line_id": "line_32",
+      "line_no": 32,
+      "description": "Migration work package 32",
+      "item_name": "Migration work package 32",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "331.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "993.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "993.00",
+          "tax_amount": "188.67",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1181.67",
+      "service_period": null
+    },
+    {
+      "line_id": "line_33",
+      "line_no": 33,
+      "description": "Migration work package 33",
+      "item_name": "Migration work package 33",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "339.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "339.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "339.00",
+          "tax_amount": "64.41",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "403.41",
+      "service_period": null
+    },
+    {
+      "line_id": "line_34",
+      "line_no": 34,
+      "description": "Migration work package 34",
+      "item_name": "Migration work package 34",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "347.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "694.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "694.00",
+          "tax_amount": "131.86",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "825.86",
+      "service_period": null
+    },
+    {
+      "line_id": "line_35",
+      "line_no": 35,
+      "description": "Migration work package 35",
+      "item_name": "Migration work package 35",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "355.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "1065.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "1065.00",
+          "tax_amount": "202.35",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1267.35",
+      "service_period": null
+    },
+    {
+      "line_id": "line_36",
+      "line_no": 36,
+      "description": "Migration work package 36",
+      "item_name": "Migration work package 36",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "363.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "363.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "363.00",
+          "tax_amount": "68.97",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "431.97",
+      "service_period": null
+    },
+    {
+      "line_id": "line_37",
+      "line_no": 37,
+      "description": "Migration work package 37",
+      "item_name": "Migration work package 37",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "371.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "742.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "742.00",
+          "tax_amount": "140.98",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "882.98",
+      "service_period": null
+    },
+    {
+      "line_id": "line_38",
+      "line_no": 38,
+      "description": "Migration work package 38",
+      "item_name": "Migration work package 38",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "379.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "1137.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "1137.00",
+          "tax_amount": "216.03",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1353.03",
+      "service_period": null
+    },
+    {
+      "line_id": "line_39",
+      "line_no": 39,
+      "description": "Migration work package 39",
+      "item_name": "Migration work package 39",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "387.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "387.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "387.00",
+          "tax_amount": "73.53",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "460.53",
+      "service_period": null
+    },
+    {
+      "line_id": "line_40",
+      "line_no": 40,
+      "description": "Migration work package 40",
+      "item_name": "Migration work package 40",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "2",
+      "unit_code": "HUR",
+      "unit_price": "395.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "790.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "790.00",
+          "tax_amount": "150.10",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "940.10",
+      "service_period": null
+    },
+    {
+      "line_id": "line_41",
+      "line_no": 41,
+      "description": "Migration work package 41",
+      "item_name": "Migration work package 41",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "403.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "1209.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "1209.00",
+          "tax_amount": "229.71",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "1438.71",
+      "service_period": null
+    },
+    {
+      "line_id": "line_42",
+      "line_no": 42,
+      "description": "Migration work package 42",
+      "item_name": "Migration work package 42",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "HUR",
+      "unit_price": "411.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "411.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "DE",
+          "category_code": "S",
+          "rate": "19",
+          "taxable_amount": "411.00",
+          "tax_amount": "78.09",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 19%"
+        }
+      ],
+      "line_gross_amount": "489.09",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "RD-2026-889",
+        "account_last4": null,
+        "iban_last4": null,
+        "bic": null
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "RD-2026-889",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "2026-06-29",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 2,
+      "source_path": null,
+      "text": "EUR 24556.84",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

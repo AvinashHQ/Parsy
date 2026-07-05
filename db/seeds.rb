@@ -25,7 +25,7 @@ end
 
 # Each sample fixture is paired with a real, renderable invoice from the synthetic
 # corpus so the side-by-side review screen shows an actual document in the source pane.
-corpus = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples/synthetic_corpus/documents")
+corpus = Rails.root.join("test/fixtures/files/invoice_parser/samples/synthetic_corpus/documents")
 sample_fixtures = [
   { filename: "fix_001_minimal_visual_usd.json", name: "Minimal USD Invoice",     source: "images/IMG-004_receipt.png",                             mime: "image/png" },
   { filename: "fix_002_credit_note_gbp.json",    name: "Credit Note GBP",         source: "pdf/inv-009_eur_credit_note.pdf",                        mime: "application/pdf" },

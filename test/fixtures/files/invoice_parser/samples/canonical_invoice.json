@@ -1,0 +1,198 @@
+{
+  "schema_version": "2.0",
+  "document_id": "doc_demo_global_0001",
+  "document_type": "invoice",
+  "source": {
+    "family": "visual_pdf",
+    "route": "visual_model",
+    "mime_type": "application/pdf",
+    "profile": null,
+    "profile_version": null,
+    "page_count": 1,
+    "has_embedded_structured_data": false
+  },
+  "locale": {
+    "document_language": "en-GB",
+    "script": "Latn",
+    "supplier_country": "GB",
+    "buyer_country": "FR",
+    "jurisdiction_candidates": [
+      "GB",
+      "FR"
+    ],
+    "applied_region_pack": {
+      "id": "global_generic_v1",
+      "version": "1.0.0",
+      "resolution": "generic_fallback"
+    }
+  },
+  "supplier": {
+    "display_name": "Northstar Services Ltd",
+    "legal_name": "Northstar Services Ltd",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "GB123456789",
+        "issuing_country": "GB",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "10 Example Street"
+      ],
+      "city": "London",
+      "subdivision": null,
+      "postal_code": "EC1A 1AA",
+      "country_code": "GB"
+    },
+    "electronic_addresses": []
+  },
+  "buyer": {
+    "display_name": "Example Buyer SAS",
+    "legal_name": "Example Buyer SAS",
+    "trading_name": null,
+    "identifiers": [
+      {
+        "scheme": "VAT",
+        "value": "FRXX123456789",
+        "issuing_country": "FR",
+        "purpose": "tax"
+      }
+    ],
+    "address": {
+      "lines": [
+        "20 Rue Exemple"
+      ],
+      "city": "Paris",
+      "subdivision": null,
+      "postal_code": "75001",
+      "country_code": "FR"
+    },
+    "electronic_addresses": []
+  },
+  "payee": null,
+  "invoice": {
+    "number": "INV-2026-1042",
+    "issue_date": "2026-06-15",
+    "due_date": "2026-07-15",
+    "tax_point_date": null,
+    "currency": "EUR",
+    "tax_currency": null,
+    "service_period": null,
+    "payment_terms_text": "Payment due in 30 days"
+  },
+  "references": [
+    {
+      "type": "purchase_order",
+      "value": "PO-8842",
+      "scheme": null,
+      "issue_date": null
+    }
+  ],
+  "allowances_charges": [],
+  "totals": {
+    "line_extension_amount": "1000.00",
+    "allowance_total_amount": "0.00",
+    "charge_total_amount": "0.00",
+    "tax_exclusive_amount": "1000.00",
+    "total_tax_amount": "200.00",
+    "tax_inclusive_amount": "1200.00",
+    "prepaid_amount": "0.00",
+    "withholding_total_amount": "0.00",
+    "rounding_amount": "0.00",
+    "payable_amount": "1200.00"
+  },
+  "tax_breakdowns": [
+    {
+      "tax_type": "VAT",
+      "component": null,
+      "jurisdiction_code": "GB",
+      "category_code": "S",
+      "rate": "20",
+      "taxable_amount": "1000.00",
+      "tax_amount": "200.00",
+      "payable_effect": "add",
+      "exemption_code": null,
+      "exemption_reason": null,
+      "reverse_charge": false,
+      "source_label": "VAT 20%"
+    }
+  ],
+  "line_items": [
+    {
+      "line_id": "line_1",
+      "line_no": 1,
+      "description": "Consulting services",
+      "item_name": "Consulting services",
+      "seller_item_id": null,
+      "buyer_item_id": null,
+      "classifications": [],
+      "quantity": "1",
+      "unit_code": "EA",
+      "unit_price": "1000.00",
+      "price_base_quantity": "1",
+      "allowances_charges": [],
+      "line_net_amount": "1000.00",
+      "tax_breakdowns": [
+        {
+          "tax_type": "VAT",
+          "component": null,
+          "jurisdiction_code": "GB",
+          "category_code": "S",
+          "rate": "20",
+          "taxable_amount": "1000.00",
+          "tax_amount": "200.00",
+          "payable_effect": "add",
+          "exemption_code": null,
+          "exemption_reason": null,
+          "reverse_charge": false,
+          "source_label": "VAT 20%"
+        }
+      ],
+      "line_gross_amount": "1200.00",
+      "service_period": null
+    }
+  ],
+  "payment": {
+    "means": [
+      {
+        "type_code": "30",
+        "type_label": "Credit transfer",
+        "payment_reference": "INV-2026-1042",
+        "account_last4": null,
+        "iban_last4": "1234",
+        "bic": "EXAMPLEBIC"
+      }
+    ],
+    "terms_text": "Payment due in 30 days"
+  },
+  "evidence": [
+    {
+      "field_path": "/invoice/number",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Invoice No. INV-2026-1042",
+      "bbox": null
+    },
+    {
+      "field_path": "/invoice/issue_date",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Invoice date 15 June 2026",
+      "bbox": null
+    },
+    {
+      "field_path": "/totals/payable_amount",
+      "source_kind": "visual",
+      "page": 1,
+      "source_path": null,
+      "text": "Amount due EUR 1,200.00",
+      "bbox": null
+    }
+  ],
+  "uncertainties": []
+}

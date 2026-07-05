@@ -1,0 +1,8 @@
+[
+  {
+    "code": "PERSPECTIVE_SKEW",
+    "severity": "MEDIUM",
+    "field_paths": [],
+    "resolution": "normalize_or_review"
+  }
+]

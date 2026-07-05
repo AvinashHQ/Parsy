@@ -17,9 +17,8 @@ models:
     promotion_reason: >-
       Restores ADR-025. Vision-capable: receives both the OCR text and the raw
       page image via Ollama's images[] field. Verified live against the
-      synthetic corpus visual_model fixtures (see
-      docs/invoice-parser-post-m2-5-final/docs/24_MODEL_SELECTION_REPORT.md
-      addendum), not just text-only mocks.
+      synthetic corpus visual_model fixtures and archived model-selection
+      evidence, not just text-only mocks.
     known_limitations:
       - >-
         Cold load + first-token Metal kernel warmup measured ~135s locally;
@@ -52,9 +51,8 @@ models:
       benchmark that fed image fixtures their own ground-truth answers as fake
       OCR text (script/run_llm_benchmark.rb#reconstruct_text_from_gt), so it
       never demonstrated real vision/OCR extraction — only its ability to copy
-      answers it was already given. See
-      docs/invoice-parser-post-m2-5-final/docs/24_MODEL_SELECTION_REPORT.md
-      addendum.
+      answers it was already given; the archived model-selection evidence keeps
+      that demotion rationale.
   - id: paddleocr_vl_1_6
     repository: PaddlePaddle/PaddleOCR-VL
     role: layout_ocr_evidence

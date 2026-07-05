@@ -8,7 +8,7 @@ require "rexml/document"
 
 module Evaluation
   class FinalDocsSamplesTest < Minitest::Test
-    SAMPLE_ROOT = Rails.root.join("docs/invoice-parser-post-m2-5-final/samples")
+    SAMPLE_ROOT = Rails.root.join("test/fixtures/files/invoice_parser/samples")
     SYNTHETIC_ROOT = SAMPLE_ROOT.join("synthetic_corpus")
 
     def test_root_canonical_samples_validate_and_round_trip_through_json_export
