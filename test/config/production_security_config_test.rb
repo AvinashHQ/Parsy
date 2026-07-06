@@ -7,9 +7,9 @@ class ProductionSecurityConfigTest < ActiveSupport::TestCase
   test "production uses private object storage and ssl" do
     production = Rails.root.join("config/environments/production.rb").read
 
-    assert_includes production, "config.active_storage.service = :amazon"
-    assert_includes production, "config.assume_ssl = true"
-    assert_includes production, "config.force_ssl = true"
+    assert_includes production, 'config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "amazon").to_sym'
+    assert_includes production, 'config.assume_ssl = ENV.fetch("FORCE_SSL", "true") == "true"'
+    assert_includes production, 'config.force_ssl = ENV.fetch("FORCE_SSL", "true") == "true"'
     assert_includes production, "config.hosts = ENV.fetch"
   end
 

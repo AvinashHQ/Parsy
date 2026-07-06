@@ -27,8 +27,13 @@ module LocalExtraction
       sys.stdout.write(base64.b64encode(pix.tobytes("png")).decode())
     PYTHON
 
+    def initialize(capture3: Open3.method(:capture3))
+      @capture3 = capture3
+    end
+
+
     def call(bytes:)
-      stdout, _stderr, status = Open3.capture3("python3", "-c", RENDER_SCRIPT, stdin_data: bytes.to_s.b)
+      stdout, _stderr, status = @capture3.call("python3", "-c", RENDER_SCRIPT, stdin_data: bytes.to_s.b, binmode: true)
       return nil unless status.success?
 
       decoded = Base64.decode64(stdout)

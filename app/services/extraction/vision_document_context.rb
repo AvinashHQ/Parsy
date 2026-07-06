@@ -59,14 +59,18 @@ module Extraction
     def page_texts(output)
       return [] unless output.is_a?(Hash)
 
-      texts = [ output["text"] ]
-      Array(output["pages"]).each do |page|
+      texts = [ fetch_key(output, :text) ]
+      Array(fetch_key(output, :pages)).each do |page|
         next unless page.is_a?(Hash)
 
-        texts << page["text"]
-        Array(page["layout"]).each { |block| texts << block["text"] if block.is_a?(Hash) }
+        texts << fetch_key(page, :text)
+        Array(fetch_key(page, :layout)).each { |block| texts << fetch_key(block, :text) if block.is_a?(Hash) }
       end
       texts
+    end
+
+    def fetch_key(hash, key)
+      hash[key.to_s] || hash[key.to_sym]
     end
   end
 end

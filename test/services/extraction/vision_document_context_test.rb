@@ -26,6 +26,19 @@ module Extraction
       assert_includes text, "ocr block text"
     end
 
+    test "extracted_text reads symbolized parser and ocr output from semantic adapter" do
+      request = {
+        "parser_output" => { text: "symbolized digital layer text" },
+        "ocr_output" => { pages: [ { text: "symbolized ocr page text", layout: [ { text: "symbolized ocr block text" } ] } ] }
+      }
+
+      text = @host.send(:extracted_text, request)
+
+      assert_includes text, "symbolized digital layer text"
+      assert_includes text, "symbolized ocr page text"
+      assert_includes text, "symbolized ocr block text"
+    end
+
     test "extracted_text is byte-bounded" do
       request = { "parser_output" => { "text" => "x" * 40_000 } }
 
