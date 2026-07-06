@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "base64"
 
 module LocalExtraction
   class ParserAdapterTest < ActiveSupport::TestCase
@@ -113,6 +114,21 @@ module LocalExtraction
       assert_empty client.calls
       refute_includes result.observability.to_s, "Should not run"
     end
+
+    test "pdf rasterizer writes binary PDF bytes to python without transcoding" do
+      binary_pdf = "%PDF-1.7\n".b + [ 0x93, 0x94, 0xFF ].pack("C*")
+      capture = lambda do |*command, stdin_data:, binmode: false|
+        assert_equal [ "python3", "-c", PdfRasterizer::RENDER_SCRIPT ], command
+        assert binmode, "PDF stdin/stdout must use binary mode or Ruby transcodes ASCII-8BIT bytes to UTF-8"
+        assert_equal binary_pdf, stdin_data
+        [ Base64.strict_encode64(PNG_BYTES), "", Struct.new(:success?).new(true) ]
+      end
+
+      png = PdfRasterizer.new(capture3: capture).call(bytes: binary_pdf)
+
+      assert_equal PNG_BYTES, png
+    end
+
 
     private
 
