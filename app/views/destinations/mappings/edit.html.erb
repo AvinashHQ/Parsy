@@ -1,0 +1,78 @@
+<% content_for :title, "Mapping · #{@connection.label} · Parsy" %>
+
+<%= page_header "#{@mapping.source_table.humanize} mapping",
+      subtitle: "Canonical #{@mapping.source_table} columns → #{@connection.label} · #{@mapping.target_table}",
+      breadcrumbs: [ [ "Destinations", destinations_connections_path ],
+                     [ @connection.label, destinations_connection_path(@connection) ] ] do %>
+  <%= status_badge @mapping.status %>
+  <% if @report.valid? && !@mapping.confirmed? %>
+    <%= button_to confirm_destinations_connection_mapping_path(@connection, @mapping), method: :post, class: "btn btn-primary" do %>
+      <%= icon "check", class: "size-4" %> Confirm mapping
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if @report.errors.any? %>
+  <div class="mb-4 rounded-lg border border-danger-line bg-danger-subtle px-4 py-3 text-sm text-danger-fg">
+    <p class="font-medium">Blocking issues — the mapping cannot be confirmed until these are fixed:</p>
+    <ul class="mt-1 list-inside list-disc">
+      <% @report.errors.each do |error| %>
+        <li><%= mapping_issue_text(error) %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+<% if @report.warnings.any? %>
+  <div class="mb-4 rounded-lg border border-warning-line bg-warning-subtle px-4 py-3 text-sm text-warning-fg">
+    <p class="font-medium">Warnings:</p>
+    <ul class="mt-1 list-inside list-disc">
+      <% @report.warnings.each do |warning| %>
+        <li><%= mapping_issue_text(warning) %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<section class="card p-5" aria-label="Column mapping editor">
+  <%= form_with url: destinations_connection_mapping_path(@connection, @mapping), method: :patch, class: "space-y-4" do %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="border-b border-line bg-subtle text-xs">
+          <tr>
+            <th class="px-3 py-2 text-left font-medium">Canonical column</th>
+            <th class="px-3 py-2 text-left font-medium">Kind</th>
+            <th class="px-3 py-2 text-left font-medium">Target column in <span class="font-mono"><%= @mapping.target_table %></span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          <% Destination::SourceSchema.column_names(@mapping.source_table).each do |source_column| %>
+            <% required = Destination::SourceSchema.required_columns(@mapping.source_table).include?(source_column) %>
+            <tr>
+              <td class="px-3 py-2 font-mono text-xs text-ink">
+                <%= source_column %>
+                <% if required %><span class="ml-1 text-danger-fg" title="Required for idempotent pushes">*</span><% end %>
+              </td>
+              <td class="px-3 py-2 text-xs text-muted"><%= Destination::SourceSchema.kind(@mapping.source_table, source_column) %></td>
+              <td class="px-3 py-2">
+                <%= select_tag "mappings[#{source_column}]",
+                      options_for_select(
+                        [ [ "— unmapped —", "" ] ] +
+                        @target_columns.map { |column| [ "#{column["name"]} (#{column["data_type"]})", column["name"] ] },
+                        @mapping.target_column_for(source_column)
+                      ),
+                      class: "w-full max-w-xs rounded-lg border border-line bg-surface px-2 py-1.5 text-xs text-ink" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn btn-primary">
+        <%= icon "save", class: "size-4" %> Save mapping
+      </button>
+      <p class="text-xs text-muted">Saving re-opens the mapping for confirmation; pushes only use confirmed mappings.</p>
+    </div>
+  <% end %>
+</section>

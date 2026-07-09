@@ -1,0 +1,64 @@
+<% input_class = "block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" %>
+<% label_class = "mb-1.5 block text-sm font-medium text-ink" %>
+
+<%= form_with model: connection, url: url, class: "space-y-5" do |form| %>
+  <% if connection.errors.any? %>
+    <div class="rounded-lg border border-danger-line bg-danger-subtle px-4 py-3 text-sm text-danger-fg">
+      <p class="font-medium">Could not save this destination:</p>
+      <ul class="mt-1 list-inside list-disc">
+        <% connection.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <%= form.label :label, "Label", class: label_class %>
+      <%= form.text_field :label, placeholder: "Customer ERP warehouse", required: true, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :adapter, "Engine", class: label_class %>
+      <%= form.select :adapter,
+            Destination::DatabaseConnection::ADAPTERS.map { |adapter| [ adapter, adapter ] },
+            {}, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :host, class: label_class %>
+      <%= form.text_field :host, placeholder: "db.customer.example", required: true, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :port, class: label_class %>
+      <%= form.number_field :port, in: 1..65_535, required: true, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :database_name, "Database name", class: label_class %>
+      <%= form.text_field :database_name, required: true, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :ssl_mode, "SSL mode", class: label_class %>
+      <%= form.select :ssl_mode,
+            Destination::DatabaseConnection::SSL_MODES.map { |mode| [ mode, mode ] },
+            {}, class: input_class %>
+    </div>
+    <div>
+      <%= form.label :username, class: label_class %>
+      <%# Never render the stored credential back into the page %>
+      <%= text_field_tag "destination_database_connection[username]",
+            nil, placeholder: connection.persisted? ? "unchanged unless filled" : "warehouse_writer",
+            required: !connection.persisted?, autocomplete: "off", class: input_class %>
+    </div>
+    <div>
+      <%= form.label :password, class: label_class %>
+      <%= password_field_tag "destination_database_connection[password]",
+            nil, placeholder: connection.persisted? ? "unchanged unless filled" : "",
+            autocomplete: "new-password", class: input_class %>
+      <p class="mt-1.5 text-xs text-muted">Stored encrypted at rest; never shown again.</p>
+    </div>
+  </div>
+
+  <%= form.button type: :submit, class: "btn btn-primary" do %>
+    <%= icon "save", class: "size-4" %> <%= connection.persisted? ? "Update destination" : "Save destination" %>
+  <% end %>
+<% end %>

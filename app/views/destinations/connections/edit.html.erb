@@ -1,0 +1,10 @@
+<% content_for :title, "Edit destination · Parsy" %>
+
+<%= page_header "Edit #{@connection.label}",
+      subtitle: "Connection details for this destination database.",
+      breadcrumbs: [ [ "Destinations", destinations_connections_path ],
+                     [ @connection.label, destinations_connection_path(@connection) ] ] %>
+
+<section class="card max-w-3xl p-5" aria-label="Edit destination">
+  <%= render "form", connection: @connection, url: destinations_connection_path(@connection) %>
+</section>
