@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_10_050000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_130000) do
     t.index ["review_document_id", "revision_number"], name: "idx_on_review_document_id_revision_number_46cdb9295a", unique: true
     t.index ["review_document_id", "status"], name: "index_candidate_revisions_on_review_document_id_and_status"
     t.index ["review_document_id"], name: "index_candidate_revisions_on_review_document_id"
+  end
+
+  create_table "destination_database_connections", force: :cascade do |t|
+    t.string "adapter", null: false
+    t.datetime "created_at", null: false
+    t.string "database_name", null: false
+    t.string "host", null: false
+    t.string "label", null: false
+    t.text "password"
+    t.integer "port", null: false
+    t.datetime "schema_captured_at"
+    t.jsonb "schema_snapshot", default: {}, null: false
+    t.string "ssl_mode", default: "prefer", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.text "username", null: false
+    t.index ["tenant_id", "label"], name: "index_destination_database_connections_on_tenant_id_and_label", unique: true
+    t.index ["tenant_id"], name: "index_destination_database_connections_on_tenant_id"
   end
 
   create_table "evidence_references", force: :cascade do |t|
@@ -245,6 +263,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_130000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "candidate_revisions", "review_documents"
+  add_foreign_key "destination_database_connections", "tenants"
   add_foreign_key "evidence_references", "candidate_revisions"
   add_foreign_key "evidence_references", "review_documents"
   add_foreign_key "export_artifacts", "review_batches"

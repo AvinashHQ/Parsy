@@ -392,6 +392,8 @@ GEM
     thruster (0.1.22-arm64-darwin)
     thruster (0.1.22-x86_64-linux)
     timeout (0.6.1)
+    trilogy (2.12.6)
+      bigdecimal
     tsort (0.2.0)
     turbo-rails (2.0.23)
       actionpack (>= 7.1.0)
@@ -456,6 +458,7 @@ DEPENDENCIES
   stimulus-rails
   tailwindcss-rails
   thruster
+  trilogy (~> 2.9)
   turbo-rails
   tzinfo-data
   web-console
@@ -608,6 +611,7 @@ CHECKSUMS
   thruster (0.1.22-arm64-darwin) sha256=d0506142832b1b020ab687dbfb938ec7cb07eeaabebc7f8682a73e8f0636917b
   thruster (0.1.22-x86_64-linux) sha256=b96436be7f0854db632f421b4a53b795429a0bc95c15c2e1c1a7a6fdd1ed090f
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
+  trilogy (2.12.6) sha256=2e0f97092150c92fec41acc304c382ad52f5ea98e1eb11073e4f501f80159cf7
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
   turbo-rails (2.0.23) sha256=ee0d90733aafff056cf51ff11e803d65e43cae258cc55f6492020ec1f9f9315f
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b

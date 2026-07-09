@@ -6,6 +6,7 @@ class Tenant < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :review_batches, class_name: "Review::Batch", dependent: :restrict_with_exception
   has_many :usage_spend_events, class_name: "Usage::SpendEvent", dependent: :destroy
+  has_many :destination_database_connections, class_name: "Destination::DatabaseConnection", dependent: :destroy
 
   validates :name, :slug, :hosting_region, :storage_region, presence: true
   validates :slug, uniqueness: true
