@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_10_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_10_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,6 +77,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_050000) do
     t.text "username", null: false
     t.index ["tenant_id", "label"], name: "index_destination_database_connections_on_tenant_id_and_label", unique: true
     t.index ["tenant_id"], name: "index_destination_database_connections_on_tenant_id"
+  end
+
+  create_table "destination_field_mappings", force: :cascade do |t|
+    t.jsonb "column_mappings", default: [], null: false
+    t.datetime "created_at", null: false
+    t.bigint "database_connection_id", null: false
+    t.string "origin", default: "heuristic", null: false
+    t.string "source_table", null: false
+    t.string "status", default: "proposed", null: false
+    t.string "target_table", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["database_connection_id", "source_table"], name: "index_destination_field_mappings_on_connection_and_source", unique: true
+    t.index ["database_connection_id"], name: "index_destination_field_mappings_on_connection"
+    t.index ["tenant_id"], name: "index_destination_field_mappings_on_tenant_id"
   end
 
   create_table "evidence_references", force: :cascade do |t|
@@ -264,6 +279,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_050000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "candidate_revisions", "review_documents"
   add_foreign_key "destination_database_connections", "tenants"
+  add_foreign_key "destination_field_mappings", "destination_database_connections", column: "database_connection_id"
+  add_foreign_key "destination_field_mappings", "tenants"
   add_foreign_key "evidence_references", "candidate_revisions"
   add_foreign_key "evidence_references", "review_documents"
   add_foreign_key "export_artifacts", "review_batches"

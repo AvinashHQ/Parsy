@@ -13,7 +13,10 @@ module Destination
       end
 
       teardown do
-        adapter.open { |session| session.exec(%(DROP TABLE IF EXISTS "#{@table}")) }
+        adapter.open do |session|
+          session.exec("SET client_min_messages = warning")
+          session.exec(%(DROP TABLE IF EXISTS "#{@table}"))
+        end
       end
 
       test "executes parameterized queries and quotes identifiers" do

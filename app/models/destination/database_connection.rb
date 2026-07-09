@@ -8,6 +8,9 @@ module Destination
     SSL_MODES = %w[disable prefer require].freeze
 
     belongs_to :tenant
+    has_many :field_mappings, class_name: "Destination::FieldMapping",
+                              foreign_key: :database_connection_id, dependent: :destroy,
+                              inverse_of: :database_connection
 
     encrypts :username
     encrypts :password
