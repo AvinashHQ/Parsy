@@ -151,12 +151,63 @@ Routes:
 
 Current UI scope: authenticated upload, review, approval, export, and approval-gated external-database push.
 
+## Using the app
+
+A typical end-to-end session, once you're signed in:
+
+1. **Upload invoices** at `/review/upload/new`. Pick a single PDF/image/XML file, or a ZIP archive for bulk intake. Name the batch and submit — you land on the batch page.
+2. **Wait for extraction.** Each document runs cloud vision extraction (Gemini) in the background. The batch page live-updates as documents move `uploaded` → `extracting` → `needs_review` / `ready_for_approval`.
+3. **Review and approve** at `/review/documents/:id`. Check extracted fields against the evidence panel (source text/bounding boxes), correct anything wrong, then approve. Unresolved high-risk findings require an explicit confirmation before a document can be approved.
+4. **Deliver the approved data** from the batch page — either or both:
+   - **Export a file**: click JSON, CSV, or XLSX to download the approved revisions.
+   - **Push to a database**: once at least one destination has a confirmed mapping (see below), a **Push to database** button appears next to Export. Pick the destination and push; the batch page shows push history and lets you retry any failed documents.
+
 ## External database delivery (M4.5)
 
-Approved invoices can be pushed directly into an operator-configured external database (PostgreSQL or MySQL). The design splits intelligence from execution so arbitrary vendor schemas stay reliable:
+Approved invoices can be pushed directly into an operator-configured external database (PostgreSQL or MySQL) — no manual export/import step. The design splits intelligence from execution so arbitrary vendor schemas stay reliable:
 
 1. **Schema understanding — once per destination.** The operator connects the customer database (credentials encrypted at rest via Active Record Encryption, ENV-keyed), tests it, and captures its real schema through `information_schema` introspection. The system then derives the canonical→target column mapping itself: deterministic name/synonym heuristics first, then a Gemini proposal over schema **metadata only** (column names/types — never invoice content; tenant-gated with a heuristic-only fallback). The operator reviews and confirms the mapping once; validation blocks confirmation on missing columns, type mismatches, unfed NOT NULL columns, or unmapped `document_id`/`line_id` keys.
 2. **Conversion + insert — every push, deterministic.** "Push to database" on a batch is an explicit operator action (ADR-027 — never an automatic side effect) that runs a background job writing only approved revisions through confirmed mappings: typed coercion per the introspected column types, pre-insert validation, per-invoice transactions, parameterized SQL with quoted identifiers, and idempotent upserts keyed on the mapped `document_id` column (re-pushes update in place; line rows are replaced atomically). Per-document results, counts, and terminal status (`pushed`/`partial`/`failed`) are recorded content-free, with retry for failed documents only.
+
+### Setting up a destination (one-time, per database)
+
+1. Go to `/destinations/connections` → **New destination**.
+2. Fill in the connection details — label, engine (PostgreSQL or MySQL), host, port, database name, username, password — and save. Credentials are encrypted at rest and never rendered back once saved; leave username/password blank on a later edit to keep the stored values.
+3. Click **Test connection** to confirm Parsy can reach the database before going further.
+4. Click **Capture schema** to introspect the database's real tables and columns.
+5. For each canonical table you want to fill (`invoices`, `line_items`), click **Propose mapping**. Parsy matches columns by name/synonym first, then asks Gemini to resolve any remaining columns using schema metadata only — never invoice content.
+6. Review the proposed mapping and adjust anything wrong, then click **Confirm**. A mapping only confirms once every required field is mapped and types are compatible; the page explains exactly what's blocking confirmation otherwise.
+7. The destination now appears in the **Push to database** picker on every batch page.
+
+### Testing locally without a real customer database
+
+Spin up a scratch PostgreSQL database with an intentionally different schema to exercise the full mapping and push flow end to end:
+
+```bash
+createdb parsy_test_customer
+psql -d parsy_test_customer <<'SQL'
+CREATE TABLE customer_invoices (
+  doc_ref varchar(128) NOT NULL UNIQUE,
+  inv_no varchar(64),
+  vendor varchar(200),
+  issued_on date,
+  grand_total numeric(12, 2)
+);
+CREATE TABLE customer_lines (
+  doc_ref varchar(128) NOT NULL,
+  line_ref varchar(64) NOT NULL,
+  details text,
+  amount numeric(12, 2)
+);
+SQL
+```
+
+Add it as a destination with host `localhost`, database `parsy_test_customer`, and your local Postgres username (leave the password blank if your local server doesn't require one). After a push, inspect the rows directly:
+
+```bash
+psql -d parsy_test_customer -c "SELECT * FROM customer_invoices;"
+psql -d parsy_test_customer -c "SELECT * FROM customer_lines;"
+```
 
 ## Engineering workflow
 
