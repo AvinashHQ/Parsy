@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_10_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_10_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,6 +92,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_060000) do
     t.index ["database_connection_id", "source_table"], name: "index_destination_field_mappings_on_connection_and_source", unique: true
     t.index ["database_connection_id"], name: "index_destination_field_mappings_on_connection"
     t.index ["tenant_id"], name: "index_destination_field_mappings_on_tenant_id"
+  end
+
+  create_table "destination_pushes", force: :cascade do |t|
+    t.string "actor", null: false
+    t.datetime "created_at", null: false
+    t.bigint "database_connection_id", null: false
+    t.jsonb "document_results", default: {}, null: false
+    t.integer "failed_count", default: 0, null: false
+    t.string "failure_reason"
+    t.datetime "finished_at"
+    t.integer "pushed_count", default: 0, null: false
+    t.bigint "review_batch_id", null: false
+    t.datetime "started_at"
+    t.string "status", default: "pending", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["database_connection_id"], name: "index_destination_pushes_on_connection"
+    t.index ["review_batch_id", "created_at"], name: "index_destination_pushes_on_review_batch_id_and_created_at"
+    t.index ["review_batch_id"], name: "index_destination_pushes_on_review_batch_id"
+    t.index ["tenant_id"], name: "index_destination_pushes_on_tenant_id"
   end
 
   create_table "evidence_references", force: :cascade do |t|
@@ -281,6 +301,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_060000) do
   add_foreign_key "destination_database_connections", "tenants"
   add_foreign_key "destination_field_mappings", "destination_database_connections", column: "database_connection_id"
   add_foreign_key "destination_field_mappings", "tenants"
+  add_foreign_key "destination_pushes", "destination_database_connections", column: "database_connection_id"
+  add_foreign_key "destination_pushes", "review_batches"
+  add_foreign_key "destination_pushes", "tenants"
   add_foreign_key "evidence_references", "candidate_revisions"
   add_foreign_key "evidence_references", "review_documents"
   add_foreign_key "export_artifacts", "review_batches"

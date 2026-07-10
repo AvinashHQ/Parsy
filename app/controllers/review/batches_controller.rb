@@ -11,6 +11,14 @@ module Review
       @progress = Review::BatchProgress.call(@batch)
       @documents = Review::RiskQueue.call(@batch)
       @intake_documents = @batch.documents.order(updated_at: :desc).includes(:current_revision)
+      @push_destinations = Destination::DatabaseConnection
+                             .where(tenant: current_tenant)
+                             .joins(:field_mappings)
+                             .where(destination_field_mappings: { source_table: "invoices", status: "confirmed" })
+                             .order(:label)
+      @batch_pushes = Destination::Push.where(review_batch_id: @batch.id)
+                                       .order(created_at: :desc).limit(5)
+                                       .includes(:database_connection)
     end
 
     def destroy

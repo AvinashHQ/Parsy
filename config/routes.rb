@@ -36,6 +36,11 @@ Rails.application.routes.draw do
     resources :batches, only: %i[index show destroy] do
       resources :exports, only: :create
       resources :export_downloads, only: :show
+      resources :database_pushes, only: :create do
+        member do
+          post :retry
+        end
+      end
     end
     resources :documents, only: %i[show update] do
       member do
