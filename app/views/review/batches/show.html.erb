@@ -178,4 +178,74 @@
       </div>
     <% end %>
   </section>
+
+  <section class="card p-5" aria-label="Push to database">
+    <% approved_count = @progress[:approved] %>
+    <% ready_destinations = @push_destinations || [] %>
+    <h2 class="text-sm font-medium text-ink">Push to database</h2>
+    <p class="mt-1 text-sm text-muted">
+      <% if approved_count.positive? && ready_destinations.any? %>
+        <%= pluralize(approved_count, "approved document") %> ready to push into a configured destination.
+      <% elsif ready_destinations.empty? %>
+        No destination with a confirmed mapping yet —
+        <%= link_to "configure one under Destinations", destinations_connections_path, class: "text-accent no-underline hover:underline" %>.
+      <% else %>
+        No approved documents yet — approve documents to enable the push.
+      <% end %>
+    </p>
+
+    <% if ready_destinations.any? %>
+      <%= form_with url: review_batch_database_pushes_path(@batch), method: :post, class: "mt-4 flex flex-wrap items-center gap-2" do %>
+        <%= select_tag :destination_connection_id,
+              options_for_select(ready_destinations.map { |connection| [ connection.label, connection.id ] }),
+              class: "rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink" %>
+        <button type="submit" class="btn btn-primary btn-sm <%= 'opacity-60' unless approved_count.positive? %>">
+          <%= icon "database", class: "size-4" %> Push to database
+        </button>
+      <% end %>
+    <% end %>
+
+    <% pushes = @batch_pushes || [] %>
+    <% if pushes.any? %>
+      <div class="mt-5 border-t border-line pt-4">
+        <p class="mb-2 text-xs font-medium text-muted">Push history</p>
+        <ul class="space-y-3">
+          <% pushes.each do |push| %>
+            <li class="text-sm">
+              <div class="flex flex-wrap items-center gap-2">
+                <%= status_badge push.status %>
+                <span class="text-ink"><%= push.database_connection.label %></span>
+                <span class="text-muted">
+                  <%= push.pushed_count %> pushed<%= ", #{push.failed_count} failed" if push.failed_count.positive? %>
+                  · <%= push.actor %> · <%= time_ago_in_words(push.created_at) %> ago
+                </span>
+                <% if %w[partial failed].include?(push.status) && push.failed_document_ids.any? %>
+                  <%= button_to retry_review_batch_database_push_path(@batch, push), method: :post, class: "btn btn-sm" do %>
+                    <%= icon "refresh", class: "size-3.5" %> Retry failed
+                  <% end %>
+                <% end %>
+              </div>
+              <% if push.failure_reason.present? %>
+                <p class="mt-1 text-xs text-danger-fg"><%= push.failure_reason %></p>
+              <% end %>
+              <% failed = push.document_results.select { |_id, result| result["status"] == "failed" } %>
+              <% if failed.any? %>
+                <details class="mt-1">
+                  <summary class="cursor-pointer text-xs text-muted"><%= pluralize(failed.size, "failed document") %></summary>
+                  <ul class="mt-1 space-y-1 pl-4 text-xs text-muted">
+                    <% failed.each do |document_id, result| %>
+                      <li>
+                        <%= link_to "Document #{document_id}", review_document_path(document_id), class: "text-accent no-underline hover:underline" %>
+                        — <%= Array(result["issues"]).map { |issue| issue["code"] }.uniq.join(", ").presence || result["operation"] %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </details>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </section>
 </div>
