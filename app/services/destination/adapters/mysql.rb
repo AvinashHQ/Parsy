@@ -55,6 +55,20 @@ module Destination
           "`#{name.to_s.gsub('`', '``')}`"
         end
 
+        def transaction
+          exec("BEGIN")
+          result = yield
+          exec("COMMIT")
+          result
+        rescue StandardError => error
+          begin
+            exec("ROLLBACK")
+          rescue Adapters::Error
+            nil
+          end
+          raise error
+        end
+
         def bind(sql, params)
           remaining = params.dup
           bound = sql.gsub("?") do
