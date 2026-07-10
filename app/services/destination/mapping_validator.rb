@@ -5,13 +5,6 @@ module Destination
   # snapshot. Errors block confirmation (and therefore pushes); warnings
   # surface risks the operator may accept.
   class MappingValidator
-    NUMERIC_TYPES = %w[
-      numeric decimal integer bigint smallint int tinyint mediumint real float money
-      double double\ precision
-    ].freeze
-    DATE_TYPES = %w[date datetime timestamp timestamp\ without\ time\ zone timestamp\ with\ time\ zone].freeze
-    TEXT_TYPES = %w[character\ varying varchar text char character longtext mediumtext tinytext enum uuid citext].freeze
-
     COMPATIBLE_BUCKETS = {
       text: %i[text],
       decimal: %i[numeric text],
@@ -94,7 +87,7 @@ module Destination
         next unless column && SourceSchema.column?(@mapping.source_table, source)
 
         source_kind = SourceSchema.kind(@mapping.source_table, source)
-        bucket = type_bucket(column["data_type"])
+        bucket = TargetTypes.bucket(column["data_type"])
         if bucket.nil?
           add_warning(:unknown_target_type, target_column: entry["target_column"], data_type: column["data_type"])
         elsif !COMPATIBLE_BUCKETS.fetch(source_kind).include?(bucket)
@@ -132,15 +125,6 @@ module Destination
       return unless @mapping.source_table == "invoices"
 
       add_warning(:document_key_not_unique, target_column: document_target)
-    end
-
-    def type_bucket(data_type)
-      normalized = data_type.to_s.downcase
-      return :numeric if NUMERIC_TYPES.include?(normalized)
-      return :date if DATE_TYPES.include?(normalized)
-      return :text if TEXT_TYPES.include?(normalized)
-
-      nil
     end
 
     def add_error(code, **details)

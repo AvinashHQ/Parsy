@@ -48,6 +48,20 @@ module Destination
           PG::Connection.quote_ident(name.to_s)
         end
 
+        def transaction
+          exec("BEGIN")
+          result = yield
+          exec("COMMIT")
+          result
+        rescue StandardError => error
+          begin
+            exec("ROLLBACK")
+          rescue Adapters::Error
+            nil
+          end
+          raise error
+        end
+
         private
 
         def positional(sql)
