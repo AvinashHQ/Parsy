@@ -29,6 +29,7 @@ Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped
 - Ruby is managed by **mise**, not rbenv (rbenv is not installed). Run `ruby bin/rails ...` directly — `rbenv exec` fails with "command not found".
 - Postgres is Homebrew `postgresql@16` and not always running: `brew services start postgresql@16`, then `ruby bin/rails db:test:prepare`. Tests fail at load time with `ConnectionNotEstablished` while it's down.
 - No `timeout` CLI on this shell — drop the README's `timeout 180 ...` prefixes.
+- `bin/rails test` runs that cross 50 tests fork parallel workers, which hang in sandboxed/background agent shells (0% CPU, no output). Prefix with `PARALLEL_WORKERS=1` (or use `COVERAGE=true`, which forces one worker).
 - Gems are shared machine-wide across git worktrees (no per-worktree bundle path). A sibling worktree's bundle change can cause transient `Bundler::GemNotFound` in fresh processes — fix with `gem install <name> -v <pinned-version>`; don't touch Gemfile.lock.
 - Ollama runs locally with `qwen3-vl:4b` and `glm-ocr` pulled — `script/run_llm_benchmark.rb` actually works here (digital PDFs ~15–70s, images ~100–240s each).
 - Sign-in is invite/operator-token gated, not password auth (`SessionsController#create` → `authenticate_operator_token`). A dev user `operator@example.com` (tenant `default-tenant`) exists; reset its token via `bin/rails runner` with `User#operator_token=` (setter hashes it) rather than creating duplicates.
