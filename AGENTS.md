@@ -18,7 +18,7 @@ session wrap-up protocol live in `../AGENTS.md` (auto-loaded by most harnesses).
 ## Architecture
 
 Rails 8.1.3 on Ruby 3.4.8 with PostgreSQL, default Rails layout, minitest (no rspec).
-Current demo scope is authenticated upload/review/approval/export; remaining M4.5 external-database delivery is not part of the stabilized demo unless explicitly requested.
+Demo scope is authenticated upload/review/approval/export plus M4.5 external-database delivery: `Destination::*` (connections with encrypted credentials, raw pg/trilogy adapters isolated from the AR pool, schema introspection, system-derived field mappings with one-time operator confirmation, approval-gated idempotent push job). Mapping proposals may send schema METADATA ONLY to Gemini (tenant-gated); the write path is fully deterministic — never put an LLM in it.
 
 Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped requests only; intake/extraction/validation/review/export behavior belongs in service/value objects; external providers stay behind adapters/clients with deterministic fakes in tests; approval-gated side effects require explicit operator action.
 
@@ -29,6 +29,7 @@ Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped
 - Ruby is managed by **mise**, not rbenv (rbenv is not installed). Run `ruby bin/rails ...` directly — `rbenv exec` fails with "command not found".
 - Postgres is Homebrew `postgresql@16` and not always running: `brew services start postgresql@16`, then `ruby bin/rails db:test:prepare`. Tests fail at load time with `ConnectionNotEstablished` while it's down.
 - No `timeout` CLI on this shell — drop the README's `timeout 180 ...` prefixes.
+- `bin/rails test` runs that cross 50 tests fork parallel workers, which hang in sandboxed/background agent shells (0% CPU, no output). Prefix with `PARALLEL_WORKERS=1` (or use `COVERAGE=true`, which forces one worker).
 - Gems are shared machine-wide across git worktrees (no per-worktree bundle path). A sibling worktree's bundle change can cause transient `Bundler::GemNotFound` in fresh processes — fix with `gem install <name> -v <pinned-version>`; don't touch Gemfile.lock.
 - Ollama runs locally with `qwen3-vl:4b` and `glm-ocr` pulled — `script/run_llm_benchmark.rb` actually works here (digital PDFs ~15–70s, images ~100–240s each).
 - Sign-in is invite/operator-token gated, not password auth (`SessionsController#create` → `authenticate_operator_token`). A dev user `operator@example.com` (tenant `default-tenant`) exists; reset its token via `bin/rails runner` with `User#operator_token=` (setter hashes it) rather than creating duplicates.

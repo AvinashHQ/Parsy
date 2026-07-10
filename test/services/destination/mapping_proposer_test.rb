@@ -86,6 +86,8 @@ module Destination
       assert_equal "invoices", call[:source_table]
       assert_not_includes call[:source_columns].map { |column| column[:name] }, "invoice_number",
                           "only unresolved columns go to the llm"
+      assert_not_includes call[:target_columns].map { |column| column[:name] }, "inv_no",
+                          "heuristically taken target columns are not offered to the llm"
       assert(call[:target_columns].all? { |column| column.key?(:name) && column.key?(:data_type) })
     end
 

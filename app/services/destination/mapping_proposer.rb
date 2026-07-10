@@ -140,12 +140,17 @@ module Destination
     def llm_matches(target_table, matched, unresolved)
       table = snapshot_tables.find { |candidate| candidate["name"] == target_table }
       taken = matched.values.to_set
-      available = target_column_names(target_table).to_set
+      # Offer only still-unclaimed target columns: heuristic matches already own
+      # theirs, and listing them just invites conflicting proposals.
+      free_columns = Array(table["columns"]).reject { |column| taken.include?(column["name"]) }
+      return {} if free_columns.empty?
+
+      available = free_columns.map { |column| column["name"] }.to_set
       proposal = @llm.propose(
         source_table: @source_table,
         source_columns: unresolved.map { |name| { name: name, kind: SourceSchema.kind(@source_table, name).to_s } },
         target_table: target_table,
-        target_columns: Array(table["columns"]).map { |column| { name: column["name"], data_type: column["data_type"] } }
+        target_columns: free_columns.map { |column| { name: column["name"], data_type: column["data_type"] } }
       )
       proposal.select do |source, target|
         unresolved.include?(source) && available.include?(target) && !taken.include?(target) && taken.add(target)

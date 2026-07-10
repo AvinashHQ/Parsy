@@ -16,8 +16,8 @@ The retained executable evidence lives in `test/fixtures/files/invoice_parser/sa
 | M2.5 — Open-source extraction upgrade | Complete | Local parser/semantic route/benchmark tests over the final synthetic corpus manifest |
 | M3 — Human review and safe acceptance | Complete | Review workflow, 50-document keyboard system flow, immutable approval, and approved-only export tests |
 | M4 — Security, privacy, reliability, deployment | Complete | Tenant isolation, private storage, purge, content-free logging, quota, restore, privacy, production config, upload-abuse, Brakeman, and dependency-audit gates |
-| M4.5 — Cloud extraction and database delivery | Planned | MVP pivot: cloud vision extraction (fixes the 0% schema-valid local model) + push approved invoices into an operator-configured external database. See GitHub milestone M4.5 |
-| M5 — Closed live MVP test | Planned | Pilots the M4.5 flow; requires M4.5 delivery, then real supervised pilot operating evidence |
+| M4.5 — Cloud extraction and database delivery | Complete | Cloud vision extraction (Gemini, ADR-026) verified end-to-end on main; external database delivery (destinations, schema introspection, system-derived mappings, approval-gated idempotent push) merged with unit + live-PostgreSQL integration coverage |
+| M5 — Closed live MVP test | Planned | Pilots the M4.5 flow; requires real supervised pilot operating evidence |
 | M6 — First demanded regional capability | Deferred | Chosen only after M5 demand evidence |
 
 Boundary: M0-M2 include owner-declared/product evidence plus implemented regressions where present. M2.5-M4 are backed by current automated tests. Real production hosting, real customer corpus accuracy, and closed-pilot operating metrics remain M5 evidence, not M4 evidence.
@@ -31,6 +31,7 @@ Boundary: M0-M2 include owner-declared/product evidence plus implemented regress
 - Local extraction contract and M2.5 benchmark harness over the final synthetic corpus manifest.
 - Review batches/documents/revisions/findings/evidence, risk queue, high-risk evidence focus, locale/profile overrides, immutable approved revisions, and approved-only exports.
 - Invite/operator-token authentication, tenant-scoped controllers, private Active Storage export downloads, retention purge evidence, restore verification, privacy launch checks, spend guard/circuit breaker, and production security config invariants.
+- External database delivery (M4.5): tenant-scoped destination connections with encrypted credentials, connection tests, `information_schema` introspection, system-derived field mappings with one-time operator confirmation, and approval-gated idempotent pushes with per-document provenance and retry.
 
 ## Retained sample fixture coverage
 
@@ -143,11 +144,19 @@ Routes:
 - `/session/new` — operator-token sign in.
 - `/review/upload/new` — operator ZIP/PDF/image/XML intake.
 - `/review/batches` — tenant-scoped batch list.
-- `/review/batches/:id` — batch progress and risk queue.
+- `/review/batches/:id` — batch progress, risk queue, exports, and the "Push to database" panel.
 - `/review/documents/:id` — evidence-backed document review/editor.
+- `/destinations/connections` — external delivery databases: connect, test, schema capture, mapping review/confirm.
 - `/up` — health check.
 
-Current UI scope: authenticated upload, review, approval, and export workflows. Remaining M4.5 external-database push work is intentionally outside the current demo scope until the DB mapping feature is implemented.
+Current UI scope: authenticated upload, review, approval, export, and approval-gated external-database push.
+
+## External database delivery (M4.5)
+
+Approved invoices can be pushed directly into an operator-configured external database (PostgreSQL or MySQL). The design splits intelligence from execution so arbitrary vendor schemas stay reliable:
+
+1. **Schema understanding — once per destination.** The operator connects the customer database (credentials encrypted at rest via Active Record Encryption, ENV-keyed), tests it, and captures its real schema through `information_schema` introspection. The system then derives the canonical→target column mapping itself: deterministic name/synonym heuristics first, then a Gemini proposal over schema **metadata only** (column names/types — never invoice content; tenant-gated with a heuristic-only fallback). The operator reviews and confirms the mapping once; validation blocks confirmation on missing columns, type mismatches, unfed NOT NULL columns, or unmapped `document_id`/`line_id` keys.
+2. **Conversion + insert — every push, deterministic.** "Push to database" on a batch is an explicit operator action (ADR-027 — never an automatic side effect) that runs a background job writing only approved revisions through confirmed mappings: typed coercion per the introspected column types, pre-insert validation, per-invoice transactions, parameterized SQL with quoted identifiers, and idempotent upserts keyed on the mapped `document_id` column (re-pushes update in place; line rows are replaced atomically). Per-document results, counts, and terminal status (`pushed`/`partial`/`failed`) are recorded content-free, with retry for failed documents only.
 
 ## Engineering workflow
 
