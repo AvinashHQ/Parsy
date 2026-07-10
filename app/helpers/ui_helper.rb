@@ -8,6 +8,7 @@ module UiHelper
   # Curated Lucide-style icon paths (24x24, stroke="currentColor"). Add sparingly.
   ICONS = {
     "check" => %(<path d="M20 6 9 17l-5-5"/>),
+    "database" => %(<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>),
     "x" => %(<path d="M18 6 6 18"/><path d="m6 6 12 12"/>),
     "chevron-down" => %(<path d="m6 9 6 6 6-6"/>),
     "chevron-right" => %(<path d="m9 18 6-6-6-6"/>),
@@ -99,14 +100,16 @@ module UiHelper
     "routed_visual" => "info", "processing" => "info",
     "needs_review" => "warning", "review" => "warning",
     "rejected" => "danger", "failed" => "danger",
-    "quarantined" => "plain", "purged" => "plain"
+    "quarantined" => "plain", "purged" => "plain",
+    "confirmed" => "success", "proposed" => "info", "invalid" => "danger"
   }.freeze
 
   STATUS_ICON = {
     "approved" => "circle-check", "exported" => "download", "completed" => "circle-check",
     "ready_for_approval" => "clock", "needs_review" => "triangle-alert",
     "rejected" => "circle-x", "failed" => "circle-x",
-    "quarantined" => "shield", "purged" => "shield"
+    "quarantined" => "shield", "purged" => "shield",
+    "confirmed" => "circle-check", "proposed" => "clock", "invalid" => "circle-x"
   }.freeze
 
   # Pill for a validation-finding severity (critical/high/medium/low/info).

@@ -1,0 +1,9 @@
+<% content_for :title, "New destination · Parsy" %>
+
+<%= page_header "New destination",
+      subtitle: "Connect the external database approved invoices will be pushed into.",
+      breadcrumbs: [ [ "Destinations", destinations_connections_path ] ] %>
+
+<section class="card max-w-3xl p-5" aria-label="New destination">
+  <%= render "form", connection: @connection, url: destinations_connections_path %>
+</section>

@@ -1,0 +1,62 @@
+<% content_for :title, "Destinations · Parsy" %>
+
+<%= page_header "Destinations",
+      subtitle: "External databases that approved invoices can be pushed into for #{current_tenant&.name}." do %>
+  <%= link_to new_destinations_connection_path, class: "btn btn-primary" do %>
+    <%= icon "database", class: "size-4" %> New destination
+  <% end %>
+<% end %>
+
+<% if @connections.any? %>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="border-b border-line bg-subtle text-xs">
+          <tr>
+            <th class="px-4 py-2.5 text-left font-medium">Label</th>
+            <th class="px-4 py-2.5 text-left font-medium">Engine</th>
+            <th class="px-4 py-2.5 text-left font-medium">Database</th>
+            <th class="px-4 py-2.5 text-left font-medium">Schema</th>
+            <th class="px-4 py-2.5 text-left font-medium">Mappings</th>
+            <th class="w-10 px-4 py-2.5"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          <% @connections.each do |connection| %>
+            <tr class="group relative transition-colors hover:bg-subtle">
+              <td class="px-4 py-3">
+                <%= link_to connection.label, destinations_connection_path(connection),
+                      class: "font-medium text-ink no-underline after:absolute after:inset-0 hover:no-underline" %>
+              </td>
+              <td class="px-4 py-3 text-muted"><%= connection.adapter %></td>
+              <td class="px-4 py-3 font-mono text-xs text-muted"><%= connection.database_name %></td>
+              <td class="px-4 py-3">
+                <% if connection.schema_known? %>
+                  <span class="badge <%= UiHelper::TONE_BADGE["success"] %>">
+                    <%= icon "circle-check", class: "size-3.5" %>
+                    <%= connection.schema_snapshot.fetch("tables").size %> tables
+                  </span>
+                <% else %>
+                  <span class="badge <%= UiHelper::TONE_BADGE["plain"] %>">not captured</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3">
+                <% confirmed = connection.field_mappings.count(&:confirmed?) %>
+                <span class="text-muted"><%= confirmed %>/<%= Destination::SourceSchema.tables.size %> confirmed</span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= icon "chevron-right", class: "ml-auto size-4 text-faint transition-transform group-hover:translate-x-0.5" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% else %>
+  <%= empty_state "database", "No destinations yet",
+        "Connect a customer database, capture its schema, and confirm the field mapping to enable approval-gated pushes." %>
+  <div class="mt-4 flex justify-center">
+    <%= link_to "Connect your first database", new_destinations_connection_path, class: "btn btn-primary mt-4" %>
+  </div>
+<% end %>

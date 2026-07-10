@@ -14,6 +14,23 @@ Rails.application.routes.draw do
 
   resource :session, only: %i[new create destroy]
 
+  namespace :destinations do
+    resources :connections do
+      member do
+        post :test
+        post :refresh_schema
+      end
+      resources :mappings, only: %i[edit update] do
+        member do
+          post :confirm
+        end
+        collection do
+          post :propose
+        end
+      end
+    end
+  end
+
   namespace :review do
     resource :upload, only: %i[new create]
     resources :batches, only: %i[index show destroy] do

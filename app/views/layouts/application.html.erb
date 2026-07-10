@@ -62,6 +62,11 @@
                class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= upload_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
               <%= icon "file-text", class: "size-4" %> Upload
             </a>
+            <% destinations_active = controller_path.start_with?("destinations") %>
+            <a href="<%= destinations_connections_path %>"
+               class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm no-underline hover:no-underline transition-colors <%= destinations_active ? "bg-subtle text-ink" : "text-muted hover:bg-subtle hover:text-ink" %>">
+              <%= icon "database", class: "size-4" %> Destinations
+            </a>
           </nav>
         <% end %>
 

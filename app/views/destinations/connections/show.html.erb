@@ -1,0 +1,121 @@
+<% content_for :title, "#{@connection.label} · Parsy" %>
+
+<%= page_header @connection.label,
+      subtitle: "#{@connection.adapter} · #{@connection.host}:#{@connection.port} · #{@connection.database_name}",
+      breadcrumbs: [ [ "Destinations", destinations_connections_path ] ] do %>
+  <%= button_to test_destinations_connection_path(@connection), method: :post, class: "btn" do %>
+    <%= icon "circle-check", class: "size-4" %> Test connection
+  <% end %>
+  <%= button_to refresh_schema_destinations_connection_path(@connection), method: :post, class: "btn" do %>
+    <%= icon "refresh", class: "size-4" %> <%= @connection.schema_known? ? "Refresh schema" : "Capture schema" %>
+  <% end %>
+  <%= link_to edit_destinations_connection_path(@connection), class: "btn" do %>
+    <%= icon "pencil", class: "size-4" %> Edit
+  <% end %>
+  <%= button_to destinations_connection_path(@connection), method: :delete,
+        class: "btn btn-danger",
+        form: { data: { turbo_confirm: "Remove this destination and its mappings?" } } do %>
+    <%= icon "trash", class: "size-4" %> Remove
+  <% end %>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card p-5" aria-label="Field mappings">
+    <h2 class="mb-1 text-base font-medium text-ink">Field mappings</h2>
+    <p class="mb-4 text-sm text-muted">
+      The system derives each mapping from the captured schema; confirm it once and pushes stay deterministic.
+    </p>
+
+    <% if @connection.schema_known? %>
+      <div class="space-y-4">
+        <% Destination::SourceSchema.tables.each do |source_table| %>
+          <% mapping = @mappings[source_table] %>
+          <div class="rounded-xl border border-line p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-medium text-ink"><%= source_table.humanize %></span>
+              <% if mapping %>
+                <%= status_badge mapping.status %>
+                <span class="text-xs text-muted">→ <span class="font-mono"><%= mapping.target_table %></span></span>
+                <span class="text-xs text-muted">
+                  <%= mapping.column_mappings.size %>/<%= Destination::SourceSchema.column_names(source_table).size %> columns
+                  · <%= mapping.origin %>
+                </span>
+              <% else %>
+                <span class="badge <%= UiHelper::TONE_BADGE["plain"] %>">not proposed</span>
+              <% end %>
+            </div>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <%= form_with url: propose_destinations_connection_mappings_path(@connection), method: :post, class: "flex items-center gap-2" do %>
+                <%= hidden_field_tag :source_table, source_table %>
+                <%= select_tag :target_table,
+                      options_for_select(
+                        [ [ "auto-pick target table", "" ] ] +
+                        Array(@connection.schema_snapshot["tables"]).map { |table| [ table["name"], table["name"] ] },
+                        mapping&.target_table
+                      ),
+                      class: "rounded-lg border border-line bg-surface px-2 py-1.5 text-xs text-ink" %>
+                <button type="submit" class="btn btn-sm">
+                  <%= icon "git-branch", class: "size-3.5" %> <%= mapping ? "Re-propose" : "Propose mapping" %>
+                </button>
+              <% end %>
+              <% if mapping %>
+                <%= link_to edit_destinations_connection_mapping_path(@connection, mapping), class: "btn btn-sm" do %>
+                  <%= icon "pencil", class: "size-3.5" %> Review & edit
+                <% end %>
+                <% unless mapping.confirmed? %>
+                  <%= button_to confirm_destinations_connection_mapping_path(@connection, mapping), method: :post, class: "btn btn-sm btn-primary" do %>
+                    <%= icon "check", class: "size-3.5" %> Confirm
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <%= empty_state "search", "Schema not captured yet",
+            "Capture the destination schema first — mappings are derived from its real tables and columns." %>
+    <% end %>
+  </section>
+
+  <section class="card p-5" aria-label="Schema browser">
+    <h2 class="mb-1 text-base font-medium text-ink">Schema browser</h2>
+    <% if @connection.schema_known? %>
+      <p class="mb-4 text-sm text-muted">
+        Captured <%= time_ago_in_words(@connection.schema_captured_at) %> ago ·
+        <%= @connection.schema_snapshot.fetch("tables").size %> tables
+      </p>
+      <div class="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
+        <% @connection.schema_snapshot.fetch("tables").each do |table| %>
+          <details class="group rounded-lg border border-line">
+            <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden">
+              <%= icon "chevron-right", class: "size-3.5 text-faint transition-transform group-open:rotate-90" %>
+              <span class="font-mono text-ink"><%= table["name"] %></span>
+              <span class="ml-auto text-xs text-faint"><%= table["columns"].size %> columns</span>
+            </summary>
+            <div class="border-t border-line px-3 py-2">
+              <table class="w-full text-xs">
+                <tbody class="divide-y divide-line/60">
+                  <% table["columns"].each do |column| %>
+                    <tr>
+                      <td class="py-1.5 pr-2 font-mono text-ink"><%= column["name"] %></td>
+                      <td class="py-1.5 pr-2 text-muted"><%= column["data_type"] %></td>
+                      <td class="py-1.5 text-right text-faint">
+                        <%= "PK" if column["primary_key"] %>
+                        <%= "unique" if column["unique"] && !column["primary_key"] %>
+                        <%= column["nullable"] ? "null" : "not null" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-muted">No snapshot yet. Use “Capture schema” after a successful connection test.</p>
+    <% end %>
+  </section>
+</div>
