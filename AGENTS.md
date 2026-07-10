@@ -18,7 +18,7 @@ session wrap-up protocol live in `../AGENTS.md` (auto-loaded by most harnesses).
 ## Architecture
 
 Rails 8.1.3 on Ruby 3.4.8 with PostgreSQL, default Rails layout, minitest (no rspec).
-Current demo scope is authenticated upload/review/approval/export; remaining M4.5 external-database delivery is not part of the stabilized demo unless explicitly requested.
+Demo scope is authenticated upload/review/approval/export plus M4.5 external-database delivery: `Destination::*` (connections with encrypted credentials, raw pg/trilogy adapters isolated from the AR pool, schema introspection, system-derived field mappings with one-time operator confirmation, approval-gated idempotent push job). Mapping proposals may send schema METADATA ONLY to Gemini (tenant-gated); the write path is fully deterministic — never put an LLM in it.
 
 Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped requests only; intake/extraction/validation/review/export behavior belongs in service/value objects; external providers stay behind adapters/clients with deterministic fakes in tests; approval-gated side effects require explicit operator action.
 
