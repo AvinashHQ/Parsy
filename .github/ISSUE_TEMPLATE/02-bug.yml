@@ -1,0 +1,83 @@
+name: Bug
+description: Observed behavior diverges from expected
+title: "[Bug] "
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the workspace issue-authoring standard (`avinashhq_brain/references/issue-authoring-standard.md`).
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What happened? Include device/OS/app version where relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Exact commands, UI steps, or inputs. If not reproducible, say so and describe frequency/conditions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs, stack trace, Crashlytics link, screenshot/recording, telemetry figures.
+    validations:
+      required: false
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Regression test plan
+      description: The failing test to add BEFORE fixing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Definition of done — keep the regression-test criterion.
+      placeholder: |
+        - [ ] Regression test fails before the fix and passes after it.
+        - [ ] Root cause stated in the closing PR (not just the symptom patched).
+        - [ ] Focused tests pass (`<test command from projects.yaml>`)
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Dependencies & links
+      description: Parent epic (link as sub-issue), related issues/PRs, ADRs.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Apply the matching `priority:pN` label after filing. p0 = crash/data loss/security/revenue.
+      options:
+        - p0 — critical
+        - p1 — high
+        - p2 — normal
+        - p3 — low
+      default: 1
+    validations:
+      required: true

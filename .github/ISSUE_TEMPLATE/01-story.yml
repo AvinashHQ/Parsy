@@ -1,0 +1,102 @@
+name: Story
+description: User-visible increment, deliverable in about one PR
+title: "[Story] "
+labels: ["type:story"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the workspace issue-authoring standard (`avinashhq_brain/references/issue-authoring-standard.md`).
+        The bar: an agent picks this up and finishes it **without guessing**.
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent epic
+      description: Epic issue number this story belongs to (link it as a native sub-issue after filing — see standard). Write `standalone` only for intentionally epic-less work.
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & user value
+      description: What is the problem, and what changes from the user's perspective? Why does it matter now?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, self-verifiable checklist — this is the definition of done. Include the verification command where one exists.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+        - [ ] Focused tests pass (`<test command from projects.yaml>`)
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope / Out of scope
+      description: What is included, and explicitly what is not.
+      placeholder: |
+        In scope:
+        - ...
+        Out of scope:
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: design
+    attributes:
+      label: Design / visual target
+      description: "UI-affecting work REQUIRES the exact design: a self-contained HTML/CSS/JS mock committed at `docs/mocks/<issue-slug>/mock.html` in this repo, rendered screenshot(s) embedded here, and an acceptance criterion bound to the mock. If this story touches no UI, write `not-ui`."
+      placeholder: |
+        Mock (acceptance target — open locally): docs/mocks/<issue-slug>/mock.html
+        States covered: default / empty / error
+        ![target-default](<screenshot url>)
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Test plan
+      description: The first failing test to write, and what regression coverage this adds.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tech
+    attributes:
+      label: Technical notes — candidate direction (unvalidated)
+      description: "file:line pointers, modules, seams. Explicitly a candidate: PM owns what/why, implementer/CTO owns how."
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Dependencies & links
+      description: Blockers, related issues/PRs, ADRs, memory pages.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Apply the matching `priority:pN` label after filing.
+      options:
+        - p0 — critical
+        - p1 — high
+        - p2 — normal
+        - p3 — low
+      default: 2
+    validations:
+      required: true

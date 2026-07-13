@@ -1,0 +1,98 @@
+name: Epic
+description: Multi-PR outcome — owns the why, the success metric, and the ordered child list
+title: "[Epic] "
+labels: ["type:epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the workspace issue-authoring standard (`avinashhq_brain/references/issue-authoring-standard.md`).
+        An epic is the single home of the *why*. Children are filed as stories/tasks/bugs and attached as
+        **native sub-issues** so this epic rolls up their progress automatically.
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome & why
+      description: The user/business outcome this epic delivers, and why it matters now. This is the context every child inherits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: metric
+    attributes:
+      label: Success metric
+      description: How we will know it worked — a measurable target (telemetry event delta, rating, conversion, crash-free %, adoption).
+      placeholder: "e.g. keyboard_shortcut_completed / keyboard_sheet_opened ≥ 40% within 2 releases"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope / Out of scope
+      description: The boundary of the epic — what future work is explicitly NOT in it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: children
+    attributes:
+      label: Ordered child list
+      description: Ordered, implementable children. File each via its own template, then attach as a native sub-issue (see standard for the gh commands). Ordinal titles ("<Epic> 1.2 — ...") keep sequence readable.
+      placeholder: |
+        1. #___ <Epic> 1.1 — ...
+        2. #___ <Epic> 1.2 — ...
+        3. #___ <Epic> 2.1 — ... (phase 2)
+    validations:
+      required: true
+
+  - type: textarea
+    id: design
+    attributes:
+      label: Design direction
+      description: "For product-surface epics: overall design intent, plus links to per-story mocks (docs/mocks/...) as they are created. Write `not-ui` if no UI surface."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria (epic-level definition of done)
+      description: When may this epic be closed? Reference children rollup + the success metric check.
+      placeholder: |
+        - [ ] All child sub-issues closed (or explicitly descoped with a note)
+        - [ ] Success metric measured and reported in the closing comment
+        - [ ] Memory page / ADRs updated with durable decisions
+    validations:
+      required: true
+
+  - type: textarea
+    id: phases
+    attributes:
+      label: Rollout phases
+      description: Optional — phase boundaries, feature flags, release gates.
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Dependencies & links
+      description: Related epics, ADRs, research spikes, memory pages, roadmap label.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Apply the matching `priority:pN` label after filing.
+      options:
+        - p0 — critical
+        - p1 — high
+        - p2 — normal
+        - p3 — low
+      default: 2
+    validations:
+      required: true
