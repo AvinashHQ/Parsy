@@ -47,3 +47,9 @@ Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped
 
 - Do not commit secrets, tokens, credentials, or generated artifacts.
 - Do not restructure this repo without recording the decision in the memory page.
+
+## Issue authoring
+
+- Every GitHub issue follows the workspace standard: `../avinashhq_brain/references/issue-authoring-standard.md` — one `type:*` label (epic/story/task/bug/spike/chore) + one `priority:p*`, a native sub-issue link to the parent epic, and mandatory acceptance criteria.
+- UI-affecting issues (`area:ui`) embed the exact design: a self-contained HTML/CSS/JS mock committed under `docs/mocks/<issue-slug>/` plus rendered screenshots in the issue body, with an acceptance criterion bound to the mock.
+- File via the `github-issue` skill (or `/create-issue`); the web forms in `.github/ISSUE_TEMPLATE/` carry the same contract. Drift check: `../scripts/issue-sync --check` from the workspace root.

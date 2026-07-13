@@ -1,0 +1,69 @@
+name: Spike
+description: Timeboxed research or design question — output is a decision/doc, not a PR
+title: "[Spike] "
+labels: ["type:spike"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the workspace issue-authoring standard (`avinashhq_brain/references/issue-authoring-standard.md`).
+        A spike ends with a written decision, not code. If code is written, it is throwaway evidence.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question to answer
+      description: The specific unknown, phrased so the answer is decidable (yes/no, option A/B/C, a number).
+    validations:
+      required: true
+
+  - type: textarea
+    id: informs
+    attributes:
+      label: Decision this informs
+      description: What epic/story is blocked or shaped by the answer? Link it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: timebox
+    attributes:
+      label: Timebox
+      description: Hard stop — report findings at the timebox even if inconclusive.
+      options:
+        - 2 hours
+        - half a day
+        - 1 day
+        - 2 days
+      default: 1
+    validations:
+      required: true
+
+  - type: input
+    id: output
+    attributes:
+      label: Output location
+      description: Where the decision lands — an ADR path, a hub memory page, or a design comment on the parent epic.
+      placeholder: "avinashhq_brain/projects/<slug>/adr/NNNN-... or epic #123 comment"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Definition of done for the research itself.
+      placeholder: |
+        - [ ] Question answered with cited evidence (file:line, benchmark output, or URL)
+        - [ ] Decision + rationale written to the output location
+        - [ ] Parent epic/story updated or unblocked
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Dependencies & links
+      description: Parent epic (link as sub-issue), prior research, references.
+    validations:
+      required: false

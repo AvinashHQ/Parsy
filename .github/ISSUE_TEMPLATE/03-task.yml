@@ -1,0 +1,84 @@
+name: Task
+description: Engineering unit with no user story (refactor, plumbing, tests, CI, chore)
+title: "[Task] "
+labels: ["type:task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Follow the workspace issue-authoring standard (`avinashhq_brain/references/issue-authoring-standard.md`).
+        For pure maintenance (deps, tooling, docs upkeep) swap the label to `type:chore` after filing.
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent epic
+      description: Epic issue number (link as native sub-issue after filing), or `standalone`.
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & problem
+      description: What engineering problem does this solve, and why now? Name the trigger (audit finding, recurring friction, debt).
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, self-verifiable checklist — the definition of done.
+      placeholder: |
+        - [ ] ...
+        - [ ] Build/lint/tests pass (`<commands from projects.yaml>`)
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope / Out of scope
+      description: What is included, and explicitly what is not (guard against refactor creep).
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_plan
+    attributes:
+      label: Test plan
+      description: How the change is verified — focused tests, structure checks, before/after measurements.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tech
+    attributes:
+      label: Technical notes — candidate direction (unvalidated)
+      description: "file:line pointers, affected modules, suggested seams."
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Dependencies & links
+      description: Blockers, related issues/PRs, ADRs, memory pages.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Apply the matching `priority:pN` label after filing.
+      options:
+        - p0 — critical
+        - p1 — high
+        - p2 — normal
+        - p3 — low
+      default: 2
+    validations:
+      required: true
