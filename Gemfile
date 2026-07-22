@@ -76,7 +76,7 @@ gem "json_schemer", "~> 2.5"
 # Raw MySQL client for external destination databases (M4.5); no libmysqlclient build dependency.
 gem "trilogy", "~> 2.9"
 gem "caxlsx", "~> 4.5"
-gem "aws-sdk-s3", "~> 1.226"
+gem "aws-sdk-s3", "~> 1.228"
 
 gem "csv", "~> 3.3"
 gem "rubyzip", "~> 3.4"
