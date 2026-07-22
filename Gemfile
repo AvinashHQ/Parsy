@@ -69,7 +69,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   # Enforce the local CI coverage gate without slowing focused TDD runs.
-  gem "simplecov", "~> 0.22.0", require: false
+  gem "simplecov", "~> 1.0.2", require: false
 end
 
 gem "json_schemer", "~> 2.5"
