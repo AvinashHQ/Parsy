@@ -41,6 +41,7 @@ Keep boundaries boring and SOLID-friendly: controllers orchestrate tenant-scoped
 - Registry entry: `../projects.yaml` (slug: `parsy`)
 - Memory search (works from any cwd): `qmd search "<term>" -c avinashhq -n 5`; semantic: `env -u CI qmd query "<question>" -c avinashhq --no-rerank -n 5`
 - Session wrap-up: `../scripts/session-close --project parsy --summary -`
+- Long-running work: keep the execution checkpoint at `../avinashhq_brain/_raw/state/parsy.md` (objective, decisions, rejected approaches, exact next action) and update it as those change; `../scripts/session-context` re-injects it plus this repo's git state after a compaction
 
 
 ## Do not
